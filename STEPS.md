@@ -9,11 +9,11 @@
 - [x] Set up a JS data array for card content so cards are easy to add/replace later
 
 ## Phase 2: Base CSS — Theme, Layout & Typography
-- [ ] Dark atmospheric background (subtle texture or gradient, not noisy)
-- [ ] Import/select premium game-adjacent fonts (readable, not cheesy)
-- [ ] CSS variables for theme colours, spacing, card dimensions
-- [ ] Responsive card grid (desktop-first, collapses to mobile)
-- [ ] Basic card sizing, spacing, and container styling
+- [x] Dark atmospheric background (subtle texture or gradient, not noisy)
+- [x] Import/select premium game-adjacent fonts (readable, not cheesy)
+- [x] CSS variables for theme colours, spacing, card dimensions
+- [x] Responsive card grid (desktop-first, collapses to mobile)
+- [x] Basic card sizing, spacing, and container styling
 
 ## Phase 3: Card Visual Design — Glass Effect
 - [ ] Front face: portrait image with dark overlay for text readability
