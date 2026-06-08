@@ -96,6 +96,20 @@ main {
     position: relative;
     cursor: pointer;
     outline: none;
+    transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.card:hover .card-glass-overlay {
+    border-color: rgba(196, 164, 90, 0.25);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+        0 12px 40px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(196, 164, 90, 0.08);
 }
 
 .card:focus-visible {
@@ -116,6 +130,7 @@ main {
     position: relative;
     border-radius: var(--card-radius);
     overflow: hidden;
+    background-color: var(--color-bg-card);
 }
 
 .card-portrait {
@@ -129,6 +144,21 @@ main {
     position: absolute;
     inset: 0;
     pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(7, 7, 12, 0.1) 0%,
+        rgba(7, 7, 12, 0.25) 40%,
+        rgba(7, 7, 12, 0.75) 75%,
+        rgba(7, 7, 12, 0.88) 100%
+    );
+    backdrop-filter: blur(1px) saturate(1.1);
+    -webkit-backdrop-filter: blur(1px) saturate(1.1);
+    border: 1px solid var(--color-border-card);
+    border-radius: var(--card-radius);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+        0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .card-content {
@@ -138,6 +168,7 @@ main {
     right: 0;
     padding: var(--space-lg) var(--space-md);
     text-align: center;
+    z-index: 1;
 }
 
 .card-name {
@@ -164,12 +195,23 @@ main {
     position: absolute;
     inset: 0;
     border-radius: var(--card-radius);
-    background-color: var(--color-bg-card-back);
+    background: linear-gradient(
+        145deg,
+        rgba(20, 20, 30, 0.95) 0%,
+        rgba(14, 14, 22, 0.98) 100%
+    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     backface-visibility: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: var(--space-lg);
+    border: 1px solid var(--color-border-card);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+        0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 .card-back-content {
@@ -187,6 +229,19 @@ main {
     font-weight: 600;
     letter-spacing: 0.06em;
     color: var(--color-text-primary);
+    padding-bottom: var(--space-sm);
+    position: relative;
+}
+
+.card-back-name::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
 }
 
 .card-back-class {
@@ -195,6 +250,8 @@ main {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-accent);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .card-back-lore {
@@ -210,6 +267,8 @@ main {
     gap: var(--space-sm);
     justify-content: center;
     margin-top: auto;
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border-subtle);
 }
 
 .stat-chip {
@@ -222,6 +281,7 @@ main {
     border: 1px solid var(--color-stat-border);
     border-radius: 100px;
     padding: var(--space-xs) var(--space-sm);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .site-footer {

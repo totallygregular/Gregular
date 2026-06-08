@@ -16,12 +16,12 @@
 - [x] Basic card sizing, spacing, and container styling
 
 ## Phase 3: Card Visual Design — Glass Effect
-- [ ] Front face: portrait image with dark overlay for text readability
-- [ ] Frosted/smoked glass overlay using `backdrop-filter`, semi-transparent bg, soft borders, inner highlights
-- [ ] Centered character name with readable contrast over portrait
-- [ ] Optional class/subclass label styling
-- [ ] Back face: layout for name, game/class/build, lore text, stat chips/tags
-- [ ] Stat chip styling (small pill/tag look, restrained colours)
+- [x] Front face: portrait image with dark overlay for text readability
+- [x] Frosted/smoked glass overlay using `backdrop-filter`, semi-transparent bg, soft borders, inner highlights
+- [x] Centered character name with readable contrast over portrait
+- [x] Optional class/subclass label styling
+- [x] Back face: layout for name, game/class/build, lore text, stat chips/tags
+- [x] Stat chip styling (small pill/tag look, restrained colours)
 
 ## Phase 4: 3D Flip Mechanics
 - [ ] CSS `perspective` on card container
