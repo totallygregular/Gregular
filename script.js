@@ -63,7 +63,7 @@ const characters = [
 
 function createCardHTML(character) {
     return `
-        <article class="card" data-character-id="${character.id}" tabindex="0" role="button" aria-label="View ${character.name} details">
+        <article class="card" data-character-id="${character.id}" tabindex="0" role="button" aria-label="View ${character.name} details" aria-expanded="false">
             <div class="card-inner">
                 <div class="card-front">
                     <img src="${character.portrait}" alt="${character.name}" class="card-portrait" loading="lazy">
@@ -112,6 +112,17 @@ function attachCardEvents() {
             openCard(card, grid);
         });
 
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (card.classList.contains('is-flipped')) {
+                    closeCard(card, grid);
+                } else {
+                    openCard(card, grid);
+                }
+            }
+        });
+
         card.addEventListener('mouseenter', handleCardMouseEnter);
         card.addEventListener('mousemove', handleCardMouseMove);
         card.addEventListener('mouseleave', handleCardMouseLeave);
@@ -122,6 +133,16 @@ function attachCardEvents() {
             const expanded = grid.querySelector('.card.is-flipped');
             if (expanded) {
                 closeCard(expanded, grid);
+            }
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const expanded = grid.querySelector('.card.is-flipped');
+            if (expanded) {
+                closeCard(expanded, grid);
+                expanded.focus();
             }
         }
     });
@@ -171,11 +192,13 @@ function openCard(card, grid) {
     card.style.setProperty('--tilt-y', '0deg');
     card.style.setProperty('--glare-opacity', '0');
     card.classList.add('is-flipped');
+    card.setAttribute('aria-expanded', 'true');
     grid.classList.add('has-expanded');
 }
 
 function closeCard(card, grid) {
     card.classList.remove('is-flipped');
+    card.setAttribute('aria-expanded', 'false');
     grid.classList.remove('has-expanded');
 }
 

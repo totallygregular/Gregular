@@ -42,14 +42,14 @@
 - [x] Use `requestAnimationFrame` or throttled handling for performance
 
 ## Phase 6: Expanded/Open State & Keyboard Accessibility
-- [ ] Expanded card: larger scale, forward Z translate, flipped to back
-- [ ] Dimming/non-interactive state for other cards when one is open
-- [ ] Close button on back face
-- [ ] Click outside card to close
-- [ ] Cards are focusable (`tabindex`)
-- [ ] Enter/Space triggers flip/open
-- [ ] Escape closes expanded card
-- [ ] Visible focus ring styles
+- [x] Expanded card: larger scale, forward Z translate, flipped to back
+- [x] Dimming/non-interactive state for other cards when one is open
+- [x] Close button on back face
+- [x] Click outside card to close
+- [x] Cards are focusable (`tabindex`)
+- [x] Enter/Space triggers flip/open
+- [x] Escape closes expanded card
+- [x] Visible focus ring styles
 
 ## Phase 7: Touch Devices, Accessibility & Performance
 - [ ] Detect touch devices — disable live tilt tracking
