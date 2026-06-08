@@ -6,7 +6,7 @@ const characters = [
         portrait: 'assets/disciple-of-varashta.png',
         game: 'Path of Exile 2',
         build: 'Sand Djinn',
-        lore: 'A Sorceress who proves herself worthy before the Maraketh leader Varashta and is granted command over the bound djinn she still rules within the Trial of the Sekhemas.',
+        talents: 'assets/disciple-of-varashta-talents.png',
         stats: ['Intelligence', 'Minion', 'Command']
     },
     {
@@ -16,7 +16,7 @@ const characters = [
         portrait: 'assets/shaman.png',
         game: 'Path of Exile 2',
         build: 'Walking Cataclysm Bear',
-        lore: 'A Druid who becomes nature’s vengeance made flesh, channeling primal fury and elemental catastrophe until he walks like a living apocalypse across Wraeclast.',
+        talents: 'assets/shaman-talents.png',
         stats: ['Strength', 'Shapeshift', 'Fire', 'Slam']
     },
     {
@@ -26,7 +26,7 @@ const characters = [
         portrait: 'assets/stormweaver.png',
         game: 'Path of Exile 2',
         build: 'Cold Lightning',
-        lore: 'A Sorceress who bends thunder, frost, and raw elemental force into a personal tempest, announcing her coming with ruin in her wake.',
+        talents: 'assets/stormweaver-talents.png',
         stats: ['Intelligence', 'Lightning', 'Cold', 'Freeze']
     }
 ];
@@ -49,7 +49,9 @@ function createCardHTML(character) {
                     <div class="card-back-content">
                         <h2 class="card-back-name">${character.name}</h2>
                         <p class="card-back-class">${character.game} • ${character.build}</p>
-                        <p class="card-back-lore">${character.lore}</p>
+                        <div class="card-talents">
+                            <img src="${character.talents}" alt="${character.name} talent tree" class="card-talents-img">
+                        </div>
                         <div class="card-stats">
                             ${character.stats.map(stat => `<span class="stat-chip">${stat}</span>`).join('')}
                         </div>
