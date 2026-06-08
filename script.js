@@ -125,7 +125,6 @@ function attachCardEvents() {
         });
 
         if (!isTouchDevice) {
-            card.addEventListener('mouseenter', handleCardMouseEnter);
             card.addEventListener('mousemove', handleCardMouseMove);
             card.addEventListener('mouseleave', handleCardMouseLeave);
         }
@@ -149,12 +148,6 @@ function attachCardEvents() {
             }
         }
     });
-}
-
-function handleCardMouseEnter(e) {
-    const card = e.currentTarget;
-    if (card.classList.contains('is-flipped')) return;
-    card.style.setProperty('--glare-opacity', '0.15');
 }
 
 function handleCardMouseMove(e) {
@@ -186,14 +179,12 @@ function handleCardMouseLeave(e) {
     const card = e.currentTarget;
     card.style.setProperty('--tilt-x', '0deg');
     card.style.setProperty('--tilt-y', '0deg');
-    card.style.setProperty('--glare-opacity', '0');
 }
 
 function openCard(card, grid) {
     grid.querySelectorAll('.card.is-flipped').forEach(c => closeCard(c, grid));
     card.style.setProperty('--tilt-x', '0deg');
     card.style.setProperty('--tilt-y', '0deg');
-    card.style.setProperty('--glare-opacity', '0');
     card.classList.add('is-flipped');
     card.setAttribute('aria-expanded', 'true');
     grid.classList.add('has-expanded');

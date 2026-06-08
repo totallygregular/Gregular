@@ -61,8 +61,8 @@
 - [x] Ensure layout works without JS (reduced but functional)
 
 ## Phase 8: Polish, README & GitHub Pages Deployment
-- [ ] Final visual pass: easing curves, glare softness, tilt subtlety
-- [ ] Ensure cards feel "premium trading card / codex UI"
-- [ ] Write README: file structure, how to replace images, add cards, deploy to GitHub Pages
+- [x] Final visual pass: easing curves, glare softness, tilt subtlety
+- [x] Ensure cards feel "premium trading card / codex UI"
+- [x] Write README: file structure, how to replace images, add cards, deploy to GitHub Pages
 - [ ] Configure GitHub Pages (settings or `gh-pages` branch)
 - [ ] Test deployed site end-to-end
