@@ -48,7 +48,7 @@ function createCardHTML(character) {
                     <button class="card-close" aria-label="Close ${character.name} details">&times;</button>
                     <div class="card-back-content">
                         <h2 class="card-back-name">${character.name}</h2>
-                        <p class="card-back-class">${character.game} • ${character.build}</p>
+                        <p class="card-back-class">${character.build}</p>
                         <div class="card-talents">
                             <img src="${character.talents}" alt="${character.name} talent tree" class="card-talents-img">
                         </div>
@@ -63,35 +63,47 @@ function createCardHTML(character) {
 }
 
 function renderCards() {
-    const grid = document.getElementById('cardGrid');
-    grid.innerHTML = characters.map(createCardHTML).join('');
+    const container = document.getElementById('cardGrid');
+    const shelves = {};
+    characters.forEach(char => {
+        if (!shelves[char.game]) shelves[char.game] = [];
+        shelves[char.game].push(char);
+    });
+    container.innerHTML = Object.entries(shelves).map(([game, chars]) => `
+        <div class="shelf">
+            <h2 class="shelf-label">${game}</h2>
+            <div class="shelf-grid">
+                ${chars.map(createCardHTML).join('')}
+            </div>
+        </div>
+    `).join('');
     attachCardEvents();
 }
 
 function attachCardEvents() {
-    const grid = document.getElementById('cardGrid');
-    const cards = grid.querySelectorAll('.card');
+    const cardGrid = document.getElementById('cardGrid');
+    const cards = cardGrid.querySelectorAll('.card');
     const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 
     cards.forEach(card => {
         card.addEventListener('click', (e) => {
             if (e.target.closest('.card-close')) {
-                closeCard(card, grid);
+                closeCard(card);
                 return;
             }
             if (card.classList.contains('is-flipped')) {
                 return;
             }
-            openCard(card, grid);
+            openCard(card);
         });
 
         card.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 if (card.classList.contains('is-flipped')) {
-                    closeCard(card, grid);
+                    closeCard(card);
                 } else {
-                    openCard(card, grid);
+                    openCard(card);
                 }
             }
         });
@@ -102,20 +114,20 @@ function attachCardEvents() {
         }
     });
 
-    grid.addEventListener('click', (e) => {
+    cardGrid.addEventListener('click', (e) => {
         if (!e.target.closest('.card')) {
-            const expanded = grid.querySelector('.card.is-flipped');
+            const expanded = cardGrid.querySelector('.card.is-flipped');
             if (expanded) {
-                closeCard(expanded, grid);
+                closeCard(expanded);
             }
         }
     });
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            const expanded = grid.querySelector('.card.is-flipped');
+            const expanded = cardGrid.querySelector('.card.is-flipped');
             if (expanded) {
-                closeCard(expanded, grid);
+                closeCard(expanded);
                 expanded.focus();
             }
         }
@@ -123,16 +135,16 @@ function attachCardEvents() {
 
     const backdrop = document.getElementById('cardBackdrop');
     backdrop.addEventListener('click', () => {
-        const expanded = grid.querySelector('.card.is-flipped');
+        const expanded = cardGrid.querySelector('.card.is-flipped');
         if (expanded) {
-            closeCard(expanded, grid);
+            closeCard(expanded);
         }
     });
 
     window.addEventListener('resize', () => {
-        const expanded = grid.querySelector('.card.is-flipped');
+        const expanded = cardGrid.querySelector('.card.is-flipped');
         if (expanded) {
-            closeCard(expanded, grid);
+            closeCard(expanded);
         }
     });
 }
@@ -176,8 +188,9 @@ function handleCardMouseLeave(e) {
     card.style.setProperty('--holo-y', '0%');
 }
 
-function openCard(card, grid) {
-    grid.querySelectorAll('.card.is-flipped').forEach(c => closeCard(c, grid));
+function openCard(card) {
+    const cardGrid = document.getElementById('cardGrid');
+    cardGrid.querySelectorAll('.card.is-flipped').forEach(c => closeCard(c));
     card.style.setProperty('--tilt-x', '0deg');
     card.style.setProperty('--tilt-y', '0deg');
     card.style.setProperty('--holo-x', '0%');
@@ -199,13 +212,14 @@ function openCard(card, grid) {
 
     card.classList.add('is-flipped');
     card.setAttribute('aria-expanded', 'true');
-    grid.classList.add('has-expanded');
+    cardGrid.classList.add('has-expanded');
 }
 
-function closeCard(card, grid) {
+function closeCard(card) {
+    const cardGrid = document.getElementById('cardGrid');
     card.classList.remove('is-flipped');
     card.setAttribute('aria-expanded', 'false');
-    grid.classList.remove('has-expanded');
+    cardGrid.classList.remove('has-expanded');
 
     const backdrop = document.getElementById('cardBackdrop');
     backdrop.classList.remove('is-visible');
