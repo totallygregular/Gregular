@@ -68,6 +68,7 @@ function createCardHTML(character) {
                 <div class="card-front">
                     <img src="${character.portrait}" alt="${character.name}" class="card-portrait" loading="lazy">
                     <div class="card-glass-overlay"></div>
+                    <div class="card-glare"></div>
                     <div class="card-content">
                         <h2 class="card-name">${character.name}</h2>
                         <p class="card-class">${character.class}</p>
@@ -110,6 +111,10 @@ function attachCardEvents() {
             }
             openCard(card, grid);
         });
+
+        card.addEventListener('mouseenter', handleCardMouseEnter);
+        card.addEventListener('mousemove', handleCardMouseMove);
+        card.addEventListener('mouseleave', handleCardMouseLeave);
     });
 
     grid.addEventListener('click', (e) => {
@@ -122,8 +127,49 @@ function attachCardEvents() {
     });
 }
 
+function handleCardMouseEnter(e) {
+    const card = e.currentTarget;
+    if (card.classList.contains('is-flipped')) return;
+    card.style.setProperty('--glare-opacity', '0.15');
+}
+
+function handleCardMouseMove(e) {
+    const card = e.currentTarget;
+    if (card.classList.contains('is-flipped')) return;
+
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const percentX = (x - centerX) / centerX;
+    const percentY = (y - centerY) / centerY;
+
+    const tiltX = percentY * -6;
+    const tiltY = percentX * 6;
+
+    const glareX = (x / rect.width) * 100;
+    const glareY = (y / rect.height) * 100;
+
+    card.style.setProperty('--tilt-x', `${tiltX}deg`);
+    card.style.setProperty('--tilt-y', `${tiltY}deg`);
+    card.style.setProperty('--glare-x', `${glareX}%`);
+    card.style.setProperty('--glare-y', `${glareY}%`);
+}
+
+function handleCardMouseLeave(e) {
+    const card = e.currentTarget;
+    card.style.setProperty('--tilt-x', '0deg');
+    card.style.setProperty('--tilt-y', '0deg');
+    card.style.setProperty('--glare-opacity', '0');
+}
+
 function openCard(card, grid) {
-    grid.querySelectorAll('.card.is-flipped').forEach(c => c.classList.remove('is-flipped'));
+    grid.querySelectorAll('.card.is-flipped').forEach(c => closeCard(c, grid));
+    card.style.setProperty('--tilt-x', '0deg');
+    card.style.setProperty('--tilt-y', '0deg');
+    card.style.setProperty('--glare-opacity', '0');
     card.classList.add('is-flipped');
     grid.classList.add('has-expanded');
 }

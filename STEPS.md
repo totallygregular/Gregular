@@ -34,13 +34,12 @@
 - [x] Close on second click or close button
 
 ## Phase 5: Hover Tilt & Reflective Glare
-- [ ] Track mouse position relative to card on `mousemove`
-- [ ] Set CSS custom properties (`--tilt-x`, `--tilt-y`, `--glare-x`, `--glare-y`)
-- [ ] Apply subtle X/Y rotation based on cursor position (few degrees max)
-- [ ] Reflective glare: pseudo-element or overlay that moves with cursor
-- [ ] Soft brightness shift to simulate cursor as light source
-- [ ] Smooth easing on mouse leave back to neutral
-- [ ] Use `requestAnimationFrame` or throttled handling for performance
+- [x] Track mouse position relative to card on `mousemove`
+- [x] Set CSS custom properties (`--tilt-x`, `--tilt-y`, `--glare-x`, `--glare-y`)
+- [x] Apply subtle X/Y rotation based on cursor position (few degrees max)
+- [x] Reflective glare: pseudo-element or overlay that moves with cursor
+- [x] Smooth easing on mouse leave back to neutral
+- [x] Use `requestAnimationFrame` or throttled handling for performance
 
 ## Phase 6: Expanded/Open State & Keyboard Accessibility
 - [ ] Expanded card: larger scale, forward Z translate, flipped to back
