@@ -138,25 +138,33 @@ function handleCardMouseMove(e) {
 
     const glareX = (x / rect.width) * 100;
     const glareY = (y / rect.height) * 100;
-    const glareAngle = Math.atan2(percentY, percentX) * (180 / Math.PI);
+    const glareAngle = Math.atan2(tiltX, tiltY) * (180 / Math.PI);
+    const holoX = percentX * 25;
+    const holoY = percentY * 25;
 
     card.style.setProperty('--tilt-x', `${tiltX}deg`);
     card.style.setProperty('--tilt-y', `${tiltY}deg`);
     card.style.setProperty('--glare-x', `${glareX}%`);
     card.style.setProperty('--glare-y', `${glareY}%`);
     card.style.setProperty('--glare-angle', `${glareAngle}deg`);
+    card.style.setProperty('--holo-x', `${holoX}%`);
+    card.style.setProperty('--holo-y', `${holoY}%`);
 }
 
 function handleCardMouseLeave(e) {
     const card = e.currentTarget;
     card.style.setProperty('--tilt-x', '0deg');
     card.style.setProperty('--tilt-y', '0deg');
+    card.style.setProperty('--holo-x', '0%');
+    card.style.setProperty('--holo-y', '0%');
 }
 
 function openCard(card, grid) {
     grid.querySelectorAll('.card.is-flipped').forEach(c => closeCard(c, grid));
     card.style.setProperty('--tilt-x', '0deg');
     card.style.setProperty('--tilt-y', '0deg');
+    card.style.setProperty('--holo-x', '0%');
+    card.style.setProperty('--holo-y', '0%');
     card.classList.add('is-flipped');
     card.setAttribute('aria-expanded', 'true');
     grid.classList.add('has-expanded');

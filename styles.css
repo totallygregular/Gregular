@@ -211,6 +211,8 @@ main {
             rgba(255, 0, 200, 0.18) 88%,
             rgba(255, 0, 0, 0.18) 100%
         );
+    background-size: 200% 200%;
+    background-position: calc(50% + var(--holo-x, 0%)) calc(50% + var(--holo-y, 0%));
     mix-blend-mode: color-dodge;
     opacity: 0;
     transition: opacity 0.3s ease;
