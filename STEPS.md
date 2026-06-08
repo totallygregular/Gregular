@@ -24,14 +24,14 @@
 - [x] Stat chip styling (small pill/tag look, restrained colours)
 
 ## Phase 4: 3D Flip Mechanics
-- [ ] CSS `perspective` on card container
-- [ ] `transform-style: preserve-3d` on inner flipping element
-- [ ] `backface-visibility: hidden` on front and back faces
-- [ ] Back face pre-rotated 180deg
-- [ ] Click handler: add/remove flipped class with smooth 3D flip animation
-- [ ] Card scales slightly + translates forward in Z on flip
-- [ ] Non-selected cards dim when one is expanded
-- [ ] Close on second click or close button
+- [x] CSS `perspective` on card container
+- [x] `transform-style: preserve-3d` on inner flipping element
+- [x] `backface-visibility: hidden` on front and back faces
+- [x] Back face pre-rotated 180deg
+- [x] Click handler: add/remove flipped class with smooth 3D flip animation
+- [x] Card scales slightly + translates forward in Z on flip
+- [x] Non-selected cards dim when one is expanded
+- [x] Close on second click or close button
 
 ## Phase 5: Hover Tilt & Reflective Glare
 - [ ] Track mouse position relative to card on `mousemove`

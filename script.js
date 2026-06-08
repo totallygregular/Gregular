@@ -74,6 +74,7 @@ function createCardHTML(character) {
                     </div>
                 </div>
                 <div class="card-back">
+                    <button class="card-close" aria-label="Close ${character.name} details">&times;</button>
                     <div class="card-back-content">
                         <h2 class="card-back-name">${character.name}</h2>
                         <p class="card-back-class">${character.game} • ${character.build}</p>
@@ -91,6 +92,45 @@ function createCardHTML(character) {
 function renderCards() {
     const grid = document.getElementById('cardGrid');
     grid.innerHTML = characters.map(createCardHTML).join('');
+    attachCardEvents();
+}
+
+function attachCardEvents() {
+    const grid = document.getElementById('cardGrid');
+    const cards = grid.querySelectorAll('.card');
+
+    cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.card-close')) {
+                closeCard(card, grid);
+                return;
+            }
+            if (card.classList.contains('is-flipped')) {
+                return;
+            }
+            openCard(card, grid);
+        });
+    });
+
+    grid.addEventListener('click', (e) => {
+        if (!e.target.closest('.card')) {
+            const expanded = grid.querySelector('.card.is-flipped');
+            if (expanded) {
+                closeCard(expanded, grid);
+            }
+        }
+    });
+}
+
+function openCard(card, grid) {
+    grid.querySelectorAll('.card.is-flipped').forEach(c => c.classList.remove('is-flipped'));
+    card.classList.add('is-flipped');
+    grid.classList.add('has-expanded');
+}
+
+function closeCard(card, grid) {
+    card.classList.remove('is-flipped');
+    grid.classList.remove('has-expanded');
 }
 
 document.addEventListener('DOMContentLoaded', renderCards);
