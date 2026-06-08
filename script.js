@@ -1,63 +1,33 @@
 const characters = [
     {
-        id: 'blood-mage',
-        name: 'Valdris the Crimson',
-        class: 'Blood Mage',
-        portrait: 'assets/blood-mage.png',
-        game: 'Eternal Crucible',
-        build: 'Sanguine Sorcerer',
-        lore: 'Once a healer of the Silver Order, Valdris discovered that life force could be weaponized. He now walks the line between salvation and destruction, paying for power with his own vitality.',
-        stats: ['Intelligence', 'Life Drain', 'Chaos Damage', 'Fragile']
+        id: 'disciple-of-varashta',
+        name: 'ChoombaWoomba',
+        class: 'Disciple of Varashta',
+        portrait: 'assets/disciple-of-varashta.png',
+        game: 'Path of Exile 2',
+        build: 'Sand Djinn',
+        lore: 'A Sorceress who proves herself worthy before the Maraketh leader Varashta and is granted command over the bound djinn she still rules within the Trial of the Sekhemas.',
+        stats: ['Intelligence', 'Minion', 'Command']
     },
     {
-        id: 'shadow-rogue',
-        name: 'Kira Nightwhisper',
-        class: 'Shadow Rogue',
-        portrait: 'assets/shadow-rogue.png',
-        game: 'Eternal Crucible',
-        build: 'Assassin of the Veil',
-        lore: 'Trained in the lightless halls beneath Ashenmoor, Kira strikes from the spaces between shadows. Her blade carries a poison that unravels the soul before the body falls.',
-        stats: ['Dexterity', 'Critical Strike', 'Stealth', 'Poison']
+        id: 'shaman',
+        name: 'ElonMuskProGamer',
+        class: 'Shaman',
+        portrait: 'assets/shaman.png',
+        game: 'Path of Exile 2',
+        build: 'Walking Cataclysm Bear',
+        lore: 'A Druid who becomes nature’s vengeance made flesh, channeling primal fury and elemental catastrophe until he walks like a living apocalypse across Wraeclast.',
+        stats: ['Strength', 'Shapeshift', 'Fire', 'Slam']
     },
     {
-        id: 'storm-warden',
-        name: 'Thorn Ironsky',
-        class: 'Storm Warden',
-        portrait: 'assets/storm-warden.png',
-        game: 'Eternal Crucible',
-        build: 'Tempest Guardian',
-        lore: 'A former skyship captain, Thorn was struck by lightning that should have killed him. Now he channels the storm itself, calling down thunder to protect those who cannot protect themselves.',
-        stats: ['Strength', 'Lightning', 'Shield Bash', 'Aura']
-    },
-    {
-        id: 'bone-sentinel',
-        name: 'Morgran the Undying',
-        class: 'Bone Sentinel',
-        portrait: 'assets/bone-sentinel.png',
-        game: 'Eternal Crucible',
-        build: 'Death Knight',
-        lore: 'Morgran died defending his keep three centuries ago. The necromancers who raised him expected a servant. They got a master. Now he commands the very bones of the fallen.',
-        stats: ['Constitution', 'Summoning', 'Bone Armor', 'Undead']
-    },
-    {
-        id: 'flame-dancer',
-        name: 'Seraphina Ashborne',
-        class: 'Flame Dancer',
-        portrait: 'assets/flame-dancer.png',
-        game: 'Eternal Crucible',
-        build: 'Pyroblade Dancer',
-        lore: 'Born in the volcanic reaches of Pyreth, Seraphina learned to dance before she learned to fight. Her movements weave fire into art, and her art leaves nothing but embers.',
-        stats: ['Agility', 'Fire Damage', 'Evasion', 'Burning']
-    },
-    {
-        id: 'void-walker',
-        name: 'Elyndra the Unbound',
-        class: 'Void Walker',
-        portrait: 'assets/void-walker.png',
-        game: 'Eternal Crucible',
-        build: 'Reality Shaper',
-        lore: 'Elyndra gazed too long into the spaces between worlds. Now she exists in multiple realities at once, bending the fabric of existence to her will. Some say she is already gone, and only her echo remains.',
-        stats: ['Willpower', 'Teleportation', 'Reality Warp', 'Unstable']
+        id: 'stormweaver',
+        name: 'FrigidBih',
+        class: 'Stormweaver',
+        portrait: 'assets/stormweaver.png',
+        game: 'Path of Exile 2',
+        build: 'Cold Lightning',
+        lore: 'A Sorceress who bends thunder, frost, and raw elemental force into a personal tempest, announcing her coming with ruin in her wake.',
+        stats: ['Intelligence', 'Lightning', 'Cold', 'Freeze']
     }
 ];
 
