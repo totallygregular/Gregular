@@ -118,6 +118,21 @@ function attachCardEvents() {
             }
         }
     });
+
+    const backdrop = document.getElementById('cardBackdrop');
+    backdrop.addEventListener('click', () => {
+        const expanded = grid.querySelector('.card.is-flipped');
+        if (expanded) {
+            closeCard(expanded, grid);
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        const expanded = grid.querySelector('.card.is-flipped');
+        if (expanded) {
+            closeCard(expanded, grid);
+        }
+    });
 }
 
 function handleCardMouseMove(e) {
@@ -165,6 +180,21 @@ function openCard(card, grid) {
     card.style.setProperty('--tilt-y', '0deg');
     card.style.setProperty('--holo-x', '0%');
     card.style.setProperty('--holo-y', '0%');
+
+    const rect = card.getBoundingClientRect();
+    const maxHeight = window.innerHeight * 0.85;
+    const maxWidth = window.innerWidth * 0.9;
+    const scale = Math.min(maxHeight / rect.height, maxWidth / rect.width);
+    const dx = (window.innerWidth / 2) - (rect.left + rect.width / 2);
+    const dy = (window.innerHeight / 2) - (rect.top + rect.height / 2);
+
+    card.style.setProperty('--flip-x', dx + 'px');
+    card.style.setProperty('--flip-y', dy + 'px');
+    card.style.setProperty('--flip-scale', scale);
+
+    const backdrop = document.getElementById('cardBackdrop');
+    backdrop.classList.add('is-visible');
+
     card.classList.add('is-flipped');
     card.setAttribute('aria-expanded', 'true');
     grid.classList.add('has-expanded');
@@ -174,6 +204,19 @@ function closeCard(card, grid) {
     card.classList.remove('is-flipped');
     card.setAttribute('aria-expanded', 'false');
     grid.classList.remove('has-expanded');
+
+    const backdrop = document.getElementById('cardBackdrop');
+    backdrop.classList.remove('is-visible');
+
+    const onTransitionEnd = () => {
+        if (!card.classList.contains('is-flipped')) {
+            card.style.setProperty('--flip-x', '0px');
+            card.style.setProperty('--flip-y', '0px');
+            card.style.setProperty('--flip-scale', '1');
+        }
+        card.removeEventListener('transitionend', onTransitionEnd);
+    };
+    card.addEventListener('transitionend', onTransitionEnd);
 }
 
 document.addEventListener('DOMContentLoaded', renderCards);
