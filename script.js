@@ -99,6 +99,7 @@ function renderCards() {
 function attachCardEvents() {
     const grid = document.getElementById('cardGrid');
     const cards = grid.querySelectorAll('.card');
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 
     cards.forEach(card => {
         card.addEventListener('click', (e) => {
@@ -123,9 +124,11 @@ function attachCardEvents() {
             }
         });
 
-        card.addEventListener('mouseenter', handleCardMouseEnter);
-        card.addEventListener('mousemove', handleCardMouseMove);
-        card.addEventListener('mouseleave', handleCardMouseLeave);
+        if (!isTouchDevice) {
+            card.addEventListener('mouseenter', handleCardMouseEnter);
+            card.addEventListener('mousemove', handleCardMouseMove);
+            card.addEventListener('mouseleave', handleCardMouseLeave);
+        }
     });
 
     grid.addEventListener('click', (e) => {

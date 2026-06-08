@@ -52,13 +52,13 @@
 - [x] Visible focus ring styles
 
 ## Phase 7: Touch Devices, Accessibility & Performance
-- [ ] Detect touch devices — disable live tilt tracking
-- [ ] Replace hover tilt with lighter tap interaction on touch
-- [ ] `prefers-reduced-motion` — disable or simplify animations
-- [ ] Verify text contrast over portrait images
-- [ ] Lazy-load card images (`loading="lazy"`)
-- [ ] Audit: GPU-friendly transforms only (no layout-triggering props)
-- [ ] Ensure layout works without JS (reduced but functional)
+- [x] Detect touch devices — disable live tilt tracking
+- [x] Replace hover tilt with lighter tap interaction on touch
+- [x] `prefers-reduced-motion` — disable or simplify animations
+- [x] Verify text contrast over portrait images
+- [x] Lazy-load card images (`loading="lazy"`)
+- [x] Audit: GPU-friendly transforms only (no layout-triggering props)
+- [x] Ensure layout works without JS (reduced but functional)
 
 ## Phase 8: Polish, README & GitHub Pages Deployment
 - [ ] Final visual pass: easing curves, glare softness, tilt subtlety

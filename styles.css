@@ -381,3 +381,24 @@ main {
         padding: var(--space-xl) var(--space-md) var(--space-lg);
     }
 }
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+
+    .card-inner {
+        transform: none !important;
+    }
+
+    .card.is-flipped .card-inner {
+        transform: rotateY(180deg) !important;
+    }
+
+    .card-glare {
+        display: none;
+    }
+}
