@@ -1,12 +1,12 @@
 # Character Vault — Build Steps
 
 ## Phase 1: Project Scaffolding & HTML Structure
-- [ ] Create file structure: `index.html`, `styles.css`, `script.js`, `assets/`
-- [ ] Build semantic HTML skeleton: header, card grid container, footer
-- [ ] Define card HTML template: front face (portrait, name, class label) + back face (name, game/class/build, lore, stat chips)
-- [ ] Populate 6 sample character cards with placeholder fantasy ARPG data (including a Blood Mage archetype)
-- [ ] Add placeholder image references in `assets/` with clear filenames
-- [ ] Set up a JS data array for card content so cards are easy to add/replace later
+- [x] Create file structure: `index.html`, `styles.css`, `script.js`, `assets/`
+- [x] Build semantic HTML skeleton: header, card grid container, footer
+- [x] Define card HTML template: front face (portrait, name, class label) + back face (name, game/class/build, lore, stat chips)
+- [x] Populate 6 sample character cards with placeholder fantasy ARPG data (including a Blood Mage archetype)
+- [x] Add placeholder image references in `assets/` with clear filenames
+- [x] Set up a JS data array for card content so cards are easy to add/replace later
 
 ## Phase 2: Base CSS — Theme, Layout & Typography
 - [ ] Dark atmospheric background (subtle texture or gradient, not noisy)
