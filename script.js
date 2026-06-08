@@ -138,11 +138,13 @@ function handleCardMouseMove(e) {
 
     const glareX = (x / rect.width) * 100;
     const glareY = (y / rect.height) * 100;
+    const glareAngle = Math.atan2(percentY, percentX) * (180 / Math.PI);
 
     card.style.setProperty('--tilt-x', `${tiltX}deg`);
     card.style.setProperty('--tilt-y', `${tiltY}deg`);
     card.style.setProperty('--glare-x', `${glareX}%`);
     card.style.setProperty('--glare-y', `${glareY}%`);
+    card.style.setProperty('--glare-angle', `${glareAngle}deg`);
 }
 
 function handleCardMouseLeave(e) {
