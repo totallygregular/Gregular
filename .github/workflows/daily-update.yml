@@ -1,14 +1,36 @@
-name: Daily mock exchange reminder
+name: Daily mock exchange update
 
 on:
   schedule:
-    - cron: '0 18 * * 0-4'
+    - cron: '0 18 * * 1-5'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  remind:
+  update:
     runs-on: ubuntu-latest
     steps:
-      - name: Reminder
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run daily updater
+        run: python scripts/update.py
+
+      - name: Commit and push if changed
         run: |
-          echo "Run Perplexity Computer with the master prompt and update the JSON files for today's market close."
+          git config user.name "mock-exchange-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: daily auto-update $(date -u +%Y-%m-%d)"
+            git push
+          fi
