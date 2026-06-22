@@ -18,25 +18,25 @@
       --color-text:#cdccca; --color-text-muted:#a4a39f; --color-text-faint:#797876; --color-primary:#4f98a3; --color-success:#6daa45; --color-error:#d163a7; --color-gold:#e8af34;
       --radius-md:0.5rem; --radius-lg:0.75rem; --radius-xl:1rem; --shadow-md:0 4px 12px rgba(0,0,0,.3); --shadow-lg:0 12px 32px rgba(0,0,0,.4);
       --transition:180ms cubic-bezier(0.16,1,0.3,1);
-      --font-body:'Satoshi', Inter, sans-serif;
-      --font-display:'Satoshi', Inter, sans-serif;
+      --font-body:'Satoshi', Inter, sans-serif; --font-display:'Satoshi', Inter, sans-serif;
+      --panel-border: rgba(255,255,255,.1); --grid-soft: rgba(255,255,255,.08); --grid-faint: rgba(255,255,255,.04);
     }
-    [data-theme="light"] { --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-border:#d4d1ca; --color-text:#28251d; --color-text-muted:#7a7974; --color-text-faint:#bab9b4; --color-primary:#01696f; --color-success:#437a22; --color-error:#a12c7b; --color-gold:#d19900; --shadow-md:0 4px 12px rgba(0,0,0,.08); --shadow-lg:0 12px 32px rgba(0,0,0,.12); }
+    [data-theme="light"] { --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-border:#d4d1ca; --color-text:#28251d; --color-text-muted:#7a7974; --color-text-faint:#bab9b4; --color-primary:#01696f; --color-success:#437a22; --color-error:#a12c7b; --color-gold:#d19900; --shadow-md:0 4px 12px rgba(0,0,0,.08); --shadow-lg:0 12px 32px rgba(0,0,0,.12); --panel-border: rgba(40,37,29,.12); --grid-soft: rgba(40,37,29,.12); --grid-faint: rgba(40,37,29,.06); }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth}
     body{min-height:100vh;font-family:var(--font-body);font-size:var(--text-base);line-height:1.6;background:var(--color-bg);color:var(--color-text)}
     img,canvas,svg{display:block;max-width:100%} button,input,select{font:inherit;color:inherit}
-    button{cursor:pointer;border:0} a{color:inherit}
+    button{cursor:pointer;border:0;background:none} a{color:inherit}
     .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
-    .sidebar{padding:var(--space-6);background:linear-gradient(180deg,var(--color-surface),var(--color-surface-offset));border-right:1px solid rgba(255,255,255,.08);position:sticky;top:0;height:100vh}
+    .sidebar{padding:var(--space-6);background:linear-gradient(180deg,var(--color-surface),var(--color-surface-offset));border-right:1px solid var(--panel-border);position:sticky;top:0;height:100vh}
     .logo{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-8)}
     .logo svg{width:28px;height:28px;color:var(--color-primary)}
     .logo h1{font-size:var(--text-lg);line-height:1.15}
     .logo span,.muted{color:var(--color-text-muted)}
     .nav{display:grid;gap:var(--space-2);margin-bottom:var(--space-8)}
-    .nav a{padding:0.8rem 1rem;border-radius:var(--radius-md);text-decoration:none;background:transparent;transition:background var(--transition), color var(--transition)}
-    .nav a:hover,.nav a:focus-visible{background:rgba(79,152,163,.12);outline:none}
-    .sidebar-card,.card{background:var(--color-surface);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-xl);box-shadow:var(--shadow-md)}
+    .nav a{padding:0.8rem 1rem;border-radius:var(--radius-md);text-decoration:none;transition:background var(--transition), color var(--transition)}
+    .nav a:hover,.nav a:focus-visible{background:color-mix(in srgb, var(--color-primary) 12%, transparent);outline:none}
+    .sidebar-card,.card{background:var(--color-surface);border:1px solid var(--panel-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-md)}
     .sidebar-card{padding:var(--space-5)}
     .main{padding:var(--space-6);display:grid;gap:var(--space-6)}
     .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-4)}
@@ -46,10 +46,11 @@
     .btn{padding:0.8rem 1rem;border-radius:var(--radius-md);transition:transform var(--transition),background var(--transition),color var(--transition),border-color var(--transition);min-height:44px}
     .btn:hover{transform:translateY(-1px)}
     .btn-primary{background:var(--color-primary);color:white}
-    .btn-secondary{background:transparent;border:1px solid rgba(255,255,255,.15)}
+    .btn-secondary{background:transparent;border:1px solid var(--panel-border)}
     .hero-grid,.panel-grid{display:grid;gap:var(--space-4)}
     .hero-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-    .panel-grid{grid-template-columns:1.4fr 1fr}
+    .panel-grid{grid-template-columns:1.3fr 1fr}
+    .panel-grid.equal{grid-template-columns:1fr 1fr}
     .card{padding:var(--space-5)}
     .kpi-label{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-2)}
     .kpi-value{font-size:var(--text-xl);line-height:1.1;margin-bottom:var(--space-2)}
@@ -57,20 +58,28 @@
     .section-head{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);margin-bottom:var(--space-4)}
     .section-head h3{font-size:var(--text-lg);line-height:1.15}
     table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums lining-nums}
-    th,td{text-align:left;padding:0.85rem 0.6rem;border-top:1px solid rgba(255,255,255,.08);font-size:var(--text-sm)}
+    th,td{text-align:left;padding:0.85rem 0.6rem;border-top:1px solid var(--grid-soft);font-size:var(--text-sm)}
     th{color:var(--color-text-muted);font-weight:500}
-    tbody tr:hover{background:rgba(255,255,255,.03)}
+    tbody tr:hover{background:color-mix(in srgb, var(--color-text) 3%, transparent)}
     .timeline{display:grid;gap:var(--space-4)}
-    .event{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid rgba(255,255,255,.08)}
+    .event{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid var(--panel-border)}
     .event h4{font-size:var(--text-base);margin-bottom:var(--space-1)}
     .event p{color:var(--color-text-muted);font-size:var(--text-sm)}
-    .pill{display:inline-flex;align-items:center;gap:var(--space-2);padding:0.35rem 0.7rem;border-radius:999px;font-size:var(--text-xs);letter-spacing:.04em;text-transform:uppercase;background:rgba(79,152,163,.12);color:var(--color-primary)}
+    .pill{display:inline-flex;align-items:center;gap:var(--space-2);padding:0.35rem 0.7rem;border-radius:999px;font-size:var(--text-xs);letter-spacing:.04em;text-transform:uppercase;background:color-mix(in srgb, var(--color-primary) 12%, transparent);color:var(--color-primary)}
     .meta-list{display:grid;gap:var(--space-2);margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)}
     .footer-note{font-size:var(--text-sm);color:var(--color-text-muted)}
-    .hidden{display:none}
-    @media (max-width: 1100px){ .app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid rgba(255,255,255,.08)} .hero-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .panel-grid{grid-template-columns:1fr} }
-    @media (max-width: 700px){ .main,.sidebar{padding:var(--space-4)} .hero-grid{grid-template-columns:1fr} .topbar{flex-direction:column} th:nth-child(4),td:nth-child(4),th:nth-child(6),td:nth-child(6){display:none} }
-    @media (prefers-reduced-motion: reduce){ *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important} }
+    .flip-card{perspective:1000px;padding:0;border:none;background:transparent;text-align:left}
+    .flip-card:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-xl)}
+    .flip-inner{position:relative;transform-style:preserve-3d;transition:transform 500ms cubic-bezier(.2,.9,.2,1);min-height:170px}
+    .flip-card.flipped .flip-inner{transform:rotateY(180deg)}
+    .flip-face{position:absolute;inset:0;padding:var(--space-5);backface-visibility:hidden;border:1px solid var(--panel-border);border-radius:var(--radius-xl);background:var(--color-surface);box-shadow:var(--shadow-md);display:flex;flex-direction:column;justify-content:space-between}
+    .flip-face.back{transform:rotateY(180deg)}
+    .flip-hint{font-size:var(--text-xs);color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.06em}
+    .chart-wrap{position:relative;height:300px}
+    .small-chart{position:relative;height:240px}
+    @media (max-width: 1100px){ .app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--panel-border)} .hero-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .panel-grid,.panel-grid.equal{grid-template-columns:1fr} }
+    @media (max-width: 700px){ .main,.sidebar{padding:var(--space-4)} .hero-grid{grid-template-columns:1fr} .topbar{flex-direction:column} th:nth-child(4),td:nth-child(4),th:nth-child(6),td:nth-child(6){display:none} .flip-inner{min-height:150px} }
+    @media (prefers-reduced-motion: reduce){ *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important} .flip-card.flipped .flip-inner{transform:none} }
   </style>
 </head>
 <body>
@@ -84,12 +93,13 @@
         </svg>
         <div>
           <h1>Mock Exchange</h1>
-          <span>Paper trading with live prices</span>
+          <span>Paper trading, US market, NZD baseline</span>
         </div>
       </div>
       <nav class="nav" aria-label="Primary">
         <a href="#overview">Overview</a>
         <a href="#holdings">Holdings</a>
+        <a href="#fx">FX</a>
         <a href="#transactions">Transactions</a>
         <a href="#decisions">AI log</a>
       </nav>
@@ -102,43 +112,62 @@
       <div class="topbar">
         <div class="title">
           <h2>Autonomous portfolio dashboard</h2>
-          <p>This GitHub Pages app reads local JSON files for cash, positions, trade history, daily snapshots, and AI reasoning. Update the JSON files daily and the dashboard refreshes automatically.</p>
+          <p>This GitHub Pages app keeps NZD as the baseline contribution currency while valuing US-market positions in both NZD and USD using a daily FX series.</p>
         </div>
         <div class="controls">
           <button class="btn btn-secondary" data-theme-toggle aria-label="Switch theme">Toggle theme</button>
           <button class="btn btn-primary" id="reloadBtn">Reload data</button>
         </div>
       </div>
-
       <section class="hero-grid" aria-label="Key metrics">
-        <article class="card"><div class="kpi-label">Portfolio value</div><div class="kpi-value" id="portfolioValue">—</div><div class="muted" id="portfolioReturn">—</div></article>
-        <article class="card"><div class="kpi-label">Cash balance</div><div class="kpi-value" id="cashBalance">—</div><div class="muted">Fortnightly deposit: $500</div></article>
-        <article class="card"><div class="kpi-label">Open positions</div><div class="kpi-value" id="positionsCount">—</div><div class="muted">Max 20% in one stock</div></article>
-        <article class="card"><div class="kpi-label">Next deposit</div><div class="kpi-value gold" id="nextDeposit">—</div><div class="muted" id="daysUntil">—</div></article>
+        <button class="flip-card" id="portfolioCard" aria-label="Toggle portfolio balance between NZD and USD">
+          <div class="flip-inner">
+            <article class="flip-face front"><div><div class="kpi-label">Portfolio value</div><div class="kpi-value" id="portfolioValueNzd">—</div><div class="muted" id="portfolioReturnNzd">—</div></div><div class="flip-hint">Tap to view USD</div></article>
+            <article class="flip-face back"><div><div class="kpi-label">Portfolio value</div><div class="kpi-value" id="portfolioValueUsd">—</div><div class="muted" id="portfolioReturnUsd">—</div></div><div class="flip-hint">Tap to view NZD</div></article>
+          </div>
+        </button>
+        <button class="flip-card" id="cashCard" aria-label="Toggle cash balance between NZD and USD">
+          <div class="flip-inner">
+            <article class="flip-face front"><div><div class="kpi-label">Cash balance</div><div class="kpi-value" id="cashBalanceNzd">—</div><div class="muted">Baseline contribution currency</div></div><div class="flip-hint">Tap to view USD</div></article>
+            <article class="flip-face back"><div><div class="kpi-label">Cash balance</div><div class="kpi-value" id="cashBalanceUsd">—</div><div class="muted">Converted from NZD at latest FX</div></div><div class="flip-hint">Tap to view NZD</div></article>
+          </div>
+        </button>
+        <article class="card"><div class="kpi-label">Open positions</div><div class="kpi-value" id="positionsCount">—</div><div class="muted">US equities and ETFs</div></article>
+        <article class="card"><div class="kpi-label">Next NZD deposit</div><div class="kpi-value gold" id="nextDeposit">—</div><div class="muted" id="daysUntil">—</div></article>
       </section>
-
-      <section class="panel-grid">
+      <section class="panel-grid equal" id="fx">
         <article class="card">
           <div class="section-head"><h3>Portfolio history</h3><span class="muted" id="snapshotCount">0 snapshots</span></div>
-          <canvas id="historyChart" height="120"></canvas>
+          <div class="chart-wrap"><canvas id="historyChart"></canvas></div>
         </article>
+        <article class="card">
+          <div class="section-head"><h3>NZD/USD exchange rate</h3><span class="muted" id="fxUpdatedAt">—</span></div>
+          <div class="kpi-value" id="fxRate">—</div>
+          <p class="muted" id="fxDescription">Daily FX reference for conversions.</p>
+          <div class="small-chart"><canvas id="fxChart"></canvas></div>
+        </article>
+      </section>
+      <section class="panel-grid">
         <article class="card" id="holdings">
           <div class="section-head"><h3>Current holdings</h3><span class="muted" id="updatedAt">—</span></div>
           <div style="overflow:auto">
             <table>
-              <thead><tr><th>Ticker</th><th>Shares</th><th>Avg cost</th><th>Last price</th><th>Value</th><th>P/L %</th></tr></thead>
+              <thead><tr><th>Ticker</th><th>Shares</th><th>Avg cost USD</th><th>Last price USD</th><th>Value NZD</th><th>P/L %</th></tr></thead>
               <tbody id="holdingsBody"></tbody>
             </table>
           </div>
         </article>
+        <article class="card">
+          <div class="section-head"><h3>Currency overview</h3><span class="muted">Live from local FX data</span></div>
+          <div class="timeline" id="currencySummary"></div>
+        </article>
       </section>
-
       <section class="panel-grid" id="transactions">
         <article class="card">
           <div class="section-head"><h3>Transaction history</h3><span class="muted">Newest first</span></div>
           <div style="overflow:auto;max-height:480px">
             <table>
-              <thead><tr><th>Date</th><th>Type</th><th>Ticker</th><th>Shares</th><th>Price</th><th>Total</th><th>Note</th></tr></thead>
+              <thead><tr><th>Date</th><th>Type</th><th>Ticker</th><th>Shares</th><th>Price USD</th><th>Total NZD</th><th>Note</th></tr></thead>
               <tbody id="transactionsBody"></tbody>
             </table>
           </div>
@@ -148,41 +177,41 @@
           <div class="timeline" id="decisionList"></div>
         </article>
       </section>
-
-      <p class="footer-note">Tip: publish this file as your GitHub Pages entry page, then point your daily automation at the JSON files inside the data folder.</p>
+      <p class="footer-note">Tip: refresh market data and FX data together each day, then commit the updated JSON files so GitHub Pages shows the new values and charts.</p>
     </main>
   </div>
-
   <script>
-    const state = { chart: null, theme: 'dark' };
-    const money = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const state = { historyChart: null, fxChart: null };
+    const moneyNzd = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'NZD', maximumFractionDigits: 2 });
+    const moneyUsd = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
     const pct = new Intl.NumberFormat('en-NZ', { style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' });
-
+    const root = document.documentElement;
     const toggleBtn = document.querySelector('[data-theme-toggle]');
     (() => {
-      const root = document.documentElement;
-      let d = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      d = root.getAttribute('data-theme') || d;
-      root.setAttribute('data-theme', d);
-      state.theme = d;
+      let theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      theme = root.getAttribute('data-theme') || theme;
+      root.setAttribute('data-theme', theme);
       toggleBtn?.addEventListener('click', () => {
-        d = d === 'dark' ? 'light' : 'dark';
-        root.setAttribute('data-theme', d);
-        state.theme = d;
+        theme = theme === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', theme);
         loadData();
       });
     })();
-
+    function setupFlip(id) {
+      const el = document.getElementById(id);
+      el?.addEventListener('click', () => el.classList.toggle('flipped'));
+      el?.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.classList.toggle('flipped'); }
+      });
+    }
+    setupFlip('portfolioCard');
+    setupFlip('cashCard');
     async function getJSON(path) {
       const res = await fetch(path, { cache: 'no-store' });
       if (!res.ok) throw new Error('Failed to load ' + path);
       return res.json();
     }
-
-    function daysBetween(a, b) {
-      return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
-    }
-
+    function daysBetween(a, b) { return Math.ceil((b - a) / (1000 * 60 * 60 * 24)); }
     function computeNextDeposit(startDate, intervalDays) {
       const start = new Date(startDate + 'T00:00:00');
       const now = new Date();
@@ -190,106 +219,80 @@
       while (next <= now) next.setDate(next.getDate() + intervalDays);
       return next;
     }
-
-    function renderMeta(meta) {
+    function themeColor(name, fallback) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback; }
+    function drawLineChart(canvasId, labels, data, label, color) {
+      const key = canvasId === 'historyChart' ? 'historyChart' : 'fxChart';
+      if (state[key]) state[key].destroy();
+      state[key] = new Chart(document.getElementById(canvasId), {
+        type: 'line',
+        data: { labels, datasets: [{ label, data, borderColor: color, backgroundColor: color + '22', fill: true, tension: .3, pointRadius: 2.5 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: themeColor('--color-text-muted', '#999') }, grid: { color: themeColor('--grid-soft', 'rgba(255,255,255,.08)') } }, x: { ticks: { color: themeColor('--color-text-muted', '#999') }, grid: { color: themeColor('--grid-faint', 'rgba(255,255,255,.04)') } } } }
+      });
+    }
+    function renderMeta(meta, fx) {
       const next = computeNextDeposit(meta.start_date, meta.deposit_interval_days);
       document.getElementById('nextDeposit').textContent = next.toLocaleDateString();
       document.getElementById('daysUntil').textContent = `${daysBetween(new Date(), next)} days remaining`;
-      document.getElementById('metaBox').innerHTML = `
-        <div><strong>Start:</strong> ${meta.start_date}</div>
-        <div><strong>Total deposited:</strong> ${money.format(meta.total_deposited)}</div>
-        <div><strong>Strategy:</strong> ${meta.strategy}</div>
-        <div><strong>Universe:</strong> ${meta.market_scope}</div>
-      `;
+      document.getElementById('metaBox').innerHTML = `<div><strong>Baseline:</strong> ${meta.base_currency}</div><div><strong>Market:</strong> ${meta.market_scope}</div><div><strong>Deposit:</strong> ${moneyNzd.format(meta.deposit_amount_nzd)} every ${meta.deposit_interval_days} days</div><div><strong>Total contributed:</strong> ${moneyNzd.format(meta.total_deposited_nzd)}</div><div><strong>FX mode:</strong> ${fx.pair} at ${fx.latest_rate.toFixed(4)}</div>`;
     }
-
-    function renderOverview(portfolio, meta, snapshots) {
-      const holdingsValue = portfolio.holdings.reduce((sum, h) => sum + h.shares * h.last_price, 0);
-      const total = portfolio.cash + holdingsValue;
-      const returnPct = meta.total_deposited ? (total - meta.total_deposited) / meta.total_deposited : 0;
-      document.getElementById('portfolioValue').textContent = money.format(total);
-      document.getElementById('portfolioReturn').textContent = `${pct.format(returnPct)} vs contributions`;
-      document.getElementById('cashBalance').textContent = money.format(portfolio.cash);
+    function renderOverview(portfolio, meta, fx, snapshots) {
+      const usdToNzd = fx.latest_rate;
+      const holdingsUsd = portfolio.holdings.reduce((sum, h) => sum + h.shares * h.last_price_usd, 0);
+      const holdingsNzd = holdingsUsd * usdToNzd;
+      const totalNzd = portfolio.cash_nzd + holdingsNzd;
+      const totalUsd = totalNzd / usdToNzd;
+      const returnNzd = meta.total_deposited_nzd ? (totalNzd - meta.total_deposited_nzd) / meta.total_deposited_nzd : 0;
+      const totalDepositedUsdRef = meta.total_deposited_nzd / usdToNzd;
+      const returnUsd = totalDepositedUsdRef ? (totalUsd - totalDepositedUsdRef) / totalDepositedUsdRef : 0;
+      document.getElementById('portfolioValueNzd').textContent = moneyNzd.format(totalNzd);
+      document.getElementById('portfolioReturnNzd').textContent = `${pct.format(returnNzd)} vs NZD contributions`;
+      document.getElementById('portfolioValueUsd').textContent = moneyUsd.format(totalUsd);
+      document.getElementById('portfolioReturnUsd').textContent = `${pct.format(returnUsd)} vs NZD contributions translated to USD`;
+      document.getElementById('cashBalanceNzd').textContent = moneyNzd.format(portfolio.cash_nzd);
+      document.getElementById('cashBalanceUsd').textContent = moneyUsd.format(portfolio.cash_nzd / usdToNzd);
       document.getElementById('positionsCount').textContent = String(portfolio.holdings.length);
       document.getElementById('updatedAt').textContent = `Updated ${portfolio.updated_at}`;
       document.getElementById('snapshotCount').textContent = `${snapshots.length} snapshots`;
     }
-
-    function renderHoldings(holdings) {
+    function renderHoldings(holdings, fx) {
       const tbody = document.getElementById('holdingsBody');
       tbody.innerHTML = holdings.map(h => {
-        const pl = (h.last_price - h.avg_cost) / h.avg_cost;
+        const pl = (h.last_price_usd - h.avg_cost_usd) / h.avg_cost_usd;
         const cls = pl >= 0 ? 'positive' : 'negative';
-        return `<tr>
-          <td>${h.ticker}</td>
-          <td>${h.shares}</td>
-          <td>${money.format(h.avg_cost)}</td>
-          <td>${money.format(h.last_price)}</td>
-          <td>${money.format(h.shares * h.last_price)}</td>
-          <td class="${cls}">${pct.format(pl)}</td>
-        </tr>`;
+        return `<tr><td>${h.ticker}</td><td>${h.shares}</td><td>${moneyUsd.format(h.avg_cost_usd)}</td><td>${moneyUsd.format(h.last_price_usd)}</td><td>${moneyNzd.format(h.shares * h.last_price_usd * fx.latest_rate)}</td><td class="${cls}">${pct.format(pl)}</td></tr>`;
       }).join('') || '<tr><td colspan="6" class="muted">No open positions yet.</td></tr>';
     }
-
     function renderTransactions(transactions) {
       const tbody = document.getElementById('transactionsBody');
-      tbody.innerHTML = transactions.slice().reverse().map(t => `<tr>
-        <td>${t.date}</td><td>${t.type}</td><td>${t.ticker || '—'}</td><td>${t.shares ?? '—'}</td>
-        <td>${t.price ? money.format(t.price) : '—'}</td><td>${money.format(t.total)}</td><td>${t.note || '—'}</td>
-      </tr>`).join('');
+      tbody.innerHTML = transactions.slice().reverse().map(t => `<tr><td>${t.date}</td><td>${t.type}</td><td>${t.ticker || '—'}</td><td>${t.shares ?? '—'}</td><td>${t.price_usd != null ? moneyUsd.format(t.price_usd) : '—'}</td><td>${moneyNzd.format(t.total_nzd)}</td><td>${t.note || '—'}</td></tr>`).join('');
     }
-
     function renderDecisions(decisions) {
-      const wrap = document.getElementById('decisionList');
-      wrap.innerHTML = decisions.slice().reverse().map(d => `<article class="event">
-        <span class="pill">${d.action}</span>
-        <h4>${d.date} — ${d.summary}</h4>
-        <p>${d.reasoning}</p>
-      </article>`).join('');
+      document.getElementById('decisionList').innerHTML = decisions.slice().reverse().map(d => `<article class="event"><span class="pill">${d.action}</span><h4>${d.date} — ${d.summary}</h4><p>${d.reasoning}</p></article>`).join('');
     }
-
-    function renderChart(snapshots) {
-      const ctx = document.getElementById('historyChart');
-      const labels = snapshots.map(s => s.date);
-      const values = snapshots.map(s => s.total_value);
-      if (state.chart) state.chart.destroy();
-      state.chart = new Chart(ctx, {
-        type: 'line',
-        data: { labels, datasets: [{ label: 'Portfolio value', data: values, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim(), backgroundColor: 'rgba(79,152,163,.18)', fill: true, tension: .3, pointRadius: 3 }] },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim(), callback: v => money.format(v) }, grid: { color: 'rgba(255,255,255,.08)' } },
-            x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim() }, grid: { color: 'rgba(255,255,255,.04)' } }
-          }
-        }
-      });
+    function renderCurrencySummary(portfolio, meta, fx) {
+      const holdingsUsd = portfolio.holdings.reduce((sum, h) => sum + h.shares * h.last_price_usd, 0);
+      const holdingsNzd = holdingsUsd * fx.latest_rate;
+      const totalNzd = portfolio.cash_nzd + holdingsNzd;
+      const totalUsd = totalNzd / fx.latest_rate;
+      document.getElementById('currencySummary').innerHTML = `<article class="event"><h4>Latest rate</h4><p>1 USD = ${fx.latest_rate.toFixed(4)} NZD, and 1 NZD = ${(1 / fx.latest_rate).toFixed(4)} USD.</p></article><article class="event"><h4>Portfolio translation</h4><p>Total value is ${moneyNzd.format(totalNzd)} or ${moneyUsd.format(totalUsd)} at the latest FX rate.</p></article><article class="event"><h4>Contribution base</h4><p>Deposits are recorded in NZD, so profit reporting uses NZD as the primary baseline and USD as a translated reference.</p></article>`;
+      document.getElementById('fxRate').textContent = `1 USD = ${fx.latest_rate.toFixed(4)} NZD`;
+      document.getElementById('fxUpdatedAt').textContent = `Updated ${fx.updated_at}`;
+      document.getElementById('fxDescription').textContent = `Source note: ${fx.source_note}`;
     }
-
     async function loadData() {
       try {
-        const [portfolio, transactions, decisions, meta, snapshotsIndex] = await Promise.all([
-          getJSON('./data/portfolio.json'),
-          getJSON('./data/transactions.json'),
-          getJSON('./data/decisions.json'),
-          getJSON('./data/meta.json'),
-          getJSON('./data/snapshots/index.json')
+        const [portfolio, transactions, decisions, meta, snapshotsIndex, fx, fxHistory] = await Promise.all([
+          getJSON('./data/portfolio.json'), getJSON('./data/transactions.json'), getJSON('./data/decisions.json'), getJSON('./data/meta.json'), getJSON('./data/snapshots/index.json'), getJSON('./data/fx/latest.json'), getJSON('./data/fx/history.json')
         ]);
         const snapshots = snapshotsIndex.snapshots;
-        renderMeta(meta);
-        renderOverview(portfolio, meta, snapshots);
-        renderHoldings(portfolio.holdings);
-        renderTransactions(transactions.transactions);
-        renderDecisions(decisions.decisions);
-        renderChart(snapshots);
+        renderMeta(meta, fx); renderOverview(portfolio, meta, fx, snapshots); renderHoldings(portfolio.holdings, fx); renderTransactions(transactions.transactions); renderDecisions(decisions.decisions); renderCurrencySummary(portfolio, meta, fx);
+        drawLineChart('historyChart', snapshots.map(s => s.date), snapshots.map(s => s.total_value_nzd), 'Portfolio value NZD', themeColor('--color-primary', '#4f98a3'));
+        drawLineChart('fxChart', fxHistory.history.map(d => d.date), fxHistory.history.map(d => d.usd_to_nzd), 'USD to NZD', themeColor('--color-gold', '#e8af34'));
       } catch (err) {
         console.error(err);
-        alert('Could not load the JSON files. Make sure this app is served from GitHub Pages or a local web server, not opened directly as a file.');
+        alert('Could not load the JSON files. Serve this through GitHub Pages or a local web server rather than opening it directly as a file.');
       }
     }
-
     document.getElementById('reloadBtn').addEventListener('click', loadData);
     window.addEventListener('DOMContentLoaded', loadData);
   </script>
