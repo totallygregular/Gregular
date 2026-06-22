@@ -1,0 +1,7 @@
+{
+  "pair": "USD/NZD",
+  "latest_rate": 1.5100,
+  "inverse_rate": 0.6623,
+  "updated_at": "2026-06-22",
+  "source_note": "Refresh daily alongside market data so NZD and USD views stay aligned."
+}

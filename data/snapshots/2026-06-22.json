@@ -1,11 +1,12 @@
 {
   "date": "2026-06-22",
-  "cash": 135.00,
-  "holdings_value": 369.86,
-  "total_value": 504.86,
+  "cash_nzd": 220.00,
+  "holdings_value_usd": 358.81,
+  "holdings_value_nzd": 541.80,
+  "total_value_nzd": 761.80,
+  "fx_usd_to_nzd": 1.51,
   "holdings": [
-    {"ticker": "VOO", "value": 140.60},
-    {"ticker": "QQQ", "value": 127.44},
-    {"ticker": "MSFT", "value": 113.95}
+    {"ticker": "VOO", "value_usd": 251.19, "value_nzd": 379.30},
+    {"ticker": "QQQ", "value_usd": 107.62, "value_nzd": 162.51}
   ]
 }
