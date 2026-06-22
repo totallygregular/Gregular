@@ -1,0 +1,11 @@
+{
+  "project_name": "Mock Exchange",
+  "base_currency": "USD",
+  "start_date": "2026-06-22",
+  "deposit_amount": 500,
+  "deposit_interval_days": 14,
+  "total_deposited": 500,
+  "strategy": "Maximise risk-adjusted profit over 3 years using a blend of core ETFs and opportunistic stock positions.",
+  "market_scope": "US equities and ETFs",
+  "last_updated": "2026-06-22"
+}

@@ -1,0 +1,11 @@
+{
+  "date": "2026-06-22",
+  "cash": 135.00,
+  "holdings_value": 369.86,
+  "total_value": 504.86,
+  "holdings": [
+    {"ticker": "VOO", "value": 140.60},
+    {"ticker": "QQQ", "value": 127.44},
+    {"ticker": "MSFT", "value": 113.95}
+  ]
+}

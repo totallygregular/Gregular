@@ -1,0 +1,14 @@
+name: Daily mock exchange reminder
+
+on:
+  schedule:
+    - cron: '0 18 * * 0-4'
+  workflow_dispatch:
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reminder
+        run: |
+          echo "Run Perplexity Computer with the master prompt and update the JSON files for today's market close."

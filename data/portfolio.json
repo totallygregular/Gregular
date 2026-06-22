@@ -1,0 +1,9 @@
+{
+  "cash": 135.00,
+  "updated_at": "2026-06-22",
+  "holdings": [
+    {"ticker": "VOO", "shares": 0.5, "avg_cost": 275.00, "last_price": 281.20},
+    {"ticker": "QQQ", "shares": 0.35, "avg_cost": 355.00, "last_price": 364.10},
+    {"ticker": "MSFT", "shares": 0.2, "avg_cost": 560.00, "last_price": 569.75}
+  ]
+}

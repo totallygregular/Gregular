@@ -1,0 +1,8 @@
+{
+  "transactions": [
+    {"date": "2026-06-22", "type": "DEPOSIT", "ticker": "", "shares": null, "price": null, "total": 500.00, "note": "Initial fortnightly contribution"},
+    {"date": "2026-06-22", "type": "BUY", "ticker": "VOO", "shares": 0.5, "price": 275.00, "total": 137.50, "note": "Core index position"},
+    {"date": "2026-06-22", "type": "BUY", "ticker": "QQQ", "shares": 0.35, "price": 355.00, "total": 124.25, "note": "Growth ETF exposure"},
+    {"date": "2026-06-22", "type": "BUY", "ticker": "MSFT", "shares": 0.2, "price": 560.00, "total": 112.00, "note": "Large-cap quality tilt"}
+  ]
+}
