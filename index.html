@@ -231,7 +231,7 @@
     }
     function renderMeta(meta, fx) {
       const next = computeNextDeposit(meta.start_date, meta.deposit_interval_days);
-      document.getElementById('nextDeposit').textContent = next.toLocaleDateString();
+      document.getElementById('nextDeposit').textContent = next.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       document.getElementById('daysUntil').textContent = `${daysBetween(new Date(), next)} days remaining`;
       document.getElementById('metaBox').innerHTML = `<div><strong>Baseline:</strong> ${meta.base_currency}</div><div><strong>Market:</strong> ${meta.market_scope}</div><div><strong>Deposit:</strong> ${moneyNzd.format(meta.deposit_amount_nzd)} every ${meta.deposit_interval_days} days</div><div><strong>Total contributed:</strong> ${moneyNzd.format(meta.total_deposited_nzd)}</div><div><strong>FX mode:</strong> ${fx.pair} at ${fx.latest_rate.toFixed(4)}</div>`;
     }
