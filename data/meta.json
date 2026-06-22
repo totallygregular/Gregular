@@ -2,11 +2,11 @@
   "project_name": "Mock Exchange",
   "base_currency": "NZD",
   "reference_currency": "USD",
-  "start_date": "2026-06-22",
+  "start_date": "2026-06-24",
   "deposit_amount_nzd": 500,
   "deposit_interval_days": 14,
-  "total_deposited_nzd": 500,
+  "total_deposited_nzd": 0,
   "strategy": "Maximise risk-adjusted profit over 3 years using NZD-funded paper trades in US equities and ETFs.",
   "market_scope": "US equities and ETFs",
-  "last_updated": "2026-06-22"
+  "last_updated": "2026-06-24"
 }

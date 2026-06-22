@@ -1,10 +1,3 @@
 {
-  "decisions": [
-    {
-      "date": "2026-06-22",
-      "action": "INITIAL_ALLOCATE",
-      "summary": "Opened ETF-led positions with NZD as the reporting base.",
-      "reasoning": "Used the first NZD contribution to open broad-market and growth ETF exposure while preserving local-currency cash for future fortnightly deposits and translated FX reporting."
-    }
-  ]
+  "decisions": []
 }

@@ -77,7 +77,21 @@
     .flip-hint{font-size:var(--text-xs);color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.06em}
     .chart-wrap{position:relative;height:300px}
     .small-chart{position:relative;height:240px}
-    @media (max-width: 1100px){ .app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--panel-border)} .hero-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .panel-grid,.panel-grid.equal{grid-template-columns:1fr} }
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--space-8) var(--space-4);text-align:center;color:var(--color-text-muted);gap:var(--space-2);min-height:120px}
+    .empty-state svg{width:40px;height:40px;color:var(--color-text-faint);margin-bottom:var(--space-2)}
+    .empty-state p{font-size:var(--text-sm)}
+    .prompt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4)}
+    .prompt-btn{display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-2);padding:var(--space-5);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid var(--panel-border);transition:border-color var(--transition),background var(--transition),transform var(--transition);text-align:left;min-height:44px;width:100%}
+    .prompt-btn:hover{border-color:var(--color-primary);background:color-mix(in srgb, var(--color-primary) 6%, var(--color-surface-2));transform:translateY(-1px)}
+    .prompt-btn:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}
+    .prompt-btn .prompt-title{font-size:var(--text-base);font-weight:500}
+    .prompt-btn .prompt-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.4}
+    .prompt-btn .prompt-status{font-size:var(--text-xs);color:var(--color-success);opacity:0;transition:opacity var(--transition);letter-spacing:.04em;text-transform:uppercase}
+    .prompt-btn .prompt-status.visible{opacity:1}
+    .prompt-btn.copied{border-color:var(--color-success);background:color-mix(in srgb, var(--color-success) 6%, var(--color-surface-2))}
+    .prompt-btn.copied .prompt-status{opacity:1}
+    .market-widget{min-height:80px;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--panel-border)}
+    @media (max-width: 1100px){ .app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--panel-border)} .hero-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .panel-grid,.panel-grid.equal{grid-template-columns:1fr} .prompt-grid{grid-template-columns:1fr} }
     @media (max-width: 700px){ .main,.sidebar{padding:var(--space-4)} .hero-grid{grid-template-columns:1fr} .topbar{flex-direction:column} th:nth-child(4),td:nth-child(4),th:nth-child(6),td:nth-child(6){display:none} .flip-inner{min-height:150px} }
     @media (prefers-reduced-motion: reduce){ *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important} .flip-card.flipped .flip-inner{transform:none} }
   </style>
@@ -102,6 +116,7 @@
         <a href="#fx">FX</a>
         <a href="#transactions">Transactions</a>
         <a href="#decisions">AI log</a>
+        <a href="#finance-prompts">Finance prompts</a>
       </nav>
       <div class="sidebar-card">
         <span class="pill">3-year simulation</span>
@@ -138,7 +153,7 @@
       <section class="panel-grid equal" id="fx">
         <article class="card">
           <div class="section-head"><h3>Portfolio history</h3><span class="muted" id="snapshotCount">0 snapshots</span></div>
-          <div class="chart-wrap"><canvas id="historyChart"></canvas></div>
+          <div class="chart-wrap" id="historyChartWrap"><canvas id="historyChart"></canvas></div>
         </article>
         <article class="card">
           <div class="section-head"><h3>NZD/USD exchange rate</h3><span class="muted" id="fxUpdatedAt">—</span></div>
@@ -165,7 +180,7 @@
       <section class="panel-grid" id="transactions">
         <article class="card">
           <div class="section-head"><h3>Transaction history</h3><span class="muted">Newest first</span></div>
-          <div style="overflow:auto;max-height:480px">
+          <div style="overflow:auto;max-height:480px" id="transactionsWrap">
             <table>
               <thead><tr><th>Date</th><th>Type</th><th>Ticker</th><th>Shares</th><th>Price USD</th><th>Total NZD</th><th>Note</th></tr></thead>
               <tbody id="transactionsBody"></tbody>
@@ -177,11 +192,35 @@
           <div class="timeline" id="decisionList"></div>
         </article>
       </section>
+      <section class="card" id="finance-prompts">
+        <div class="section-head"><h3>Finance prompts</h3><span class="muted">Copy a prompt for Perplexity Finance</span></div>
+        <div class="prompt-grid">
+          <button class="prompt-btn" data-prompt="daily" aria-label="Copy daily review prompt">
+            <span class="prompt-title">Daily review</span>
+            <span class="prompt-desc">Get a daily portfolio review with price moves, news, and hold/trim/sell recommendations.</span>
+            <span class="prompt-status" aria-live="polite">Prompt copied</span>
+          </button>
+          <button class="prompt-btn" data-prompt="trade" aria-label="Copy trade decision prompt">
+            <span class="prompt-title">Trade decision</span>
+            <span class="prompt-desc">Analyse whether to buy, sell, or hold today with thesis, risks, and position sizing.</span>
+            <span class="prompt-status" aria-live="polite">Prompt copied</span>
+          </button>
+          <button class="prompt-btn" data-prompt="weekly" aria-label="Copy weekly rebalance prompt">
+            <span class="prompt-title">Weekly rebalance</span>
+            <span class="prompt-desc">Assess concentration risk, sector balance, and whether to rebalance or deploy cash.</span>
+            <span class="prompt-status" aria-live="polite">Prompt copied</span>
+          </button>
+        </div>
+      </section>
+      <section class="card" id="market-widget">
+        <div class="section-head"><h3>Live market context</h3><span class="muted">Optional &mdash; TradingView embed</span></div>
+        <div class="market-widget" id="tradingViewWrap"></div>
+      </section>
       <p class="footer-note">Tip: refresh market data and FX data together each day, then commit the updated JSON files so GitHub Pages shows the new values and charts.</p>
     </main>
   </div>
   <script>
-    const state = { historyChart: null, fxChart: null };
+    const state = { historyChart: null, fxChart: null, portfolio: null, meta: null, fx: null, transactions: null, decisions: null, snapshots: null };
     const moneyNzd = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'NZD', maximumFractionDigits: 2 });
     const moneyUsd = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
     const pct = new Intl.NumberFormat('en-NZ', { style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' });
@@ -229,6 +268,9 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: themeColor('--color-text-muted', '#999') }, grid: { color: themeColor('--grid-soft', 'rgba(255,255,255,.08)') } }, x: { ticks: { color: themeColor('--color-text-muted', '#999') }, grid: { color: themeColor('--grid-faint', 'rgba(255,255,255,.04)') } } } }
       });
     }
+    function renderEmptyState(container, message, iconPath) {
+      container.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="${iconPath || 'M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83'}"/></svg><p>${message}</p></div>`;
+    }
     function renderMeta(meta, fx) {
       const next = computeNextDeposit(meta.start_date, meta.deposit_interval_days);
       document.getElementById('nextDeposit').textContent = next.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -245,9 +287,9 @@
       const totalDepositedUsdRef = meta.total_deposited_nzd / usdToNzd;
       const returnUsd = totalDepositedUsdRef ? (totalUsd - totalDepositedUsdRef) / totalDepositedUsdRef : 0;
       document.getElementById('portfolioValueNzd').textContent = moneyNzd.format(totalNzd);
-      document.getElementById('portfolioReturnNzd').textContent = `${pct.format(returnNzd)} vs NZD contributions`;
+      document.getElementById('portfolioReturnNzd').textContent = meta.total_deposited_nzd ? `${pct.format(returnNzd)} vs NZD contributions` : 'No contributions yet';
       document.getElementById('portfolioValueUsd').textContent = moneyUsd.format(totalUsd);
-      document.getElementById('portfolioReturnUsd').textContent = `${pct.format(returnUsd)} vs NZD contributions translated to USD`;
+      document.getElementById('portfolioReturnUsd').textContent = meta.total_deposited_nzd ? `${pct.format(returnUsd)} vs NZD contributions translated to USD` : 'No contributions yet';
       document.getElementById('cashBalanceNzd').textContent = moneyNzd.format(portfolio.cash_nzd);
       document.getElementById('cashBalanceUsd').textContent = moneyUsd.format(portfolio.cash_nzd / usdToNzd);
       document.getElementById('positionsCount').textContent = String(portfolio.holdings.length);
@@ -256,18 +298,34 @@
     }
     function renderHoldings(holdings, fx) {
       const tbody = document.getElementById('holdingsBody');
+      if (!holdings || holdings.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>No holdings yet</p></div></td></tr>';
+        return;
+      }
       tbody.innerHTML = holdings.map(h => {
         const pl = (h.last_price_usd - h.avg_cost_usd) / h.avg_cost_usd;
         const cls = pl >= 0 ? 'positive' : 'negative';
         return `<tr><td>${h.ticker}</td><td>${h.shares}</td><td>${moneyUsd.format(h.avg_cost_usd)}</td><td>${moneyUsd.format(h.last_price_usd)}</td><td>${moneyNzd.format(h.shares * h.last_price_usd * fx.latest_rate)}</td><td class="${cls}">${pct.format(pl)}</td></tr>`;
-      }).join('') || '<tr><td colspan="6" class="muted">No open positions yet.</td></tr>';
+      }).join('');
     }
     function renderTransactions(transactions) {
+      const wrap = document.getElementById('transactionsWrap');
+      if (!transactions || transactions.length === 0) {
+        wrap.innerHTML = '';
+        renderEmptyState(wrap, 'No transactions yet', 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2');
+        return;
+      }
+      wrap.innerHTML = `<table><thead><tr><th>Date</th><th>Type</th><th>Ticker</th><th>Shares</th><th>Price USD</th><th>Total NZD</th><th>Note</th></tr></thead><tbody id="transactionsBody"></tbody></table>`;
       const tbody = document.getElementById('transactionsBody');
       tbody.innerHTML = transactions.slice().reverse().map(t => `<tr><td>${t.date}</td><td>${t.type}</td><td>${t.ticker || '—'}</td><td>${t.shares ?? '—'}</td><td>${t.price_usd != null ? moneyUsd.format(t.price_usd) : '—'}</td><td>${moneyNzd.format(t.total_nzd)}</td><td>${t.note || '—'}</td></tr>`).join('');
     }
     function renderDecisions(decisions) {
-      document.getElementById('decisionList').innerHTML = decisions.slice().reverse().map(d => `<article class="event"><span class="pill">${d.action}</span><h4>${d.date} — ${d.summary}</h4><p>${d.reasoning}</p></article>`).join('');
+      const el = document.getElementById('decisionList');
+      if (!decisions || decisions.length === 0) {
+        renderEmptyState(el, 'No decisions logged yet', 'M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 12 18.469c-.74 0-1.45.294-1.988.82l-.548-.548z');
+        return;
+      }
+      el.innerHTML = decisions.slice().reverse().map(d => `<article class="event"><span class="pill">${d.action}</span><h4>${d.date} — ${d.summary}</h4><p>${d.reasoning}</p></article>`).join('');
     }
     function renderCurrencySummary(portfolio, meta, fx) {
       const holdingsUsd = portfolio.holdings.reduce((sum, h) => sum + h.shares * h.last_price_usd, 0);
@@ -279,14 +337,149 @@
       document.getElementById('fxUpdatedAt').textContent = `Updated ${fx.updated_at}`;
       document.getElementById('fxDescription').textContent = `Source note: ${fx.source_note}`;
     }
+    function renderHistoryChart(snapshots) {
+      const wrap = document.getElementById('historyChartWrap');
+      if (!snapshots || snapshots.length === 0) {
+        const canvas = document.getElementById('historyChart');
+        if (canvas) canvas.style.display = 'none';
+        if (!wrap.querySelector('.empty-state')) {
+          renderEmptyState(wrap, 'No portfolio history yet — snapshots will appear after the first daily update.', 'M3 3v18h18M7 16l4-4 4 4 6-6');
+        }
+        return;
+      }
+      const canvas = document.getElementById('historyChart');
+      canvas.style.display = '';
+      const existing = wrap.querySelector('.empty-state');
+      if (existing) existing.remove();
+      drawLineChart('historyChart', snapshots.map(s => s.date), snapshots.map(s => s.total_value_nzd), 'Portfolio value NZD', themeColor('--color-primary', '#4f98a3'));
+    }
+    function generatePortfolioSummary() {
+      const p = state.portfolio;
+      const m = state.meta;
+      const fx = state.fx;
+      const txns = state.transactions;
+      if (!p || !m || !fx) return '';
+      const date = p.updated_at || new Date().toISOString().slice(0, 10);
+      const rate = fx.latest_rate;
+      const holdingsUsd = p.holdings.reduce((s, h) => s + h.shares * h.last_price_usd, 0);
+      const holdingsNzd = holdingsUsd * rate;
+      const totalNzd = p.cash_nzd + holdingsNzd;
+      const totalUsd = totalNzd / rate;
+      const cashUsd = p.cash_nzd / rate;
+      let lines = [];
+      lines.push(`Date: ${date}`);
+      lines.push(`Base currency: NZD`);
+      lines.push(`Reference currency: USD`);
+      lines.push(`Latest FX rate: 1 USD = ${rate.toFixed(4)} NZD`);
+      lines.push('');
+      lines.push(`Cash: NZD ${p.cash_nzd.toFixed(2)} / USD ${cashUsd.toFixed(2)}`);
+      lines.push('');
+      if (p.holdings.length === 0) {
+        lines.push('Holdings: none');
+      } else {
+        lines.push('Holdings:');
+        p.holdings.forEach(h => {
+          const valNzd = h.shares * h.last_price_usd * rate;
+          lines.push(`  - ${h.ticker}: ${h.shares} shares, avg cost USD ${h.avg_cost_usd.toFixed(2)}, last price USD ${h.last_price_usd.toFixed(2)}, value NZD ${valNzd.toFixed(2)}`);
+        });
+      }
+      lines.push('');
+      lines.push(`Total portfolio value: NZD ${totalNzd.toFixed(2)} / USD ${totalUsd.toFixed(2)}`);
+      lines.push(`Total deposited: NZD ${m.total_deposited_nzd.toFixed(2)}`);
+      lines.push('');
+      lines.push('Strategy rules:');
+      lines.push('  - US market only');
+      lines.push('  - Add NZD 500 every 14 days');
+      lines.push('  - Max 20% in one stock');
+      lines.push('  - Keep at least 5% cash');
+      lines.push('  - Goal: maximum profit over 3 years');
+      if (txns && txns.length > 0) {
+        lines.push('');
+        lines.push('Recent actions:');
+        txns.slice(-5).forEach(t => {
+          const detail = t.ticker ? `${t.type} ${t.shares ?? ''} ${t.ticker}`.trim() : t.type;
+          lines.push(`  - ${t.date}: ${detail} — ${t.note || 'no note'}`);
+        });
+      }
+      return lines.join('\n');
+    }
+    function buildDailyPrompt(summary) {
+      return `You are reviewing my paper-trading portfolio. Use current US market data.\n\nPortfolio state:\n${summary}\n\nPlease provide:\n1. Current price and 1-day move for each holding\n2. Any major news or catalyst affecting each holding\n3. Whether sector conditions help or hurt my portfolio today\n4. 3 US stocks or ETFs worth watching\n5. A concise recommendation for each holding: BUY MORE, HOLD, TRIM, or SELL\n6. Keep the answer practical and brief`;
+    }
+    function buildTradePrompt(summary) {
+      return `Act as a disciplined portfolio analyst for a 3-year paper-trading experiment.\n\nPortfolio state:\n${summary}\n\nRules:\n- US market only\n- Base currency is NZD\n- USD is reference only\n- Add NZD 500 every 14 days\n- Max 20% in one stock\n- Keep at least 5% cash\n- Goal is maximum profit over 3 years\n\nUsing current market data, tell me whether I should BUY, SELL, or HOLD today.\nFor each recommended action, include:\n- Thesis\n- Risks\n- Key catalyst\n- Position sizing suggestion\n- Why it fits or breaks my rules\n\nFinish with one clear action plan for today.`;
+    }
+    function buildWeeklyPrompt(summary) {
+      return `Review this paper portfolio for a weekly rebalance using current US market data.\n\nPortfolio state:\n${summary}\n\nPlease assess:\n- Concentration risk\n- Sector balance\n- ETF vs individual stock exposure\n- Momentum and recent weakness\n- Better alternatives in the US market\n\nThen recommend one of:\nA. No change\nB. Rebalance existing holdings\nC. Replace one holding\nD. Deploy available cash\n\nBe explicit about what to buy, trim, or avoid.`;
+    }
+    async function copyPrompt(type) {
+      const summary = generatePortfolioSummary();
+      const builders = { daily: buildDailyPrompt, trade: buildTradePrompt, weekly: buildWeeklyPrompt };
+      const text = builders[type](summary);
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      const btn = document.querySelector(`[data-prompt="${type}"]`);
+      if (btn) {
+        btn.classList.add('copied');
+        setTimeout(() => btn.classList.remove('copied'), 2000);
+      }
+    }
+    document.querySelectorAll('[data-prompt]').forEach(btn => {
+      btn.addEventListener('click', () => copyPrompt(btn.getAttribute('data-prompt')));
+    });
+    function loadTradingViewWidget() {
+      const wrap = document.getElementById('tradingViewWrap');
+      if (!wrap) return;
+      const script = document.createElement('script');
+      script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
+      script.async = true;
+      script.textContent = JSON.stringify({
+        symbols: [
+          { proName: "FOREXCOM:SPXUSD", title: "S&P 500" },
+          { proName: "FOREXCOM:NSXUSD", title: "US 100" },
+          { proName: "FX_IDC:EURUSD", title: "EUR to USD" },
+          { proName: "FX_IDC:USDNZD", title: "USD to NZD" }
+        ],
+        showSymbolLogo: true,
+        isTransparent: true,
+        displayMode: "adaptive",
+        colorTheme: document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark',
+        locale: "en"
+      });
+      const container = document.createElement('div');
+      container.className = 'tradingview-widget-container__widget';
+      wrap.appendChild(container);
+      wrap.appendChild(script);
+    }
     async function loadData() {
       try {
         const [portfolio, transactions, decisions, meta, snapshotsIndex, fx, fxHistory] = await Promise.all([
           getJSON('./data/portfolio.json'), getJSON('./data/transactions.json'), getJSON('./data/decisions.json'), getJSON('./data/meta.json'), getJSON('./data/snapshots/index.json'), getJSON('./data/fx/latest.json'), getJSON('./data/fx/history.json')
         ]);
         const snapshots = snapshotsIndex.snapshots;
-        renderMeta(meta, fx); renderOverview(portfolio, meta, fx, snapshots); renderHoldings(portfolio.holdings, fx); renderTransactions(transactions.transactions); renderDecisions(decisions.decisions); renderCurrencySummary(portfolio, meta, fx);
-        drawLineChart('historyChart', snapshots.map(s => s.date), snapshots.map(s => s.total_value_nzd), 'Portfolio value NZD', themeColor('--color-primary', '#4f98a3'));
+        state.portfolio = portfolio;
+        state.meta = meta;
+        state.fx = fx;
+        state.transactions = transactions.transactions;
+        state.decisions = decisions.decisions;
+        state.snapshots = snapshots;
+        renderMeta(meta, fx);
+        renderOverview(portfolio, meta, fx, snapshots);
+        renderHoldings(portfolio.holdings, fx);
+        renderTransactions(transactions.transactions);
+        renderDecisions(decisions.decisions);
+        renderCurrencySummary(portfolio, meta, fx);
+        renderHistoryChart(snapshots);
         drawLineChart('fxChart', fxHistory.history.map(d => d.date), fxHistory.history.map(d => d.usd_to_nzd), 'USD to NZD', themeColor('--color-gold', '#e8af34'));
       } catch (err) {
         console.error(err);
@@ -294,7 +487,10 @@
       }
     }
     document.getElementById('reloadBtn').addEventListener('click', loadData);
-    window.addEventListener('DOMContentLoaded', loadData);
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      loadTradingViewWidget();
+    });
   </script>
 </body>
 </html>

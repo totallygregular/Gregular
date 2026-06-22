@@ -1,8 +1,5 @@
 {
-  "cash_nzd": 220.00,
-  "updated_at": "2026-06-22",
-  "holdings": [
-    {"ticker": "VOO", "shares": 0.45, "avg_cost_usd": 552.00, "last_price_usd": 558.20},
-    {"ticker": "QQQ", "shares": 0.20, "avg_cost_usd": 530.00, "last_price_usd": 538.10}
-  ]
+  "cash_nzd": 0,
+  "updated_at": "2026-06-24",
+  "holdings": []
 }
