@@ -8,6 +8,15 @@
       "price_usd": null,
       "total_nzd": 500.0,
       "note": "Auto fortnightly NZD contribution (every 14 days)."
+    },
+    {
+      "date": "2026-07-08",
+      "type": "DEPOSIT",
+      "ticker": "",
+      "shares": null,
+      "price_usd": null,
+      "total_nzd": 500.0,
+      "note": "Auto fortnightly NZD contribution (every 14 days)."
     }
   ]
 }
