@@ -17,6 +17,12 @@
       "action": "AUTO_DEPOSIT",
       "summary": "Auto-deposited 500 NZD on the 14-day schedule.",
       "reasoning": "Today is 2026-07-22, which is >= 14 days after the last deposit on 2026-07-08. The daily updater added the scheduled NZD contribution to cash."
+    },
+    {
+      "date": "2026-08-05",
+      "action": "AUTO_DEPOSIT",
+      "summary": "Auto-deposited 500 NZD on the 14-day schedule.",
+      "reasoning": "Today is 2026-08-05, which is >= 14 days after the last deposit on 2026-07-22. The daily updater added the scheduled NZD contribution to cash."
     }
   ]
 }
