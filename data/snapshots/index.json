@@ -164,6 +164,11 @@
       "date": "2026-08-05",
       "total_value_nzd": 0.0,
       "fx_usd_to_nzd": 1.7015
+    },
+    {
+      "date": "2026-08-06",
+      "total_value_nzd": 0.0,
+      "fx_usd_to_nzd": 1.6999
     }
   ]
 }
