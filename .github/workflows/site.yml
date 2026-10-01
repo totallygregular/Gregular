@@ -1,0 +1,28 @@
+name: Briarwick static site
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: briarwick-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui
+      - run: npm run build
+  # The live site currently uses branch publishing. This workflow verifies changes;
+  # it does not switch Pages source or introduce a second deployment mechanism.
+  # There is deliberately no cron and no trading-data writer.

@@ -1,0 +1,9 @@
+{
+  "name": "briarwick-noticeboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test tests/story.test.mjs tests/save.test.mjs", "test:ui": "playwright test", "serve": "node scripts/serve.mjs", "build": "node scripts/build.mjs", "preview:artifact": "node scripts/preview.mjs" },
+  "devDependencies": { "@axe-core/playwright": "4.13.0", "@playwright/test": "1.63.0" }
+}
