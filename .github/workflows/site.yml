@@ -1,4 +1,4 @@
-name: Briarwick static site
+name: WoW Forever class draft
 on:
   push:
     branches: [main]
@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: briarwick-${{ github.ref }}
+  group: class-draft-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   verify:

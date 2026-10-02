@@ -1,60 +1,56 @@
-# Briarwick — Matters of Little Consequence
+# Party / Roll — WoW Forever class draft
 
-A complete, small, authored fantasy browser adventure: one town, five revisitable places, four recurring locals (and a magpie), three interconnected jobs, three outcomes per job, an ending that reflects all three choices, and playable aftermath.
+A responsive static shared-screen class draft for friends. Enter player names and optional roles, roll d20s, resolve same-role dice ties with random paper-scissors-rock tournaments, and spin for a globally unique eligible class for each player.
 
-## Play and preview
+## Rules and controls
+
+- Tanks pick first, healers next, DPS last. Higher dice rolls pick first within each role. Unassigned players count as DPS (`Auto: DPS` in the role selector).
+- Roll an individual die or roll all. Rolls are editable before locking the party.
+- Equal dice inside the same role enter automatic paper-scissors-rock tournaments. Hands are independently uniform. Draws repeat. A newly shuffled knockout bracket selects first place; all remaining players play another bracket for second place, then third, and so on. Every tied player receives a complete unique rank, including all losers. Odd brackets grant seeded byes; seeds are randomly shuffled for each place.
+- The wheel samples uniformly from its displayed equal slices using Web Crypto rejection sampling. Each class leaves the shared pool after it is picked.
+- A bipartite matching check rejects impossible rosters and excludes a currently eligible class if picking it would strand a later role. The UI lists every such exclusion and explains the reason. Uniform choice is among the safe displayed classes, not among all possible complete-party assignments.
+- Editing a locked setup requires confirmation and clears rolls, tournaments and picks. New draft preserves names and pools but clears the draft. Reset saved draft clears the party and restores defaults after confirmation.
+- A pending spin and complete tournament outcomes are persisted before their animations. Reload finishes the interrupted operation with its original result/order rather than rolling again.
+- Class pools support enabling/disabling, renaming, role eligibility, addition/removal and restoring defaults. Up to 32 players/classes are supported; with the nine standard classes, at most nine players can receive unique classes.
+- Copy results uses the clipboard when available and offers a selectable text fallback. OS reduced motion and an explicit Less motion toggle shorten animations. Buttons and dialogs support keyboard use.
+
+## Starting class pools
+
+Nine classes: Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Warlock and Warrior. Starting roles are conservative editable group rules:
+
+| Role | Classes |
+| --- | --- |
+| Tank | Warrior, Paladin, Druid |
+| Healer | Priest, Paladin, Druid, Shaman |
+| DPS | All nine |
+
+Experimental Shaman tank is an explicit optional toggle, off by default. It is not represented as impossible or as a confirmed launch role. Beta balance and role viability can change; edit the pools for your group.
+
+Official research references: [class overview](https://news.blizzard.com/en-gb/article/24304075/create-the-hero-you-want-to-be-in-world-of-warcraft-forever), [deep dive panel](https://news.blizzard.com/en-gb/article/24303313/world-of-warcraft-forever-deep-dive-panel-recap), [Hunter and Druid](https://news.blizzard.com/en-us/article/24301515/world-of-warcraft-forever-class-deep-dives-hunter-and-druid), [Priest and Warrior](https://worldofwarcraft.blizzard.com/en-gb/news/24301514/world-of-warcraft-forever-class-deep-dives-priest-and-warrior). No API, game client, race restriction or faction lookup is used at runtime.
+
+## Run and verify
 
 ```powershell
 npm ci --ignore-scripts
 npm run serve
-```
-
-Open `http://127.0.0.1:4174`. Take notices in the square, inspect objects at the indicated locations, and choose actions. Every job can be completed in any order. The journal records clues and past actions. Crowns, items, injury, local reactions and subsequent notices reflect your choices. Nothing is timed.
-
-When all three jobs are finished, attend the town meeting. Afterwards you can revisit the locals, repair harmful decisions, or stay for another morning. The story has a definite first-adventure ending; it does not generate unlimited quests or accept free-text roleplay. There is no AI API, account, backend, analytics or audio.
-
-`npm run preview:artifact` produces **`artifacts/Briarwick - Playable Preview.html`**, a self-contained offline game with the image, style, story and save system embedded. Open it in a normal browser. If file-origin storage is unsupported by that browser, the game still works and offers save export/import. The preview’s local save does not automatically transfer to the eventual published site; export and import it to continue there.
-
-## Saving
-
-- Versioned save key: `briarwick.story.v1`.
-- Automatic local saving on every action, with a visible save-status message.
-- Reload restores location, clues, belongings, jobs, outcomes, journal, coins, day and town memory.
-- Blocked storage/quota failure leaves a playable in-memory session and an export route.
-- Corrupt, unsupported and cross-tab-changed saves are protected from accidental overwrite.
-- Import validates size/schema and asks for confirmation before replacing the current session.
-- Reset requires a separate explicit confirmation; cancel preserves the story.
-- Exported saves contain only adventure state. No passwords, identifiers or network tokens.
-
-## Verification
-
-```powershell
 npm test
 npx playwright install chromium
 npm run test:ui
 npm run build
-npm run preview:artifact
 ```
 
-Node tests exercise every **27 outcome combinations × 6 job orders = 162 full playthroughs**, all endings, continued play, meaningful cross-job consequences, aftercare, invalid/duplicate actions, zero-crown completion and save robustness. Browser tests play all nine individual job outcomes, the meeting and next morning, mobile play, reload, reset, import/export, blocked/corrupt storage, cross-tab protection and keyboard dialogs. Responsive QA covers 360, 390, 768 and 1440px with axe WCAG AA automated checks.
+Local preview: `http://127.0.0.1:4175`. On Windows, set `PLAYWRIGHT_EXECUTABLE_PATH` to installed Edge or Chrome. CI installs Chromium.
 
-For local Windows QA, `PLAYWRIGHT_EXECUTABLE_PATH` can point at installed Edge or Chrome. CI installs Chromium. Dependencies are development-only; the actual game is plain HTML/CSS/JavaScript.
+Core tests cover random selection, role ordering, repeated draws, full tournament rankings, largest ties, duplicate prevention, matching against an independent exhaustive solver over every enabled-class subset, many complete random draft paths, schema validation and interruption recovery. Browser tests cover setup, per-player dice, full drafts, animated draws, interruption, editing confirmation, configurable pools, blocked/corrupt storage, clipboard fallback, cross-tab protection, keyboard/mobile play and automated accessibility at 320/360/390/768/1440px.
 
-After generating the offline preview, `node scripts/check-offline.mjs` checks a full adventure, aftermath and reload using the standalone file, and asserts that it makes zero HTTP requests. It uses the same optional browser executable setting.
+## Saves and privacy
 
-## Publishing proposal — not executed
+The versioned browser key is `wow-forever.class-draft.v1`. Saves contain only player-entered names, roles, pools, rolls and draft results. They are local to this browser and origin. No accounts, backend, AI service, analytics or multiplayer network sync exist. Blocked/quota-limited storage leaves the current tab playable; copy results before closing it. Corrupt saves and changes from another tab are protected from overwrite until deliberate reset. This is an unofficial fan tool.
 
-This isolated branch preserves Git history and keeps the live/original Gregular checkout and the separate armory prototype unchanged. It is based on current remote `main` at `5445bcee668d68d73b7d1cf6e86aeb8853ea7b25`.
+## Hosting and recovery
 
-After user review and publication approval:
+Existing GitHub Pages branch publishing uses `main` `/` with CNAME `gregular.org` and unchanged DNS. `.github/workflows/site.yml` verifies changes on push/PR; it does not deploy independently. No manual workflow dispatch or trading updater is needed. The public build allowlist is `index.html`, `assets/`, `CNAME`, `.nojekyll`; the existing root publishing setup can also expose other public source files, which contain no credentials or player saves.
 
-1. Preserve a recoverable pre-migration Git reference, review/commit this branch, and merge/push the approved replacement to `main`.
-2. Keep existing GitHub Pages branch publishing from `main` `/`, existing `CNAME` (`gregular.org`) and DNS. No new credentials, servers, domains, Pages source switch or persistent access grants are needed.
-3. Removal of `daily-update.yml` stops future trading updates once merged. Check for any old update run already in flight and stop it at cutover to avoid it rewriting retired data.
-4. Verify the resulting Pages build, domain, paths, browser save and mobile gameplay. HTTPS currently works, but the inspected Pages setting did not enforce it; enabling enforcement can be a separately approved live setting change.
+Briarwick was preserved before replacement in the remote branch **`archive/briarwick-2026-10-01`**, verified at **`64ae5b4328296bb4fd20e83f0b9e9f3adf60216e`**. Its original isolated local checkout is also preserved. The class-draft main tree contains no Briarwick game route, story/save modules, town artwork or game preview scripts. No archive copy is deployed. To restore later, create a reviewed restoration branch from that archive and merge it normally; history is never rewritten.
 
-The proposed `site.yml` runs verification only. No cron, trading bot or secret is used. Publishing still occurs through the repository’s established branch-based Pages setup. `npm run build` produces an explicit public-file allowlist; the existing root-based Pages setup may also serve other public repository source files. No saved player state or credentials enter the repository or deployment.
-
-## Artwork
-
-The original Briarwick town illustration was created with the built-in image generation tool, then converted to an approximately 640 KB JPEG for the browser. Project asset: `assets/town.jpg`; full generated source is retained in ignored `artifacts/briarwick-town-source.png`. The final prompt is recorded in `artifacts/art-prompt.txt`. No existing game art or copyrighted characters were used as references.
+The earlier trading site remains recoverable through `archive/gregular-before-briarwick-2026-10-01`. The separate armory prototype is untouched. No cloud data or unrelated resources are removed.
