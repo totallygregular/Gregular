@@ -1,4 +1,56 @@
-# Party / Roll — WoW Forever class draft
+# Gregular — WoW Forever companion prototype
+
+First development pass: a character roster and personal quest journal, with browser-local profiles. The existing **Party / Roll class draft remains unchanged at the root**. This branch adds the companion; it does not release it to production.
+
+## Run the companion
+
+Use Node **22.18+ (22.x)** or **24+** and npm. From the repository directory:
+
+```powershell
+npm ci --ignore-scripts
+npm run dev
+```
+
+Open **http://127.0.0.1:5173/**. Enter any username, create a Troll Priest or your own character, then open their journal. Add objectives, complete checklists, explore the six sections, and save notes. Reloading restores this tab's active profile; entering the same username later loads the same browser-local data. Names are case-insensitive. Additional characters wrap onto another row; there is no three-character limit.
+
+Username entry is **not secure authentication**. Profiles stay in this browser and origin, are not synced, and can be opened by anyone using it. Game-specific screens are visibly marked mock data. Race/class combinations and the provisional 1–60 input range are not a promise about beta rules. JSON export is available; import/recovery is planned.
+
+## Build and validate
+
+```powershell
+npm run typecheck
+npm test
+npx playwright install chromium
+npm run test:ui
+npm run build
+npm run preview
+```
+
+Preview the combined build at **http://127.0.0.1:5174/companion/** and the preserved class draft at **http://127.0.0.1:5174/**. Development, build preview, and production are different origins, so their local saves are separate. Use one origin consistently during evaluation. `npm run serve` starts only the existing draft on port 4175.
+
+On Windows, an installed browser can be used instead of downloading Chromium:
+
+```powershell
+$env:PLAYWRIGHT_EXECUTABLE_PATH = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+npm run test:ui
+```
+
+The verification workflow runs both unit and browser suites plus the combined build. It does not deploy. Pages currently serves the source tree from `main` `/`; an approved production migration must publish the built `dist/` artifact and verify the custom domain in Pages settings. Simply merging Vite source will not deploy a runnable companion. No DNS or hosting changes are included.
+
+## First-pass deliverables
+
+- [Repository assessment](docs/repository-assessment.md)
+- [Architecture and future cloud migration](docs/architecture.md)
+- [UX and design specification](docs/ux-design.md)
+- [Forever data-source feasibility and licensing gaps](docs/game-data-feasibility.md)
+- [Prioritized roadmap and acceptance criteria](docs/roadmap.md)
+- [Validation evidence and limitations](docs/validation.md)
+
+The companion lives in `companion/`. Domain validation and immutable mutations, asynchronous persistence, UI components, and mock game data are separate modules. Artwork and class crests are original SVG/CSS; no game assets or external tooltip scripts are bundled.
+
+---
+
+## Preserved Party / Roll class draft
 
 A responsive static shared-screen class draft for friends. Enter player names and optional roles, roll d20s, resolve same-role dice ties with random paper-scissors-rock tournaments, and spin for a globally unique eligible class for each player.
 

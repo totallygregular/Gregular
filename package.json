@@ -1,9 +1,19 @@
 {
-  "name": "wow-forever-class-draft",
-  "version": "1.0.0",
+  "name": "gregular-forever-companion",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
-  "scripts": { "test": "node --test tests/draft.test.mjs", "test:ui": "playwright test", "serve": "node scripts/serve.mjs", "build": "node scripts/build.mjs" },
-  "devDependencies": { "@axe-core/playwright": "4.13.0", "@playwright/test": "1.63.0" }
+  "engines": { "node": "^22.18.0 || >=24.0.0" },
+  "scripts": {
+    "dev": "vite --config companion/vite.config.ts --host 127.0.0.1",
+    "typecheck": "tsc -p companion/tsconfig.json --noEmit",
+    "test": "node --test tests/draft.test.mjs && vitest run --config companion/vite.config.ts",
+    "test:ui": "playwright test && playwright test --config playwright.companion.config.mjs",
+    "test:companion": "playwright test --config playwright.companion.config.mjs",
+    "serve": "node scripts/serve.mjs",
+    "preview": "node scripts/preview.mjs",
+    "build": "npm run typecheck && node scripts/build.mjs && vite build --config companion/vite.config.ts"
+  },
+  "dependencies": { "react": "19.3.0", "react-dom": "19.3.0" },
+  "devDependencies": { "@axe-core/playwright": "4.13.0", "@playwright/test": "1.63.0", "@types/react": "19.3.0", "@types/react-dom": "19.3.0", "@vitejs/plugin-react": "6.1.2", "typescript": "7.0.2", "vite": "8.3.4", "vitest": "5.0.4" }
 }

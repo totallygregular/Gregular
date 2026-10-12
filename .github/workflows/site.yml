@@ -1,4 +1,4 @@
-name: WoW Forever class draft
+name: Gregular verification
 on:
   push:
     branches: [main]
