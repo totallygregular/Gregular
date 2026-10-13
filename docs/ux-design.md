@@ -6,7 +6,7 @@ Gregular should feel like a quiet place to prepare the next adventure. The inter
 
 1. Enter a username to open or create a local browser profile. Explain local-only identity and persistence beside the entry field.
 2. View the character selection screen. Start empty for a new profile, with a clear create-character action and optional illustrative content.
-3. Create a character through a labelled form: name, race, class, faction, planned specialization, level and progression status. Troll Priest must be straightforward to enter. The prototype does not validate current beta race/class restrictions.
+3. Create a character through a labelled form: name, reviewed Forever race, available class, optional class-specific specialisation, level, progression status and starting zone. Faction follows the selected race affiliation. The suggested race start is optional: change it to join a friend or choose a blank route. Existing imported labels remain intact until deliberately replaced.
 4. Select a character to enter its journal. Keep the character's identity visible while switching Quest journal, Leveling, Dungeons, Talents, Equipment and Notes.
 5. Complete or add planning objectives, edit notes, and return to the character selection screen. Saves report their actual status.
 6. Edit a character without changing its identity; confirm removal with the character's name and the scope of deletion.

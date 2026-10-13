@@ -20,7 +20,7 @@ describe("versioned zone catalogue", () => {
     expect(new Set(catalogueSources.map(({ id }) => id)).size).toBe(
       catalogueSources.length,
     );
-    expect(catalogueMetadata.version).toBe("forever-zones-2026-10-13.1");
+    expect(catalogueMetadata.version).toBe("forever-zones-2026-10-13.3");
     for (const zone of zoneCatalogue) {
       expect(zone.id).toMatch(/^forever:zone:[a-z0-9-]+$/);
       expect(zone.reviewedAt).toBe(catalogueMetadata.reviewedAt);
@@ -78,7 +78,7 @@ describe("versioned zone catalogue", () => {
     expect(getZone(zoneId("tanaris"))?.evidence.levels.sourceIds).toEqual([
       "libtourist-classic",
     ]);
-    expect(getZone(zoneId("riverglades"))?.recommendedLevel).toBeUndefined();
+    expect(getZone(zoneId("moonglade"))?.recommendedLevel).toBeUndefined();
     expect(getZone(zoneId("mount-hyjal"))?.faction).toBe("Unknown");
     expect(
       confidenceLabel(getZone(zoneId("westfall"))!.evidence.levels),
@@ -88,6 +88,130 @@ describe("versioned zone catalogue", () => {
         (zone) => zone.evidence.levels.kind === "forever-confirmed",
       ),
     ).toHaveLength(1);
+  });
+
+  it("keeps Riverglades 35–45 as an editorial correction without upgrading official evidence", () => {
+    const zone = getZone(zoneId("riverglades"))!;
+    expect(zone.recommendedLevel).toEqual({ min: 35, max: 45 });
+    expect(zone.evidence.levels).toMatchObject({
+      kind: "editorial",
+      confidence: "low",
+      sourceIds: ["gregular-editorial-2026-10-13"],
+    });
+    expect(zone.evidence.levels.note).toContain("Owner-requested");
+    expect(zone.evidence.levels.note).toContain("not established");
+    expect(zone.evidence.identity.kind).toBe("forever-confirmed");
+    expect(zone.evidence.faction.kind).toBe("forever-confirmed");
+    expect(zone.evidence.geography.kind).toBe("editorial");
+    expect(zone.startingRaces).toEqual([]);
+    expect(zone.adjoiningZoneIds).toEqual([]);
+    for (const level of [35, 40, 45])
+      expect(
+        filterZones({ level, suitability: "now" }).some(({ id }) => id === zone.id),
+      ).toBe(true);
+    expect(
+      filterZones({ level: 34, suitability: "later" }).some(({ id }) => id === zone.id),
+    ).toBe(true);
+    expect(
+      filterZones({ level: 46, suitability: "now" }).some(({ id }) => id === zone.id),
+    ).toBe(false);
+    expect(zoneCatalogue.filter(({ recommendedLevel }) => recommendedLevel)).toHaveLength(40);
+    expect(zoneCatalogue.filter(({ recommendedLevel }) => !recommendedLevel)).toHaveLength(5);
+  });
+
+  it("matches the freshly reviewed follow-up quest windows without claiming Forever XP coverage", () => {
+    // Facts independently checked against ForeverDB's 2 October guide on 13 October.
+    const guideRanges: [string, number, number][] = [
+      ["westfall", 10, 18],
+      ["loch-modan", 10, 20],
+      ["darkshore", 12, 20],
+      ["silverpine-forest", 10, 18],
+      ["the-barrens", 10, 25],
+      ["redridge-mountains", 14, 25],
+      ["stonetalon-mountains", 18, 28],
+      ["ashenvale", 20, 30],
+      ["wetlands", 21, 31],
+      ["duskwood", 24, 32],
+      ["hillsbrad-foothills", 24, 37],
+      ["thousand-needles", 28, 41],
+    ];
+    expect(
+      zoneCatalogue.filter((zone) =>
+        zone.evidence.levels.sourceIds.includes("foreverdb-leveling"),
+      ),
+    ).toHaveLength(guideRanges.length);
+    for (const [slug, min, max] of guideRanges) {
+      const zone = getZone(zoneId(slug))!;
+      expect(zone.recommendedLevel, slug).toEqual({ min, max });
+      expect(zone.evidence.levels.kind, slug).toBe("classic-derived");
+      expect(zone.evidence.levels.note, slug).toContain("10th–90th");
+      expect(zone.evidence.levels.note, slug).toContain("new Forever quests are not included");
+      expect(zone.evidence.levels.note, slug).toContain("not an entry requirement or XP-coverage estimate");
+    }
+  });
+
+  it("matches the pinned licensed Classic audience ranges and keeps their provisional meaning", () => {
+    // Checked from LibTourist's d2380757 source, not inferred from route ordering.
+    const classicRanges: [string, number, number][] = [
+      ["elwynn-forest", 1, 12],
+      ["dun-morogh", 1, 12],
+      ["teldrassil", 1, 12],
+      ["durotar", 1, 12],
+      ["mulgore", 1, 12],
+      ["tirisfal-glades", 1, 12],
+      ["alterac-mountains", 30, 40],
+      ["arathi-highlands", 30, 40],
+      ["stranglethorn-vale", 30, 45],
+      ["desolace", 30, 40],
+      ["dustwallow-marsh", 35, 45],
+      ["badlands", 35, 45],
+      ["swamp-of-sorrows", 35, 45],
+      ["the-hinterlands", 40, 50],
+      ["feralas", 40, 50],
+      ["tanaris", 40, 50],
+      ["searing-gorge", 43, 50],
+      ["blasted-lands", 47, 55],
+      ["azshara", 48, 55],
+      ["felwood", 48, 55],
+      ["ungoro-crater", 48, 55],
+      ["western-plaguelands", 50, 60],
+      ["burning-steppes", 50, 60],
+      ["eastern-plaguelands", 55, 60],
+      ["winterspring", 55, 60],
+      ["silithus", 55, 60],
+    ];
+    expect(
+      zoneCatalogue.filter((zone) =>
+        zone.evidence.levels.sourceIds.includes("libtourist-classic"),
+      ),
+    ).toHaveLength(classicRanges.length);
+    for (const [slug, min, max] of classicRanges) {
+      const zone = getZone(zoneId(slug))!;
+      expect(zone.recommendedLevel, slug).toEqual({ min, max });
+      expect(zone.evidence.levels.kind, slug).toBe("classic-derived");
+      expect(zone.evidence.levels.confidence, slug).toBe("low");
+      expect(zone.evidence.levels.note, slug).toContain("not verified");
+    }
+  });
+
+  it("keeps every unresolved general questing range unknown after the range review", () => {
+    expect(
+      zoneCatalogue
+        .filter((zone) => !zone.recommendedLevel)
+        .map(({ id }) => id)
+        .sort(),
+    ).toEqual(
+      ["deadwind-pass", "moonglade", "mount-hyjal", "shendralas", "darkspear-islands"]
+        .map(zoneId)
+        .sort(),
+    );
+    for (const zone of zoneCatalogue.filter((zone) => !zone.recommendedLevel)) {
+      expect(zone.evidence.levels).toMatchObject({
+        kind: "unknown",
+        confidence: "unknown",
+        sourceIds: [],
+      });
+    }
   });
 
   it("filters questing suitability without inventing hard faction entry restrictions", () => {

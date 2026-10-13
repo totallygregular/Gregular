@@ -1,7 +1,7 @@
 import { createBlankPlanner, validatePlanner } from "./planner";
 import type { CharacterPlanner } from "./progressionTypes";
 
-/** Local character models. User-entered race/class combinations are not validated as game facts. */
+/** Saved character labels stay import-compatible; new editor choices use reviewed Forever data. */
 export const PROFILE_SCHEMA_VERSION = 2 as const;
 
 export type CharacterStatus = "planned" | "leveling" | "paused";

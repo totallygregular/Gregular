@@ -29,17 +29,15 @@ async function create(page, name = "Zala", options = {}) {
   await dialog.getByLabel("Character name", { exact: true }).fill(name);
   await dialog
     .getByRole("combobox", { name: "Race", exact: true })
-    .fill(options.race || "Troll");
+    .selectOption((options.race || "Troll").toLowerCase().replaceAll(" ", "-"));
   await dialog
     .getByRole("combobox", { name: "Class", exact: true })
-    .fill(options.className || "Priest");
-  await dialog
-    .getByRole("combobox", { name: "Faction", exact: true })
-    .selectOption(options.faction || "Horde");
+    .selectOption(options.className || "Priest");
+  await dialog.getByRole("combobox", { name: "Starting zone", exact: true }).selectOption("");
   if (options.level)
     await dialog.getByLabel("Current level").fill(String(options.level));
   if (options.spec)
-    await dialog.getByLabel("Planned specialisation").fill(options.spec);
+    await dialog.getByLabel("Planned specialisation").selectOption(options.spec);
   if (options.sample)
     await dialog.getByLabel("Add sample planning objectives").check();
   await dialog
@@ -143,15 +141,19 @@ test("creates a Troll Priest with opted-in sample objectives and keeps it after 
   expect(errors).toEqual([]);
 });
 
-test("accepts arbitrary planning labels, supports more than three characters, and edits preserve IDs", async ({
+test("preserves saved arbitrary planning labels, supports more than three characters, and edits preserve IDs", async ({
   page,
 }) => {
   await enter(page);
-  await create(page, "Zala", {
-    race: "Unverified race",
-    className: "Unverified class",
-    faction: "Alliance",
+  await create(page, "Zala");
+  const legacy = await saved(page);
+  Object.assign(legacy.characters[0], {
+    race: "Unverified race", className: "Unverified class",
+    faction: "Alliance", plannedSpec: "Custom saved path",
   });
+  await page.evaluate(({ key, profile }) => localStorage.setItem(key, JSON.stringify(profile)),
+    { key: keyFor(), profile: legacy });
+  await page.reload();
   for (const name of ["Bram", "Mira", "Rowan"]) await create(page, name);
   await expect(page.locator(".character-card")).toHaveCount(4);
   const before = await saved(page);
@@ -172,6 +174,8 @@ test("accepts arbitrary planning labels, supports more than three characters, an
     status: "leveling",
     race: "Unverified race",
     className: "Unverified class",
+    plannedSpec: "Custom saved path",
+    faction: "Alliance",
   });
   expect(after.characters.slice(1)).toEqual(before.characters.slice(1));
   await page.reload();
@@ -193,10 +197,10 @@ test("character form rejects invalid levels before saving", async ({
     .fill("Invalid level");
   await dialog
     .getByRole("combobox", { name: "Race", exact: true })
-    .fill("Troll");
+    .selectOption("troll");
   await dialog
     .getByRole("combobox", { name: "Class", exact: true })
-    .fill("Priest");
+    .selectOption("Priest");
   for (const level of ["0", "61", "1.5"]) {
     await dialog.getByLabel("Current level").fill(level);
     await dialog

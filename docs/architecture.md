@@ -47,7 +47,7 @@ Recovery reviews the latest replacement backup through the same confirmation pat
 
 ## Character and planning model
 
-Character identity and the user's declared plan are authoritative user input. Race and class fields in the prototype support planning; they do not prove current Forever character-creation legality. The 1–60 input range is a provisional prototype bound, not a verified current beta level cap. A planned specialization is a label, not a validated build. Progression status is manually chosen from planned, leveling and paused.
+Character identity and personal plans remain user input. New character forms use reviewed official Forever race/class choices, derive faction from the selected race affiliation, and list class-specific specialisations. Skyborne affiliations remain separate dropdown choices while preserving the existing canonical race/faction fields. Imported legacy labels remain valid profile data and are preserved by unrelated edits; no schema migration rewrites them. A chosen first zone is saved atomically with a new character, and a friend destination or blank route remains available. The 1–60 input range includes future planning rather than claiming a current beta cap. A planned specialisation is not a detected or validated talent build. Progression status is manually chosen from planned, leveling and paused. See [character choices](character-options.md) and [next-bracket ordering](route-relevance.md).
 
 Existing journal objectives keep their IDs, title, completion state and high or normal priority. Sample objectives are clearly labelled illustrative examples and added deliberately. They do not become verified recommendations. Personal notes remain plain text, rendered safely by React rather than injected as HTML.
 

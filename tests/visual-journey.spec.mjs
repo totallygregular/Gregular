@@ -236,8 +236,8 @@ for (const [label, width, height] of [
     await expect(candidate(page, "Redridge Mountains")).toBeVisible();
     await expect(candidate(page, "Westfall")).toHaveCount(0);
     await capture(page, `search-${label}`);
-    await browser(page).getByLabel("Search zones", { exact: true }).fill("Riverglades");
-    await expect(candidate(page, "Riverglades")).toContainText("Unknown");
+    await browser(page).getByLabel("Search zones", { exact: true }).fill("Moonglade");
+    await expect(candidate(page, "Moonglade")).toContainText("Unknown");
     await capture(page, `unknown-${label}`);
     await route(page).getByRole("button", { name: "Insert zone after Westfall", exact: true }).click();
     await browser(page).getByLabel("Search zones", { exact: true }).fill("ridge");
