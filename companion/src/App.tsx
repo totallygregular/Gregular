@@ -7,7 +7,6 @@ import {
   type FormEvent,
 } from "react";
 import {
-  addCharacter,
   addObjective,
   createProfile,
   removeCharacter,
@@ -31,6 +30,9 @@ import { ProfileSettings } from "./ProfileSettings";
 import { buildInfo } from "./buildInfo";
 import { progressionDataset } from "./data/progression";
 import { setEntryStatus } from "./planner";
+import { addPlannedCharacter } from "./characterCreation";
+import { raceOptions, raceOptionFor, classesForRace, specialisationsForClass } from "./data/characterOptions";
+import { getZone, startingZoneFor, zoneCatalogue } from "./data/zones";
 import {
   DATA_NOTICE,
   sampleDungeon,
@@ -38,27 +40,6 @@ import {
   talentNodes,
 } from "./mockData";
 
-const CLASSES = [
-  "Warrior",
-  "Paladin",
-  "Hunter",
-  "Rogue",
-  "Priest",
-  "Shaman",
-  "Mage",
-  "Warlock",
-  "Druid",
-];
-const RACES = [
-  "Human",
-  "Dwarf",
-  "Night Elf",
-  "Gnome",
-  "Orc",
-  "Undead",
-  "Tauren",
-  "Troll",
-];
 const COLORS: Record<string, string> = {
   Priest: "#d6d9cc",
   Warrior: "#d1aa82",
@@ -752,10 +733,10 @@ export function App() {
               setEditor(null);
             }
           }}
-          save={async (draft, sample) => {
+          save={async (draft, sample, startingZoneId) => {
             const ok = await commit((p) =>
               editor === "new"
-                ? addCharacter(p, draft, { mockObjectives: sample })
+                ? addPlannedCharacter(p, draft, { mockObjectives: sample, startingZoneId })
                 : updateCharacter(p, editor.id, draft),
             );
             if (ok) setEditor(null);
@@ -807,7 +788,7 @@ function CharacterEditor({
   character?: Character;
   saving: boolean;
   close: () => void;
-  save: (draft: CharacterDraft, sample: boolean) => Promise<boolean>;
+  save: (draft: CharacterDraft, sample: boolean, startingZoneId?: string) => Promise<boolean>;
   remove: () => void;
 }) {
   const [draft, setDraft] = useState<CharacterDraft>(
@@ -825,6 +806,30 @@ function CharacterEditor({
   );
   const [sample, setSample] = useState(false);
   const [formError, setFormError] = useState("");
+  const [raceChoice, setRaceChoice] = useState(() => character ? raceOptionFor(character.race, character.faction)?.id ?? "saved" : "");
+  const [startingZoneId, setStartingZoneId] = useState("");
+  const [followSuggestedStart, setFollowSuggestedStart] = useState(true);
+  const selectedRace = raceOptions.find((option) => option.id === raceChoice);
+  const availableClasses = classesForRace(raceChoice);
+  const availableSpecs = specialisationsForClass(draft.className);
+  const raceStart = selectedRace ? startingZoneFor(selectedRace.race, selectedRace.faction) : undefined;
+  const suggestedStart = raceStart?.recommendedLevel && draft.level >= raceStart.recommendedLevel.min
+    && draft.level <= raceStart.recommendedLevel.max ? raceStart : undefined;
+  const selectedStart = getZone(startingZoneId);
+  const savedClass = Boolean(character && character.className === draft.className && !availableClasses.includes(draft.className));
+  const savedSpec = Boolean(character && character.plannedSpec === draft.plannedSpec && draft.plannedSpec && !availableSpecs.includes(draft.plannedSpec));
+  const hasLegacyChoice = Boolean(character && (raceChoice === "saved" || savedClass || savedSpec));
+  useEffect(() => {
+    if (!character && followSuggestedStart) setStartingZoneId(suggestedStart?.id ?? "");
+  }, [character, followSuggestedStart, suggestedStart?.id]);
+  function chooseRace(id: string) {
+    const option = raceOptions.find((race) => race.id === id);
+    setRaceChoice(id);
+    if (!option) return;
+    const keepClass = classesForRace(id).includes(draft.className);
+    setDraft((previous) => ({ ...previous, race: option.race, faction: option.faction,
+      className: keepClass ? previous.className : "", plannedSpec: keepClass ? previous.plannedSpec : "" }));
+  }
   const field = <K extends keyof CharacterDraft>(
     key: K,
     value: CharacterDraft[K],
@@ -840,7 +845,10 @@ function CharacterEditor({
           setFormError("");
           try {
             validateCharacterDraft(draft);
-            if (!(await save(draft, sample)))
+            if (!character && (!selectedRace || !availableClasses.includes(draft.className)
+              || (draft.plannedSpec && !availableSpecs.includes(draft.plannedSpec))))
+              throw new Error("Choose an available race, class and specialisation.");
+            if (!(await save(draft, sample, character ? undefined : startingZoneId || undefined)))
               setFormError(
                 "Could not update this character. Check the save status and try again.",
               );
@@ -881,35 +889,27 @@ function CharacterEditor({
           </label>
           <label>
             Race
-            <input
-              list="race-options"
+            <select
               required
-              maxLength={60}
-              value={draft.race}
-              onChange={(e) => field("race", e.target.value)}
-            />
+              value={raceChoice}
+              onChange={(e) => chooseRace(e.target.value)}
+            >
+              <option value="" disabled>Choose a race</option>
+              {character && raceChoice === "saved" && <option value="saved">Saved: {character.race} · {character.faction}</option>}
+              {raceOptions.map((race) => <option key={race.id} value={race.id}>{race.label}</option>)}
+            </select>
           </label>
           <label>
             Class
-            <input
-              list="class-options"
-              required
-              maxLength={60}
-              value={draft.className}
-              onChange={(e) => field("className", e.target.value)}
-            />
-          </label>
-          <label>
-            Faction
             <select
-              value={draft.faction}
-              onChange={(e) =>
-                field("faction", e.target.value as CharacterDraft["faction"])
-              }
+              required
+              disabled={!raceChoice}
+              value={draft.className}
+              onChange={(e) => setDraft((previous) => ({ ...previous, className: e.target.value, plannedSpec: "" }))}
             >
-              <option>Horde</option>
-              <option>Alliance</option>
-              <option>Undecided</option>
+              <option value="" disabled>Choose a class</option>
+              {savedClass && <option value={draft.className}>Saved: {draft.className}</option>}
+              {availableClasses.map((name) => <option key={name}>{name}</option>)}
             </select>
           </label>
           <label>
@@ -925,12 +925,15 @@ function CharacterEditor({
           </label>
           <label>
             Planned specialisation
-            <input
-              maxLength={80}
+            <select
+              disabled={!draft.className}
               value={draft.plannedSpec}
               onChange={(e) => field("plannedSpec", e.target.value)}
-              placeholder="e.g. Holy — your own plan"
-            />
+            >
+              <option value="">Choose later</option>
+              {savedSpec && <option value={draft.plannedSpec}>Saved: {draft.plannedSpec}</option>}
+              {availableSpecs.map((name) => <option key={name}>{name}</option>)}
+            </select>
           </label>
           <label>
             Progression status
@@ -946,19 +949,21 @@ function CharacterEditor({
             </select>
           </label>
         </div>
-        <datalist id="race-options">
-          {RACES.map((r) => (
-            <option key={r}>{r}</option>
-          ))}
-        </datalist>
-        <datalist id="class-options">
-          {CLASSES.map((c) => (
-            <option key={c}>{c}</option>
-          ))}
-        </datalist>
+        <p className="field-help" role="status">Faction: <strong>{selectedRace?.faction ?? (character ? draft.faction : "Choose a race")}</strong>{selectedRace && " · based on your race choice"}</p>
+        {!character && <div className="character-start-choice">
+          <label>Starting zone
+            <select value={startingZoneId} disabled={!selectedRace} onChange={(e) => { setStartingZoneId(e.target.value); setFollowSuggestedStart(false); }}>
+              <option value="">Choose later · blank route</option>
+              {suggestedStart && <option value={suggestedStart.id}>{suggestedStart.name} · suggested for {draft.race}</option>}
+              {zoneCatalogue.filter((zone) => zone.id !== suggestedStart?.id).slice().sort((a, b) => a.name.localeCompare(b.name, "en")).map((zone) => <option key={zone.id} value={zone.id}>{zone.name}{zone.recommendedLevel ? ` · ${zone.recommendedLevel.min}–${zone.recommendedLevel.max}` : " · range unknown"}</option>)}
+            </select>
+          </label>
+          <p className="field-help">{suggestedStart ? `Suggested: ${suggestedStart.name}. ` : ""}Change it to join a friend, or plan your first stop later. You can edit its planned levels in your route.</p>
+          {selectedStart && selectedStart.faction !== "Both" && selectedStart.faction !== "Unknown" && selectedStart.faction !== draft.faction && <p className="field-help">This zone’s questing guidance is for {selectedStart.faction}. You can still plan this visit.</p>}
+        </div>}
+        {hasLegacyChoice && <p className="field-help">Saved labels are kept until you choose a replacement. New choices use the reviewed Forever catalogue.</p>}
         <p className="field-help">
-          Planning labels; race/class eligibility is not validated. Reviewed
-          beta cap: 30. Targets up to 60 are personal future plans.
+          WoW Forever race and class choices follow reviewed Blizzard announcements. Specialisation is your plan, not a claim that talents are unlocked. Targets up to 60 remain personal future plans.
         </p>
         {!character && (
           <label className="checkbox-option">

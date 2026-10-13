@@ -76,7 +76,7 @@ export const catalogueSources: CatalogueSource[] = [
     reviewedAt: REVIEWED,
     gameRevision: "1.60.1.70170 (guide); 1.60.1.70291 (review footer)",
     reuse:
-      "Selected numerical facts and race associations, manually curated; no guide prose copied. Ranges use Classic quest levels.",
+      "Selected numerical facts and race associations, manually curated; no guide prose copied. Ranges are the 10th–90th percentiles of Classic quest levels for quests reported present in Forever; new Forever quest levels are excluded.",
   },
   {
     id: "foreverdb-maps",
@@ -126,7 +126,7 @@ export const catalogueSources: CatalogueSource[] = [
 ];
 
 export const catalogueMetadata = {
-  version: "forever-zones-2026-10-13.2",
+  version: "forever-zones-2026-10-13.3",
   reviewedAt: REVIEWED,
   gameRevision: "1.60.1.70338 (community-reported client snapshot)",
   sources: catalogueSources,
@@ -601,12 +601,14 @@ export const zoneCatalogue: ZoneRecord[] = seeds.map(
                 : "classic-derived",
             [rangeSource],
             rangeSource === "foreverdb-leveling"
-              ? "Approximate Classic quest-level percentiles for quests present in the Forever client; new Forever quests are not included."
+              ? "Approximate 10th–90th percentiles of Classic quest levels for quests reported present in the Forever client; new Forever quests are not included. This is a content window, not an entry requirement or XP-coverage estimate."
               : rangeSource === "blizzard-skyborne"
                 ? "Blizzard announced a level 1–12 starting experience."
                 : rangeSource === "gregular-editorial-2026-10-13"
                   ? "Owner-requested editorial planning range of 35–45. Exact endpoints are not established by the reviewed official material or independent gameplay."
-                  : "Classic Era guidance; Forever questing suitability is not verified.",
+                  : startingRaces.length
+                    ? "Classic Era 1–12 starting-zone guidance includes the level-1 starting area. Forever quest levels, new content and XP coverage are not verified."
+                    : "Classic Era audience guidance; Forever questing suitability, new content and XP coverage are not verified.",
           )
         : evidence(
             "unknown",

@@ -47,7 +47,7 @@ export function ZoneBrowser({
   const candidates = useMemo(
     () =>
       rankZoneSuggestions({
-        planner: character.planner, level, insertionIndex, faction: character.faction,
+        planner: character.planner, level, insertionIndex, faction: character.faction, race: character.race,
       })
         .filter(({ zone, travel }) => {
           if (
@@ -84,11 +84,12 @@ export function ZoneBrowser({
       insertionIndex,
       character.planner,
       character.faction,
+      character.race,
     ],
   );
   const stops = character.planner.entries.filter((e) => e.kind !== "custom");
   const relevanceContext = getSuggestionContext({
-    planner: character.planner, level, insertionIndex, faction: character.faction,
+    planner: character.planner, level, insertionIndex, faction: character.faction, race: character.race,
   });
   const context = getInsertionTravel(
     character.planner,
@@ -209,19 +210,21 @@ export function ZoneBrowser({
           </p>
         </div>
         <p className="suggestion-context" aria-live="polite">
-          Finding fits around level <strong>{relevanceContext.planningLevel}</strong>
-          {relevanceContext.basedOnPreviousPlan ? " · uses the previous stop’s planned exit" : " · uses your browser level"}.
+          {relevanceContext.basedOnPreviousZone && relevanceContext.sourceZone
+            ? <>Next bracket near levels <strong>{rangeText(relevanceContext.planningWindow)}</strong> · from the upper end of {relevanceContext.sourceZone.name}’s recommended {rangeText(relevanceContext.sourceRange)} range.</>
+            : <>Finding fits around level <strong>{relevanceContext.planningLevel}</strong>{relevanceContext.basedOnPreviousPlan ? " · the preceding stop has no established suitable range, so its personal exit is used" : " · uses your browser level"}.</>}
+          {relevanceContext.suggestedStart && <> Suggested start: <strong>{relevanceContext.suggestedStart.name}</strong>. Choose another destination whenever you like.</>}
           {relevanceContext.hasLevelConflict && " The surrounding planned levels overlap or run backwards; review the fit."}
         </p>
         <details className="suggestion-explanation">
           <summary>How suggestions are sorted</summary>
-          <p>Best route relevance first: suitable levels and entry fit, then travel on both sides, faction suitability and repeat visits. Later and awkward options remain available. Unknown travel never counts as easy.</p>
+          <p>Next suggested zones first: the next content bracket overlaps near the end of the preceding zone’s recommended range. Matching options sort by known travel distance, including onward travel when inserting between stops. Your browser level keeps advanced characters out of earlier brackets. Repeat visits and the full catalogue remain available.</p>
           <p>Recommended ranges describe relevant content, not how many levels you will gain. Coverage notes are broad editorial prompts, not quest or XP estimates.</p>
         </details>
       </div>
       <div className="zone-results-bar">
         <p className="zone-results" role="status">
-          <strong>{candidates.length}</strong> zones <span>· best route relevance first</span>
+          <strong>{candidates.length}</strong> zones <span>· next suggested zone, then travel</span>
         </p>
         {hasFilters && <button className="text-button" onClick={resetFilters}>Reset filters</button>}
       </div>

@@ -41,13 +41,11 @@ async function createCharacter(
   await dialog.getByLabel("Character name", { exact: true }).fill(name);
   await dialog
     .getByRole("combobox", { name: "Race", exact: true })
-    .fill("Troll");
+    .selectOption(faction === "Alliance" ? "human" : "troll");
   await dialog
     .getByRole("combobox", { name: "Class", exact: true })
-    .fill("Priest");
-  await dialog
-    .getByRole("combobox", { name: "Faction", exact: true })
-    .selectOption(faction);
+    .selectOption("Priest");
+  await dialog.getByRole("combobox", { name: "Starting zone", exact: true }).selectOption("");
   await dialog.getByLabel("Current level", { exact: true }).fill(String(level));
   await dialog
     .getByRole("combobox", { name: "Progression status", exact: true })

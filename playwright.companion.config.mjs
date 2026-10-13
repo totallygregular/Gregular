@@ -10,6 +10,7 @@ export default defineConfig({
     "zone-route.spec.mjs",
     "visual-journey.spec.mjs",
     "route-relevance.spec.mjs",
+    "character-options.spec.mjs",
   ],
   workers: 1,
   timeout: 45_000,

@@ -30,7 +30,7 @@ test.beforeEach(async ({ page }) => { await page.emulateMedia({ reducedMotion: "
 
 test("current relevance leads, labels explain fits and the full catalogue remains reachable", async ({ page }) => {
   await open(page);
-  await expect(browser(page).locator(".zone-results")).toContainText("best route relevance first");
+  await expect(browser(page).locator(".zone-results")).toContainText("next suggested zone, then travel");
   const first = browser(page).locator(".zone-candidate").first();
   await expect(first).toHaveAttribute("data-fit", "good");
   await expect(first.locator(".candidate-level-range")).toContainText("35–45");
@@ -47,13 +47,13 @@ test("current relevance leads, labels explain fits and the full catalogue remain
   expect(await browser(page).locator(".zone-candidate").evaluateAll((els) => els.map((el) => el.getAttribute("aria-label")))).toEqual(names);
 });
 
-test("insertion context reranks using personal exit levels and exposes onward travel", async ({ page }) => {
+test("insertion context uses the reviewed upper bracket and exposes onward travel", async ({ page }) => {
   await open(page, [visit("Elwynn Forest", "elwynn-forest", 1, 12, "completed"),
     visit("Westfall", "westfall", 12, 18, "active"), visit("Tanaris", "tanaris", 40, 45)], 12);
-  await expect(browser(page).locator(".suggestion-context")).toContainText("level 45");
+  await expect(browser(page).locator(".suggestion-context")).toContainText("48–50");
   await expect(candidate(page, "Tanaris").locator(".candidate-suitability")).toContainText("Suitable laterBrowser level 12");
   await browser(page).getByRole("combobox", { name: "Insert at", exact: true }).selectOption("1");
-  await expect(browser(page).locator(".suggestion-context")).toContainText("level 12");
+  await expect(browser(page).locator(".suggestion-context")).toContainText("12–12");
   await expect(browser(page).locator(".insertion-context")).toContainText("Elwynn Forest");
   await expect(browser(page).locator(".insertion-context")).toContainText("Westfall");
   await expect(candidate(page, "Loch Modan").locator(".outgoing-travel")).toContainText("Then to Westfall");

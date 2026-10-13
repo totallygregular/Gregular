@@ -45,13 +45,13 @@ async function createCharacter(
     .click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Character name", { exact: true }).fill(name);
-  await dialog.getByRole("combobox", { name: "Race", exact: true }).fill(race);
+  await dialog.getByRole("combobox", { name: "Race", exact: true })
+    .selectOption(race.toLowerCase().replaceAll(" ", "-"));
   await dialog
     .getByRole("combobox", { name: "Class", exact: true })
-    .fill("Priest");
-  await dialog
-    .getByRole("combobox", { name: "Faction", exact: true })
-    .selectOption(faction);
+    .selectOption("Priest");
+  await dialog.getByRole("combobox", { name: "Starting zone", exact: true }).selectOption("");
+  await expect(dialog.getByRole("status")).toContainText(`Faction: ${faction}`);
   await dialog.getByLabel("Current level", { exact: true }).fill(String(level));
   await dialog
     .getByRole("combobox", { name: "Progression status", exact: true })
@@ -496,7 +496,7 @@ test("browser filters combine level, continent and transition difficulty without
   expect(await saved(page)).toEqual(before);
 });
 
-test("editing the character faction refreshes browser suggestions and preserves the existing plan", async ({
+test("editing the character race derives faction, refreshes suggestions and preserves the existing plan", async ({
   page,
 }) => {
   await signIn(page);
@@ -511,10 +511,9 @@ test("editing the character faction refreshes browser suggestions and preserves 
   const dialog = page.getByRole("dialog");
   await dialog
     .getByRole("combobox", { name: "Race", exact: true })
-    .fill("Troll");
-  await dialog
-    .getByRole("combobox", { name: "Faction", exact: true })
-    .selectOption("Horde");
+    .selectOption("troll");
+  await expect(dialog.getByRole("status")).toContainText("Faction: Horde");
+  await expect(dialog.getByRole("combobox", { name: "Faction", exact: true })).toHaveCount(0);
   await dialog
     .getByRole("button", { name: "Save changes", exact: true })
     .click();
