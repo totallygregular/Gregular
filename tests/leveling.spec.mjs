@@ -280,7 +280,7 @@ test("blank routes support personal, zone and dungeon CRUD, ordering and status 
   const [download] = await Promise.all([
     page.waitForEvent("download"),
     page
-      .getByRole("button", { name: "Export local profile", exact: true })
+      .getByRole("button", { name: "Export profile", exact: true })
       .click(),
   ]);
   const exported = JSON.parse(await readFile(await download.path(), "utf8"));

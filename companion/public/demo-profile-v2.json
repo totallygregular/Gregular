@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 2,
+  "id": "10000000-0000-4000-8000-000000000001",
+  "username": "Gregular Demo",
+  "usernameKey": "gregular demo",
+  "revision": 1,
+  "createdAt": "2026-10-13T00:00:00.000Z",
+  "updatedAt": "2026-10-13T00:00:00.000Z",
+  "characters": [
+    {
+      "id": "20000000-0000-4000-8000-000000000001",
+      "name": "Zala",
+      "race": "Troll",
+      "className": "Priest",
+      "faction": "Horde",
+      "plannedSpec": "Holy",
+      "level": 24,
+      "status": "leveling",
+      "objectives": [
+        {
+          "id": "30000000-0000-4000-8000-000000000001",
+          "title": "Bring supplies for the party",
+          "completed": false,
+          "priority": "high"
+        },
+        {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "title": "Agree on a play session",
+          "completed": true,
+          "priority": "normal"
+        }
+      ],
+      "notes": "Fictional QA character. All route levels and readiness are personal test plans, not verified Forever recommendations.",
+      "planner": {
+        "id": "40000000-0000-4000-8000-000000000001",
+        "name": "Horde party plan",
+        "datasetVersion": "forever-progression-2026-10-13.1",
+        "entries": [
+          {
+            "id": "50000000-0000-4000-8000-000000000001",
+            "kind": "custom",
+            "title": "Pack the travel bag",
+            "notes": "Completed personal preparation.",
+            "priority": "normal",
+            "status": "completed",
+            "targetLevel": { "min": 20, "max": 22 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": [],
+            "origin": "user",
+            "access": "confirmed"
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000002",
+            "kind": "zone",
+            "title": "Meet the party in the Barrens",
+            "notes": "Personal destination and target levels for QA; no zone range is asserted.",
+            "priority": "normal",
+            "status": "active",
+            "targetLevel": { "min": 23, "max": 26 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": ["50000000-0000-4000-8000-000000000001"],
+            "origin": "user",
+            "access": "confirmed"
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000003",
+            "kind": "custom",
+            "title": "Review abilities with the group",
+            "notes": "Overdue high-priority personal reminder.",
+            "priority": "high",
+            "status": "planned",
+            "targetLevel": { "min": 22, "max": 23 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": [],
+            "origin": "user",
+            "access": "confirmed"
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000004",
+            "kind": "dungeon",
+            "title": "Dungeon night with friends",
+            "notes": "Personal session goal. Choose a suitable dungeon in game; no entry level, quest or reward is asserted.",
+            "priority": "normal",
+            "status": "planned",
+            "targetLevel": { "min": 27, "max": 29 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": ["50000000-0000-4000-8000-000000000003"],
+            "origin": "user",
+            "access": "confirmed"
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000005",
+            "kind": "custom",
+            "title": "Optional material gathering",
+            "notes": "Skipped for this route.",
+            "priority": "normal",
+            "status": "skipped",
+            "targetLevel": { "min": 24, "max": 25 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": [],
+            "origin": "user",
+            "access": "confirmed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000002",
+      "name": "Mira",
+      "race": "Human",
+      "className": "Paladin",
+      "faction": "Alliance",
+      "plannedSpec": "Holy",
+      "level": 12,
+      "status": "leveling",
+      "objectives": [
+        {
+          "id": "30000000-0000-4000-8000-000000000003",
+          "title": "Ask the group about professions",
+          "completed": false,
+          "priority": "normal"
+        }
+      ],
+      "notes": "Fictional Alliance QA character. Personal plans only.",
+      "planner": {
+        "id": "40000000-0000-4000-8000-000000000002",
+        "name": "Alliance weekend plan",
+        "datasetVersion": "forever-progression-2026-10-13.1",
+        "entries": [
+          {
+            "id": "50000000-0000-4000-8000-000000000006",
+            "kind": "custom",
+            "title": "Choose a profession",
+            "notes": "Already decided for this test scenario.",
+            "priority": "normal",
+            "status": "completed",
+            "targetLevel": { "min": 10, "max": 11 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": [],
+            "origin": "user",
+            "access": "confirmed"
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000007",
+            "kind": "zone",
+            "title": "Explore with the Alliance group",
+            "notes": "Pick the destination together in game.",
+            "priority": "normal",
+            "status": "active",
+            "targetLevel": { "min": 12, "max": 14 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": [],
+            "origin": "user",
+            "access": "confirmed"
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000008",
+            "kind": "dungeon",
+            "title": "Research a first dungeon",
+            "notes": "Deliberately unconfirmed readiness to test blocked recommendations.",
+            "priority": "high",
+            "status": "planned",
+            "targetLevel": { "min": 14, "max": 16 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": [],
+            "origin": "user",
+            "access": "unknown"
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000009",
+            "kind": "custom",
+            "title": "Review the next session plan",
+            "notes": "Upcoming personal reminder.",
+            "priority": "normal",
+            "status": "planned",
+            "targetLevel": { "min": 17, "max": 18 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": [],
+            "origin": "user",
+            "access": "confirmed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000003",
+      "name": "Bram",
+      "race": "Orc",
+      "className": "Warrior",
+      "faction": "Horde",
+      "plannedSpec": "Protection",
+      "level": 30,
+      "status": "paused",
+      "objectives": [],
+      "notes": "Fictional QA character at the reviewed beta level cap. No post-cap content is promised.",
+      "planner": {
+        "id": "40000000-0000-4000-8000-000000000003",
+        "name": "Catch-up plan",
+        "datasetVersion": "forever-progression-2026-10-13.1",
+        "entries": [
+          {
+            "id": "50000000-0000-4000-8000-000000000010",
+            "kind": "custom",
+            "title": "Compare plans with friends",
+            "notes": "Completed catch-up goal.",
+            "priority": "normal",
+            "status": "completed",
+            "targetLevel": { "min": 28, "max": 29 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": [],
+            "origin": "user",
+            "access": "confirmed"
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000011",
+            "kind": "custom",
+            "title": "Sort the bank before returning",
+            "notes": "Personal task at the current level.",
+            "priority": "high",
+            "status": "planned",
+            "targetLevel": { "min": 30, "max": 30 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": [],
+            "origin": "user",
+            "access": "confirmed"
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000012",
+            "kind": "zone",
+            "title": "Optional solo exploration",
+            "notes": "Skipped personal destination.",
+            "priority": "normal",
+            "status": "skipped",
+            "targetLevel": { "min": 29, "max": 30 },
+            "targetLevelSource": "user",
+            "prerequisiteEntryIds": [],
+            "origin": "user",
+            "access": "confirmed"
+          }
+        ]
+      }
+    }
+  ]
+}

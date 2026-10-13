@@ -10,6 +10,7 @@
     "test": "node --test tests/draft.test.mjs && vitest run --config companion/vite.config.ts",
     "test:ui": "playwright test && playwright test --config playwright.companion.config.mjs",
     "test:companion": "playwright test --config playwright.companion.config.mjs",
+    "test:build": "node --test tests/build-output.test.mjs",
     "serve": "node scripts/serve.mjs",
     "preview": "node scripts/preview.mjs",
     "build": "npm run typecheck && node scripts/build.mjs && vite build --config companion/vite.config.ts"

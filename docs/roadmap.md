@@ -38,14 +38,27 @@ Acceptance criteria:
 
 See [progression-data.md](progression-data.md), [leveling-demo.md](leveling-demo.md) and [validation.md](validation.md) for scope and evidence. JSON import/restore is deliberately deferred to keep this pass focused; no restore control is implied by export or the local migration backup.
 
-## Pass 3 Recovery and progression data review
+## Pass 2.5 PR previews and profile recovery
 
-Scope: validated JSON import/restore with a replacement preview and backup; explicit recovery UX; review Forever zone ranges, faction quest coverage, dungeon entrance rules and a few class milestones. Add a reproducible importer only when a permitted source is available. Keep personal plans independent of changing catalogue records.
+Scope: a compatible combined static build for a separate Cloudflare Pages review project, native GitHub preview instructions, a pinned Node version, JSON import/restore, replacement backup, opt-in demo fixture and compiled-site validation. This pass does not change production hosting or expand game data.
 
 Acceptance criteria:
 
-- A user can restore a valid export into a clean browser. Invalid/newer input changes nothing; replacing an existing profile is previewed and deliberate.
-- Recovery preserves an existing readable profile and gives useful errors for corruption, quota limits and conflicts.
+- Cloudflare can build repository root with `npm run build` and publish `dist`; `/companion/`, relative assets, hash navigation and the original root draft remain usable.
+- Native branch preview aliases and their local-storage boundaries are documented, with exact dashboard setup and no credentials or deployment scripts in the repository.
+- Version-1/2 imports are validated and previewed before explicit confirmation, preserve supported character data and IDs, and back up an existing target before replacement.
+- Invalid files, unsupported schemas, storage failures and observed multi-tab conflicts leave the good target profile intact. Previous replacement data can be downloaded or restored after a new preview.
+- A fictional opt-in demo profile exercises both factions and different planner states. Unit, browser, accessibility and compiled build checks cover recovery and existing functionality.
+- The stacked draft targets `codex/leveling-planner`; production main, Pages source, DNS and archive branches remain unchanged.
+
+See [preview-setup.md](preview-setup.md), [manual-qa.md](manual-qa.md) and [validation.md](validation.md). Cloudflare account authorization and dashboard connection are external setup, not a repository deployment.
+
+## Pass 3 Progression data review
+
+Scope: review Forever zone ranges, faction quest coverage, dungeon entrance rules and a few class milestones. Add a reproducible importer only when a permitted source is available. Keep personal plans independent of changing catalogue records. JSON profile recovery was brought forward into Pass 2.5.
+
+Acceptance criteria:
+
 - Every new game field/relationship has Forever-specific provenance, a reviewed revision and an appropriate reuse basis.
 - Imported changes produce a reviewable diff, reject broken references and identify removed records without resetting personal progress.
 - No Classic Era, Season of Discovery or Retail fallback becomes a Forever fact.
