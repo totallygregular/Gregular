@@ -1092,6 +1092,8 @@ export function getQuestGoals(
         source = wishlistEntry
           ? getSelectedSource(wishlistEntry, resolved)
           : undefined;
+      // A later reward's restrictions must not suppress independently available preparation.
+      if (source?.questId !== id) continue;
       if (source?.availability !== "available")
         blockedReasons.push(
           "Desired reward source availability requires review.",

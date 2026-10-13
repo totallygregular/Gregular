@@ -369,9 +369,13 @@ describe("shared acquisition planning", () => {
     data.quests[0].requiredLevel = 10;
     data.sources[0].availability = "unknown";
     expect(
+      getQuestGoals(state, data, 60).find((goal) => goal.questId === "final")
+        ?.blockedReasons,
+    ).toContain("Desired reward source availability requires review.");
+    expect(
       getQuestGoals(state, data, 60).find((goal) => goal.questId === "first")
         ?.ready,
-    ).toBe(false);
+    ).toBe(true);
     state = updateWishlistEntry(state, state.wishlist[0].id, {
       preferredSourceId: undefined,
     });
@@ -495,6 +499,29 @@ describe("shared acquisition planning", () => {
       getQuestGoals(state, dataset(), 12).find((goal) => goal.questId === id)
         ?.ready,
     ).toBe(false);
+  });
+
+  it("keeps available prerequisite preparation ready when its later reward source is uncertain or above level", () => {
+    const data = dataset();
+    data.sources[0].availability = "unknown";
+    data.sources[0].requiredLevel = 50;
+    let state = trackQuest(createBlankAcquisition(), "first");
+    expect(getQuestGoals(state, data, 10)[0].ready).toBe(true);
+    state = addWishlistItem(state, "reward-a", "quest-source");
+    const goals = getQuestGoals(state, data, 10);
+    expect(goals.find((goal) => goal.questId === "first")).toMatchObject({
+      ready: true,
+      desiredItems: [],
+    });
+    expect(
+      goals.find((goal) => goal.questId === "first")?.supportingItems,
+    ).toHaveLength(1);
+    expect(
+      goals.find((goal) => goal.questId === "final")?.blockedReasons,
+    ).toContain("Desired reward source availability requires review.");
+    expect(
+      goals.find((goal) => goal.questId === "final")?.blockedReasons,
+    ).toContain("Reward source requires level 50.");
   });
 
   it("respects a player's later target level above an earlier known quest minimum", () => {

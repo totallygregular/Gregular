@@ -43,7 +43,7 @@ See [model and migration specification](connected-acquisition-model.md). Failed 
 | Check | Result |
 | --- | --- |
 | Starting branch unit baseline | 228 passed: 24 class draft + 204 companion |
-| Final unit suite | 271 passed: 24 class draft + 247 companion |
+| Final unit suite | 272 passed: 24 class draft + 248 companion |
 | TypeScript and combined production build | Passed |
 | Compiled static/HTTP checks | 9 passed |
 | Class-draft source browser suite | 21 passed |

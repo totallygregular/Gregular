@@ -72,7 +72,8 @@ information exists and the character meets the later of its known minimum and
 personal target, prerequisite coverage is complete, all known prerequisites
 and preceding chain steps are completed, and dependencies contain no cycle or
 missing record. Source availability and source level requirements also gate
-linked reward suggestions. Unknown facts do not become urgent Next Up goals.
+linked reward suggestions at the reward quest. A later reward's restrictions do not
+suppress independently available prerequisite preparation. Unknown facts do not become urgent Next Up goals.
 Personal availability confirmation remains labelled user supplied.
 
 `getZoneAcquisitionGoals` supplies outstanding quest, desired item and dungeon
