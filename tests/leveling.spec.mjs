@@ -374,6 +374,12 @@ test("Next Up follows levels, personal priorities, access, prerequisites and ski
     "Complete “Train at 26” first.",
   );
   await navigation(page, "journal").click();
+  // Finish the screen's deliberate focus handoff before testing keyboard input.
+  await expect(navigation(page, "journal")).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect(page.locator("#main-content")).toBeFocused();
   await nextUp(page)
     .getByRole("button", { name: "Complete Train at 26", exact: true })
     .focus();
