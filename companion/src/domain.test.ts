@@ -4,9 +4,11 @@ import {
   addObjective,
   createCharacter,
   createProfile,
+  migrateProfile,
   normalizeUsername,
   removeCharacter,
   setNotes,
+  setCharacterPlanner,
   setObjectiveComplete,
   updateCharacter,
   validateProfile,
@@ -165,7 +167,7 @@ describe("profile and character domain", () => {
     expect(validateProfile(JSON.parse(JSON.stringify(profile)))).toEqual(
       profile,
     );
-    expect(() => validateProfile({ ...profile, schemaVersion: 2 })).toThrow(
+    expect(() => validateProfile({ ...profile, schemaVersion: 99 })).toThrow(
       "unsupported",
     );
     expect(() =>
@@ -189,5 +191,106 @@ describe("profile and character domain", () => {
         ],
       }),
     ).toThrow("duplicate objective");
+  });
+
+  it("migrates version-1 profiles without losing identities, notes or completed objectives", () => {
+    let profile = addCharacter(createProfile("Greg"), draft, {
+      mockObjectives: true,
+    });
+    profile = addCharacter(profile, {
+      ...draft,
+      name: "Second character",
+      level: 24,
+    });
+    const first = profile.characters[0];
+    profile = setObjectiveComplete(
+      profile,
+      first.id,
+      first.objectives[0].id,
+      true,
+    );
+    profile = setNotes(
+      profile,
+      first.id,
+      "Previous notes\n  with intentional spacing.  ",
+    );
+    const legacy = {
+      ...profile,
+      schemaVersion: 1,
+      characters: profile.characters.map(
+        ({ planner: _planner, ...character }) => character,
+      ),
+    };
+    const raw = JSON.stringify(legacy);
+    const migrated = migrateProfile(JSON.parse(raw));
+    expect(migrated).toMatchObject({ ...legacy, schemaVersion: 2 });
+    expect(migrated.characters[0].objectives[0].completed).toBe(true);
+    expect(migrated.characters.map((character) => character.id)).toEqual(
+      profile.characters.map((character) => character.id),
+    );
+    expect(
+      migrated.characters.map((character) => character.planner.id),
+    ).toEqual(profile.characters.map((character) => character.id));
+    expect(
+      migrated.characters.every(
+        (character) => character.planner.entries.length === 0,
+      ),
+    ).toBe(true);
+    expect(migrateProfile(JSON.parse(raw))).toEqual(migrated);
+    expect(JSON.stringify(legacy)).toBe(raw);
+    expect(validateProfile(JSON.parse(JSON.stringify(migrated)))).toEqual(
+      migrated,
+    );
+    expect(() => validateProfile(legacy)).toThrow("unsupported");
+  });
+
+  it("rejects malformed legacy records and protects unsupported future versions", () => {
+    const profile = addCharacter(createProfile("Greg"), draft, {
+      mockObjectives: true,
+    });
+    const character = profile.characters[0];
+    expect(() =>
+      migrateProfile({
+        ...profile,
+        schemaVersion: 1,
+        characters: [
+          {
+            ...character,
+            objectives: [{ ...character.objectives[0], completed: "yes" }],
+          },
+        ],
+      }),
+    ).toThrow("completion");
+    expect(() => migrateProfile({ ...profile, schemaVersion: 3 })).toThrow(
+      "unsupported",
+    );
+  });
+
+  it("updates a single character's validated planner without altering legacy state", () => {
+    let profile = addCharacter(createProfile("Greg"), draft, {
+      mockObjectives: true,
+    });
+    profile = addCharacter(profile, { ...draft, name: "Second character" });
+    const first = profile.characters[0];
+    const planner = { ...first.planner, name: "My level 24 route" };
+    const changed = setCharacterPlanner(profile, first.id, planner);
+    expect(changed.characters[0].planner.name).toBe("My level 24 route");
+    expect(changed.characters[0].planner).not.toBe(planner);
+    expect(changed.characters[0].objectives).toEqual(first.objectives);
+    expect(changed.characters[0].notes).toBe(first.notes);
+    expect(changed.characters[1]).toBe(profile.characters[1]);
+    expect(first.planner.name).toBe("My route");
+    expect(() =>
+      setCharacterPlanner(profile, first.id, {
+        ...planner,
+        entries: null,
+      } as never),
+    ).toThrow();
+    expect(() =>
+      validateProfile({
+        ...profile,
+        characters: [{ ...first, planner: { ...planner, entries: null } }],
+      }),
+    ).toThrow();
   });
 });

@@ -1,6 +1,6 @@
 # Gregular companion implementation roadmap
 
-Build in reviewable passes. The first release decision is whether the local companion is useful and visually convincing; accurate game content and shared persistence follow only after their data and operational requirements are resolved. Each pass ends with a runnable artifact and acceptance evidence.
+Build in reviewable passes, each ending with a runnable artifact and acceptance evidence. Progression planning has deliberately moved ahead of the original persistence/talent sequence. Pass 2 delivers a useful personal planner with a narrow reviewed reference catalogue; broader data and shared persistence follow after their requirements are resolved.
 
 ## Pass 1 Local companion prototype
 
@@ -20,22 +20,40 @@ Acceptance criteria:
 
 Review the actual test outcomes and limits in [validation.md](validation.md). Prototype acceptance does not certify game data or a fully usable talent calculator.
 
-## Pass 2 Persistence hardening and validated content foundation
+## Pass 2 Leveling planner
 
-Scope: import and recovery UX building on the existing JSON export; schema migrations with fixtures; stronger multi-tab conflict recovery; choose initial Forever data source after permissions review; build reproducible snapshot imports and provenance views. Select a deliberately narrow content slice, such as one class and a small set of confirmed records.
+Scope: character-specific editable routes; zone, dungeon and custom objectives; level brackets; completion/skipping; deterministic Next Up; two editorial starter routes; a small source-reviewed Forever snapshot; schema-1 migration to schema 2 with original-save backup. Preserve notes, legacy objectives, draft-tool saves and conflict protection. This pass does not add a backend or a complete game guide.
 
 Acceptance criteria:
 
-- A user can export a profile, restore it into a clean browser, and inspect a meaningful error for invalid or newer schema data without losing an existing save.
-- Two tabs cannot silently overwrite a known newer revision; the user can reload or preserve a local copy.
-- Each imported dataset identifies Forever edition, build or revision, source, retrieval date, license or permission basis and transformation version.
-- An importer is repeatable, rejects broken relationships and produces a reviewable diff between snapshots.
-- Unsupported Forever fields remain explicitly unknown; no Classic Era or Retail fallback is used.
-- Sample content and verified content are visually distinguishable at record level.
+- A level-24 Troll Priest can select a Horde starter or start blank, inspect current/upcoming plans, add a dungeon milestone and personal goal, complete an objective and see Next Up change after a level edit.
+- Route entries can be edited, reordered, removed, completed and skipped with keyboard/touch controls. Restoring a template retains personal entries and existing progress.
+- Each character owns its own route; switching characters, usernames and reloading preserves the correct state.
+- Next Up excludes completed/skipped, unavailable, faction-incompatible and unmet-prerequisite activities from actionable recommendations; overdue high-priority goals remain discoverable and reasons explain selection.
+- Earlier/later brackets and blocked/upcoming activities are inspectable without forcing every suggestion into a linear chain.
+- Version-1 profiles retain character/objective IDs, notes and completion. Migration does not write on load, and failure to back up the original prevents its replacement.
+- Invalid saved planner data is protected; stale tabs cannot silently overwrite known newer content. JSON export includes schema-2 routes.
+- Snapshot identity, source revision and field confidence are visible. Unknown ranges/prerequisites stay unknown; editorial windows and user data remain distinct from game facts.
+- Tests cover route mutations, recommendations, faction/prerequisite gates, migration, reference changes, persistence and browser flows at desktop/tablet/mobile sizes.
 
-Dependency: a usable data source and permitted reuse. If unavailable, improve user-authored planning and links rather than fabricating a database.
+See [progression-data.md](progression-data.md), [leveling-demo.md](leveling-demo.md) and [validation.md](validation.md) for scope and evidence. JSON import/restore is deliberately deferred to keep this pass focused; no restore control is implied by export or the local migration backup.
 
-## Pass 3 Accurate talent planning
+## Pass 3 Recovery and progression data review
+
+Scope: validated JSON import/restore with a replacement preview and backup; explicit recovery UX; review Forever zone ranges, faction quest coverage, dungeon entrance rules and a few class milestones. Add a reproducible importer only when a permitted source is available. Keep personal plans independent of changing catalogue records.
+
+Acceptance criteria:
+
+- A user can restore a valid export into a clean browser. Invalid/newer input changes nothing; replacing an existing profile is previewed and deliberate.
+- Recovery preserves an existing readable profile and gives useful errors for corruption, quota limits and conflicts.
+- Every new game field/relationship has Forever-specific provenance, a reviewed revision and an appropriate reuse basis.
+- Imported changes produce a reviewable diff, reject broken references and identify removed records without resetting personal progress.
+- No Classic Era, Season of Discovery or Retail fallback becomes a Forever fact.
+- In-game/source checks validate a small useful set of route details before the templates are presented as verified guidance.
+
+Dependency: credible data and permitted reuse. If unavailable, keep the editable planner and external references; do not fabricate catalogue coverage.
+
+## Pass 4 Accurate talent planning
 
 Scope: one verified class first, then expand through the same data contract. Add accessible node details, rank-aware allocation, point budgets, prerequisites, reset/undo, named saved builds and a level-by-level plan.
 
@@ -49,9 +67,9 @@ Acceptance criteria:
 
 Dependency: confirmed talent structure, spell/rank relationships, level rules and reuse rights. A cosmetic talent canvas alone does not meet this pass.
 
-## Pass 4 Progression and equipment planning
+## Pass 5 Equipment and dungeon detail
 
-Scope: verified zones, dungeons, quests, prerequisites, items and drop sources; personal wishlists and acquisition state; class-aware milestones and explainable suggestions. Introduce editorial recommendations only where supported, with source and revision dates.
+Scope: permitted, verified items and drop sources; personal wishlists/acquisition state; dungeon quests and prerequisites; source-aware tooltips. Connect these details to existing planner entries instead of creating a parallel progression system. Introduce class-aware suggestions only where supported.
 
 Acceptance criteria:
 
@@ -61,7 +79,7 @@ Acceptance criteria:
 - A recommendation explains why it appears and does not suggest a completed or unmet-prerequisite objective as immediately ready.
 - Changes to beta content generate an auditable data diff and preserve user-authored notes.
 
-## Pass 5 Accounts and cloud synchronization
+## Pass 6 Accounts and cloud synchronization
 
 Scope: choose a backend, implement authenticated identity, private profile authorization, explicit local-profile import, server revisions, basic conflict recovery, backups and deletion. Retain the frontend repository boundary and Pages-compatible build.
 
@@ -75,7 +93,7 @@ Acceptance criteria:
 
 Avoid adding real-time collaboration until basic sync is dependable.
 
-## Pass 6 Shared group planning
+## Pass 7 Shared group planning
 
 Scope: opt-in character sharing, group membership and invitations, level comparisons, common dungeon objectives, combined wishlists and shared session plans. Add professions after the shared planning model proves useful.
 

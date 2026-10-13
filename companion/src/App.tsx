@@ -13,6 +13,7 @@ import {
   removeCharacter,
   setNotes,
   setObjectiveComplete,
+  setCharacterPlanner,
   updateCharacter,
   validateCharacterDraft,
   type Character,
@@ -24,6 +25,8 @@ import {
   profileStorageKey,
 } from "./profileRepository";
 import { ClassCrest, Icon, Landscape, Modal } from "./components";
+import { LevelingPlanner, NextUpPanel } from "./LevelingPlanner";
+import { setEntryStatus } from "./planner";
 import {
   DATA_NOTICE,
   sampleDungeon,
@@ -263,7 +266,7 @@ export function App() {
         </a>
         <div className="header-actions">
           <span className="prototype-tag">
-            FIRST EDITION <span> / PROTOTYPE</span>
+            LEVELING PLANNER <span> / BETA</span>
           </span>
           <a
             className="draft-link"
@@ -297,8 +300,8 @@ export function App() {
           tabIndex={-1}
           className="loading-view"
         >
-          <span className="eyebrow">OPENING YOUR JOURNAL</span>
-          <h1>A moment by the campfire…</h1>
+          <span className="eyebrow">LOCAL PROFILE</span>
+          <h1>Opening your journal…</h1>
         </main>
       ) : !profile ? (
         <main id="main-content" ref={mainRef} tabIndex={-1} className="welcome">
@@ -441,7 +444,7 @@ export function App() {
               </div>
               <div className="character-layout">
                 <aside className="character-sidebar">
-                  <p className="eyebrow">YOUR ADVENTURE</p>
+                  <p className="eyebrow">CHARACTER</p>
                   <nav aria-label="Character sections">
                     {SECTIONS.map((s) => (
                       <a
@@ -457,14 +460,6 @@ export function App() {
                       </a>
                     ))}
                   </nav>
-                  <div className="sidebar-note">
-                    <span>◇</span>
-                    <p>
-                      One quest at a time.
-                      <br />
-                      Make the journey yours.
-                    </p>
-                  </div>
                 </aside>
                 <div
                   className="dashboard-content"
@@ -478,9 +473,22 @@ export function App() {
                     />
                   )}
                   {route.section === "leveling" && (
-                    <Leveling
+                    <LevelingPlanner
                       character={character}
-                      edit={() => setEditor(character)}
+                      saving={saving}
+                      editLevel={() => setEditor(character)}
+                      change={(change) =>
+                        commit((p) =>
+                          setCharacterPlanner(
+                            p,
+                            character.id,
+                            change(
+                              p.characters.find((c) => c.id === character.id)!
+                                .planner,
+                            ),
+                          ),
+                        )
+                      }
                     />
                   )}
                   {route.section === "dungeons" && <Dungeons />}
@@ -655,8 +663,8 @@ export function App() {
           JOURNEY
         </span>
         <p>
-          Unofficial fan prototype · Not affiliated with Blizzard · Game
-          examples are mock data
+          Unofficial companion · Not affiliated with Blizzard · Talent and item
+          previews use mock data
         </p>
         <a
           className="footer-draft-link"
@@ -746,9 +754,9 @@ function CharacterEditor({
       ? { ...character }
       : {
           name: "",
-          race: "Troll",
-          className: "Priest",
-          faction: "Horde",
+          race: "",
+          className: "",
+          faction: "Undecided",
           plannedSpec: "",
           level: 1,
           status: "planned",
@@ -888,8 +896,8 @@ function CharacterEditor({
           ))}
         </datalist>
         <p className="field-help">
-          Race, class, and faction are your planning labels; beta eligibility is
-          not validated. The 1–60 level range is provisional.
+          Planning labels; race/class eligibility is not validated. Reviewed
+          beta cap: 30. Targets up to 60 are personal future plans.
         </p>
         {!character && (
           <label className="checkbox-option">
@@ -961,44 +969,34 @@ function MockLabel() {
 }
 function Journal({ character, saving, commit }: DashboardProps) {
   const [title, setTitle] = useState("");
-  const next = character.objectives
-    .filter((o) => !o.completed)
-    .sort(
-      (a, b) => Number(b.priority === "high") - Number(a.priority === "high"),
-    )[0];
   return (
     <>
       <SectionTitle
-        eyebrow="A LITTLE DIRECTION GOES A LONG WAY"
+        eyebrow="OVERVIEW"
         title="Your quest journal."
-        description="Small steps. Good company. A story worth keeping."
+        description={`Level ${character.level} · ${character.planner.name}`}
       />
       <div className="journal-top">
-        <section className="next-up panel">
-          <p className="eyebrow">
-            <span className="gold-dot" /> NEXT UP{" "}
-            <span className="user-plan">YOUR PLAN</span>
-          </p>
-          <h3>{next?.title || "Make room for the next adventure."}</h3>
-          <p>
-            {next
-              ? "The next unfinished objective in your journal. Set your own pace."
-              : "Add an objective below. Your next step starts with a good idea."}
-          </p>
-          {next && (
-            <button
-              className="primary"
-              disabled={saving}
-              onClick={() =>
-                void commit((p) =>
-                  setObjectiveComplete(p, character.id, next.id, true),
-                )
-              }
-            >
-              Mark complete <Icon name="check" size={17} />
-            </button>
-          )}
-        </section>
+        <NextUpPanel
+          character={character}
+          saving={saving}
+          openPlanner={() => go(character.id, "leveling")}
+          complete={(item) =>
+            void commit((p) =>
+              item.source === "journal"
+                ? setObjectiveComplete(p, character.id, item.id, true)
+                : setCharacterPlanner(
+                    p,
+                    character.id,
+                    setEntryStatus(
+                      p.characters.find((c) => c.id === character.id)!.planner,
+                      item.id,
+                      "completed",
+                    ),
+                  ),
+            )
+          }
+        />
         <section className="progress-panel panel">
           <span className="eyebrow">JOURNAL PROGRESS</span>
           <div className="progress-value">
@@ -1013,7 +1011,12 @@ function Journal({ character, saving, commit }: DashboardProps) {
               }}
             />
           </div>
-          <span className="caption">EVERY LITTLE STEP COUNTS.</span>
+          <button
+            className="text-button"
+            onClick={() => go(character.id, "leveling")}
+          >
+            View leveling progress →
+          </button>
         </section>
       </div>
       <section className="panel objectives">
@@ -1057,7 +1060,7 @@ function Journal({ character, saving, commit }: DashboardProps) {
         ) : (
           <div className="inline-empty">
             <Icon name="journal" size={30} />
-            <p>A blank page is a good beginning.</p>
+            <p>No journal objectives.</p>
             <span>Your objectives will appear here.</span>
           </div>
         )}
@@ -1089,64 +1092,10 @@ function Journal({ character, saving, commit }: DashboardProps) {
       <div className="journal-footnote">
         <Icon name="route" />
         <p>
-          Your plans lead the way. Verified routes, class quests, and group
-          recommendations are coming in a later pass.
+          Leveling routes and milestones are in your roadmap. Journal objectives
+          remain available here.
         </p>
       </div>
-    </>
-  );
-}
-function Leveling({
-  character,
-  edit,
-}: {
-  character: Character;
-  edit: () => void;
-}) {
-  return (
-    <>
-      <SectionTitle
-        eyebrow="THE LONG ROAD, ONE STEP AT A TIME"
-        title="Enjoy the journey."
-        description="A place for your route, milestones, and the detours along the way."
-      />
-      <MockLabel />
-      <section className="panel leveling-overview">
-        <div>
-          <span className="eyebrow">CURRENT CHAPTER</span>
-          <h3>Level {character.level}</h3>
-          <p>
-            {character.status === "planned"
-              ? "An adventure waiting to begin."
-              : "Your progress, at your own pace."}
-          </p>
-          <button className="secondary" onClick={edit}>
-            Update your level <Icon name="edit" size={17} />
-          </button>
-        </div>
-        <ClassCrest className={character.className} />
-      </section>
-      <div className="milestone-grid">
-        {["Find your footing", "Choose your path", "Make your mark"].map(
-          (name, i) => (
-            <section className="panel milestone" key={name}>
-              <span className="chapter">0{i + 1} / EXAMPLE CHAPTER</span>
-              <h3>{name}</h3>
-              <p>
-                Future milestones will connect verified zone routes, class
-                quests, and travel unlocks.
-              </p>
-              <span className="placeholder-label">
-                Data integration planned
-              </span>
-            </section>
-          ),
-        )}
-      </div>
-      <p className="data-explanation">
-        These are layout examples. No zone order, level bracket, or class quest
-        is being recommended.
-      </p>
     </>
   );
 }

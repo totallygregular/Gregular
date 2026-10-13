@@ -1,4 +1,9 @@
-import { normalizeUsername, validateProfile, type Profile } from "./domain";
+import {
+  migrateProfile,
+  normalizeUsername,
+  validateProfile,
+  type Profile,
+} from "./domain";
 
 export type LoadMode = "ready" | "missing" | "unavailable" | "protected";
 export interface LoadResult {
@@ -24,6 +29,11 @@ export interface StorageLike {
 export const PROFILE_STORAGE_PREFIX = "gregular:forever:profile:";
 export function profileStorageKey(username: string): string {
   return `${PROFILE_STORAGE_PREFIX}${encodeURIComponent(normalizeUsername(username))}`;
+}
+
+/** The original v1 JSON is retained once, before its first v2 save. */
+export function profileV1BackupKey(username: string): string {
+  return `${profileStorageKey(username)}:backup:v1`;
 }
 
 type StorageProvider = StorageLike | (() => StorageLike);
@@ -73,11 +83,26 @@ export class BrowserProfileRepository implements ProfileRepository {
       return { profile: null, mode: "missing" };
     }
     try {
-      const profile = validateProfile(JSON.parse(raw));
+      const parsed: unknown = JSON.parse(raw);
+      const profile = migrateProfile(parsed);
       if (profile.usernameKey !== normalizeUsername(username))
         throw new Error("Mismatched profile.");
       this.snapshots.set(key, { raw, profile });
-      return { profile, mode: "ready" };
+      const migrated =
+        typeof parsed === "object" &&
+        parsed !== null &&
+        "schemaVersion" in parsed &&
+        parsed.schemaVersion === 1;
+      return {
+        profile,
+        mode: "ready",
+        ...(migrated
+          ? {
+              message:
+                "Your existing profile is ready for the leveling planner. Its original data will be backed up when you next save a change.",
+            }
+          : {}),
+      };
     } catch {
       this.snapshots.delete(key);
       return { profile: null, mode: "protected", message: PROTECTED_ERROR };
@@ -107,9 +132,12 @@ export class BrowserProfileRepository implements ProfileRepository {
       return { ok: false, message: READ_ERROR };
     }
     let current: Profile | null = null;
+    let currentVersion: unknown;
     if (currentRaw !== null) {
       try {
-        current = validateProfile(JSON.parse(currentRaw));
+        const parsed = JSON.parse(currentRaw);
+        currentVersion = parsed.schemaVersion;
+        current = migrateProfile(parsed);
         if (current.usernameKey !== profile.usernameKey)
           throw new Error("Mismatched profile.");
       } catch {
@@ -140,6 +168,28 @@ export class BrowserProfileRepository implements ProfileRepository {
         message: "The profile revision limit was reached. Nothing was saved.",
       };
     const raw = JSON.stringify(saved);
+    if (currentRaw !== null && currentVersion === 1) {
+      try {
+        const backupKey = profileV1BackupKey(profile.usernameKey);
+        if (storage.getItem(backupKey) === null) {
+          storage.setItem(backupKey, currentRaw);
+        }
+      } catch {
+        return {
+          ok: false,
+          message:
+            "The original profile could not be backed up. Nothing was changed. Free browser storage and try again.",
+        };
+      }
+    }
+    // Check again after backup creation: a stale tab must not replace a newer
+    // profile, even if it was initially reading an older storage schema.
+    try {
+      if (storage.getItem(key) !== currentRaw)
+        return { ok: false, message: CONFLICT_ERROR };
+    } catch {
+      return { ok: false, message: READ_ERROR };
+    }
     try {
       storage.setItem(key, raw);
     } catch {
