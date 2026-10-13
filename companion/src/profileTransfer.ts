@@ -10,11 +10,15 @@ export interface ProfileTransferSummary {
   skippedEntries: number;
   objectives: number;
   completedObjectives: number;
+  wishlistEntries: number;
+  questGoals: number;
+  questChains: number;
+  dungeonGoals: number;
 }
 
 export interface ParsedProfileTransfer {
   profile: Profile;
-  sourceSchemaVersion: 1 | 2;
+  sourceSchemaVersion: 1 | 2 | 3;
   summary: ProfileTransferSummary;
 }
 
@@ -34,9 +38,9 @@ export function parseProfileTransfer(text: string): ParsedProfileTransfer {
     typeof value === "object" && value !== null && "schemaVersion" in value
       ? value.schemaVersion
       : undefined;
-  if (version !== 1 && version !== 2)
+  if (version !== 1 && version !== 2 && version !== 3)
     throw new ValidationError(
-      "This profile uses an unsupported storage version. Import a version-1 or version-2 profile.",
+      "This profile uses an unsupported storage version. Import a version-1, version-2 or version-3 profile.",
     );
   const profile = migrateProfile(value);
   const entries = profile.characters.flatMap(
@@ -58,6 +62,10 @@ export function parseProfileTransfer(text: string): ParsedProfileTransfer {
       objectives: objectives.length,
       completedObjectives: objectives.filter((objective) => objective.completed)
         .length,
+      wishlistEntries: profile.characters.reduce((total, character) => total + character.acquisition.wishlist.length, 0),
+      questGoals: profile.characters.reduce((total, character) => total + character.acquisition.questProgress.length, 0),
+      questChains: profile.characters.reduce((total, character) => total + character.acquisition.manualChains.length, 0),
+      dungeonGoals: profile.characters.reduce((total, character) => total + character.acquisition.dungeonProgress.length, 0),
     },
   };
 }

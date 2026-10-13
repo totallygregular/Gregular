@@ -22,7 +22,7 @@ async function signIn(page, username = "Planner", navigate = true) {
   if (navigate) await page.goto("./");
   await page.getByLabel("Username", { exact: true }).fill(username);
   await page
-    .getByRole("button", { name: "Open my journal", exact: true })
+    .getByRole("button", { name: "Open my planner", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "New character", exact: true }),
@@ -330,7 +330,7 @@ test("Next Up follows levels, personal priorities, access, prerequisites and ski
     access: "unknown",
     prerequisite: "Train at 26",
   });
-  await navigation(page, "journal").click();
+  await navigation(page, "overview").click();
   await expect(
     nextUp(page).getByRole("button", {
       name: "Complete Overdue profession goal",
@@ -378,9 +378,9 @@ test("Next Up follows levels, personal priorities, access, prerequisites and ski
   await expect(entry(page, "Group run")).toContainText(
     "Complete “Train at 26” first.",
   );
-  await navigation(page, "journal").click();
+  await navigation(page, "overview").click();
   // Finish the screen's deliberate focus handoff before testing keyboard input.
-  await expect(navigation(page, "journal")).toHaveAttribute(
+  await expect(navigation(page, "overview")).toHaveAttribute(
     "aria-current",
     "page",
   );
@@ -429,7 +429,7 @@ test("Next Up follows levels, personal priorities, access, prerequisites and ski
       exact: true,
     }),
   ).toHaveValue("skipped");
-  await navigation(page, "journal").click();
+  await navigation(page, "overview").click();
   await expect(
     nextUp(page).getByRole("button", {
       name: "Complete Group run",
@@ -493,7 +493,7 @@ test("editorial starters filter by faction and restore missing entries without r
     }),
   ).toHaveValue("completed");
   await expect(entry(page, "Stonetalon Mountains")).toBeVisible();
-  await navigation(page, "journal").click();
+  await navigation(page, "overview").click();
   await expect(
     nextUp(page).getByRole("button", {
       name: "Complete Hillsbrad Foothills",
@@ -621,7 +621,7 @@ test("real v1 JSON migrates on first edit with IDs, notes, completion and raw ba
   ).toBeVisible();
   await addObjective(page, "My first route goal", { min: 24, max: 30 });
   const migrated = await saved(page);
-  expect(migrated.schemaVersion).toBe(2);
+  expect(migrated.schemaVersion).toBe(3);
   expect(migrated.id).toBe(legacy.id);
   expect(migrated.characters[0]).toMatchObject(legacy.characters[0]);
   expect(
@@ -916,7 +916,7 @@ for (const [label, width, height] of [
       path: `artifacts/leveling-${label}.png`,
       fullPage: true,
     });
-    await navigation(page, "journal").click();
+    await navigation(page, "overview").click();
     await expect(nextUp(page)).toContainText("Train and restock");
     await noOverflow(page);
     await accessible(page);

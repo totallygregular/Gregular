@@ -367,7 +367,7 @@ describe("portable route compatibility", () => {
     profile = setCharacterPlanner(profile, first.id, plan);
     profile = setNotes(profile, first.id, "Personal notes\n  exact.  ");
     const parsed = parseProfileTransfer(JSON.stringify(profile));
-    expect(parsed.sourceSchemaVersion).toBe(2);
+    expect(parsed.sourceSchemaVersion).toBe(3);
     expect(parsed.profile).toEqual(profile);
     expect(parsed.profile.characters[1]).toEqual(untouched);
     expect(parsed.profile.characters[0].planner.entries).toEqual(plan.entries);

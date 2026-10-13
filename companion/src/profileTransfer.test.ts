@@ -56,12 +56,12 @@ function sampleProfile() {
 }
 
 describe("portable profile validation", () => {
-  it("round-trips supported v2 data and reports a useful preview without changing IDs", () => {
+  it("round-trips supported v3 data and reports a useful preview without changing IDs", () => {
     const profile = sampleProfile();
     const parsed = parseProfileTransfer(JSON.stringify(profile));
     expect(parsed.profile).toEqual(profile);
     expect(parsed.profile).not.toBe(profile);
-    expect(parsed.sourceSchemaVersion).toBe(2);
+    expect(parsed.sourceSchemaVersion).toBe(3);
     expect(parsed.summary).toEqual({
       characters: 1,
       routeEntries: 3,
@@ -69,6 +69,7 @@ describe("portable profile validation", () => {
       skippedEntries: 1,
       objectives: 1,
       completedObjectives: 1,
+      wishlistEntries: 0, questGoals: 0, questChains: 0, dungeonGoals: 0,
     });
     expect(parsed.profile.characters[0].planner.entries[0].recordId).toBe(
       "no-longer-in-snapshot",
@@ -86,12 +87,13 @@ describe("portable profile validation", () => {
     };
     const parsed = parseProfileTransfer(JSON.stringify(legacy));
     expect(parsed.sourceSchemaVersion).toBe(1);
-    expect(parsed.profile).toMatchObject({ ...legacy, schemaVersion: 2 });
+    expect(parsed.profile).toMatchObject({ ...legacy, schemaVersion: 3 });
     expect(parsed.profile.characters[0].planner.entries).toEqual([]);
     expect(parsed.summary).toMatchObject({
       characters: 1,
       routeEntries: 0,
       completedObjectives: 1,
+      wishlistEntries: 0, questGoals: 0, questChains: 0, dungeonGoals: 0,
     });
   });
 
@@ -106,7 +108,7 @@ describe("portable profile validation", () => {
     null,
     [],
     {},
-    { schemaVersion: 3 },
+    { schemaVersion: 4 },
     { schemaVersion: "2" },
     { schemaVersion: -1 },
   ])("rejects unsupported or missing schema versions", (value) => {

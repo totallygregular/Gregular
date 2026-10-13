@@ -13,7 +13,7 @@ const optionValues = (select) => select.locator("option").evaluateAll((options) 
 async function enter(page) {
   await page.goto("./");
   await page.getByLabel("Username", { exact: true }).fill(username);
-  await page.getByRole("button", { name: "Open my journal", exact: true }).click();
+  await page.getByRole("button", { name: "Open my planner", exact: true }).click();
   await expect(page.getByRole("button", { name: "New character", exact: true })).toBeVisible();
 }
 
@@ -30,7 +30,7 @@ async function create(dialog) {
 }
 
 async function openRoute(page, name = "Zala") {
-  await page.getByRole("button", { name: `Open ${name}'s journal`, exact: true }).click();
+  await page.getByRole("button", { name: `Open ${name}'s overview`, exact: true }).click();
   await page.getByRole("navigation", { name: "Character sections" }).locator('a[href$="/leveling"]').click();
   await expect(route(page)).toBeVisible();
   await expect(zoneBrowser(page)).toBeVisible();
@@ -229,8 +229,10 @@ test("imported legacy labels and their route survive unrelated character edits",
   await expect(dialog).toBeHidden();
   const importedKey = `gregular:forever:profile:${encodeURIComponent(profile.usernameKey)}`;
   const after = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)), importedKey);
-  expect(after.characters[0]).toEqual({ ...profile.characters[0], name: "Saved traveller updated", level: 18 });
-  expect(after.characters.slice(1)).toEqual(profile.characters.slice(1));
+  const blankAcquisition = { wishlist: [], questProgress: [], manualItems: [], manualSources: [], manualDungeons: [], manualQuests: [], manualChains: [], dungeonProgress: [] };
+  expect(after.schemaVersion).toBe(3);
+  expect(after.characters[0]).toEqual({ ...profile.characters[0], name: "Saved traveller updated", level: 18, acquisition: blankAcquisition });
+  expect(after.characters.slice(1)).toEqual(profile.characters.slice(1).map((character) => ({ ...character, acquisition: blankAcquisition })));
   await page.reload();
   await expect(page.getByRole("heading", { name: "Saved traveller updated", exact: true })).toBeVisible();
 });

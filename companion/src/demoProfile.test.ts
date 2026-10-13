@@ -5,8 +5,10 @@ import { getNextUp } from "./planner";
 
 describe("opt-in demo profile", () => {
   it("is a valid portable version-2 fixture with stable character and progress IDs", () => {
-    const demo = validateProfile(demoJson);
-    expect(demo).toEqual(demoJson);
+    const demo = migrateProfile(demoJson);
+    expect(demo).toMatchObject({ ...demoJson, schemaVersion: 3 });
+    expect(validateProfile(JSON.parse(JSON.stringify(demo)))).toEqual(demo);
+    expect(demo.characters.every((character) => character.acquisition.wishlist.length === 0)).toBe(true);
     expect(migrateProfile(JSON.parse(JSON.stringify(demo)))).toEqual(demo);
     expect(demo.username).toBe("Gregular Demo");
     expect(demo.characters.map(({ level }) => level)).toEqual([24, 12, 30]);
@@ -31,7 +33,7 @@ describe("opt-in demo profile", () => {
   });
 
   it("exercises distinct actionable, upcoming and blocked personal plans", () => {
-    const demo = validateProfile(demoJson);
+    const demo = migrateProfile(demoJson);
     const [priest, paladin, warrior] = demo.characters;
     const horde = getNextUp(priest);
     expect(horde.recommendations.map(({ title }) => title)).toContain(

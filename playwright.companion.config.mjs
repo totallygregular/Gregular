@@ -11,6 +11,7 @@ export default defineConfig({
     "visual-journey.spec.mjs",
     "route-relevance.spec.mjs",
     "character-options.spec.mjs",
+    "connected-progression.spec.mjs",
   ],
   workers: 1,
   timeout: 45_000,

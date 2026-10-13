@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { Character } from "./domain";
+import { getQuestGoals } from "./acquisition";
+import { acquisitionDataset } from "./data/acquisitionCatalogue";
+import { characterHash } from "./navigation";
 import { Icon, Modal } from "./components";
 import {
   progressionDataset,
@@ -56,6 +59,8 @@ export function NextUpPanel({
   openPlanner: () => void;
 }) {
   const result = getNextUp(character);
+  const pendingQuests = getQuestGoals(character.acquisition, acquisitionDataset, character.level)
+    .filter((goal) => goal.ready && goal.progress.status !== "completed").slice(0, 2);
   const panelRef = useRef<HTMLElement>(null);
   const completing = useRef(false);
   useEffect(() => {
@@ -139,6 +144,13 @@ export function NextUpPanel({
           </ul>
         </details>
       )}
+      {!!pendingQuests.length && <div className="pending-quest-next">
+        <span className="eyebrow">PENDING QUESTS</span>
+        <ul>{pendingQuests.map((goal) => <li key={goal.questId}>
+          <a href={`#${characterHash(character.id, "quests")}`}>{goal.quest?.name}</a>
+          <small>{goal.quest?.evidence.kind === "user-supplied" ? "Your target level and preceding steps allow planning" : "Reviewed level and prerequisites allow planning"} · verify acceptance in-game</small>
+        </li>)}</ul>
+      </div>}
     </section>
   );
 }

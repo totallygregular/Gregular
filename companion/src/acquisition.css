@@ -1,0 +1,396 @@
+/* Connected goals use the same stone, gold and class palette as the route builder. */
+.acquisition-page {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.acquisition-page .dashboard-title {
+  margin-bottom: 0;
+}
+.acquisition-page .dashboard-title h2 {
+  margin-bottom: 8px;
+}
+.acquisition-toolbar,
+.acquisition-actions,
+.acquisition-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.acquisition-heading {
+  justify-content: space-between;
+}
+.acquisition-heading h3,
+.acquisition-card h3,
+.acquisition-card h4 {
+  margin: 0;
+}
+.acquisition-heading h3 {
+  font:
+    24px Georgia,
+    serif;
+}
+.acquisition-page .panel {
+  padding: 22px;
+  min-width: 0;
+}
+.acquisition-notice {
+  border-left: 3px solid var(--gold);
+  background: #d8b66d08;
+  padding: 13px 16px;
+  color: #c8d0c5;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+.acquisition-muted {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.acquisition-page p {
+  overflow-wrap: anywhere;
+}
+.acquisition-page button {
+  min-height: 44px;
+  min-width: 44px;
+}
+.acquisition-page .secondary,
+.acquisition-page .primary,
+.acquisition-page .danger {
+  padding: 10px 15px;
+}
+.acquisition-page input:not([type="checkbox"]),
+.acquisition-page select,
+.acquisition-page textarea,
+.acquisition-form input:not([type="checkbox"]),
+.acquisition-form select,
+.acquisition-form textarea {
+  min-height: 44px;
+  padding: 10px 11px;
+  background: #111a1d;
+  color: #e8e6dd;
+  border: 1px solid #7a8c8055;
+  width: 100%;
+  min-width: 0;
+}
+.acquisition-form {
+  display: grid;
+  gap: 16px;
+}
+.acquisition-form label,
+.acquisition-filters label {
+  display: grid;
+  gap: 6px;
+  color: #d4d9d0;
+  font-size: 13px;
+  min-width: 0;
+}
+.acquisition-form .field-help {
+  margin: 0;
+}
+.acquisition-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.acquisition-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.acquisition-form-grid .full-width {
+  grid-column: 1 / -1;
+}
+.acquisition-form fieldset {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 14px;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.acquisition-form legend {
+  padding: 0 7px;
+  color: var(--gold);
+  font-size: 13px;
+}
+.acquisition-form .checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.acquisition-form .checkbox-option input {
+  flex-shrink: 0;
+}
+.acquisition-filters {
+  display: grid;
+  grid-template-columns: minmax(160px, 2fr) repeat(3, minmax(115px, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+.acquisition-filters.secondary-filters {
+  grid-template-columns: repeat(4, minmax(115px, 1fr));
+  margin-top: -4px;
+}
+.acquisition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.acquisition-card {
+  border: 1px solid #8a9c812a;
+  border-radius: 7px;
+  background: #10191c66;
+  padding: 17px;
+  min-width: 0;
+}
+.acquisition-card > p {
+  margin: 9px 0;
+}
+.acquisition-card .acquisition-actions {
+  margin-top: 14px;
+}
+.acquisition-card h4 {
+  font-size: 17px;
+  line-height: 1.45;
+}
+.acquisition-card details {
+  margin-top: 12px;
+}
+.acquisition-card summary {
+  cursor: pointer;
+  min-height: 44px;
+  align-content: center;
+  color: var(--gold);
+  font-size: 13px;
+}
+.acquisition-card details > .acquisition-form {
+  margin-top: 10px;
+}
+.acquisition-card a,
+.acquisition-form a {
+  color: #dfc28b;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.acquisition-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+}
+.acquisition-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #889b8140;
+  border-radius: 4px;
+  padding: 3px 7px;
+  color: #c0cbbd;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.acquisition-badge.is-user {
+  border-color: #d8b66d55;
+  color: #dfc28b;
+}
+.acquisition-badge.is-warning {
+  border-color: #c9916066;
+  color: #e7bf98;
+}
+.acquisition-badge.is-complete {
+  border-color: #8eae7e55;
+  color: #bdd4ac;
+}
+.acquisition-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 12px 0;
+  gap: 7px 18px;
+  font-size: 13px;
+}
+.acquisition-stats div {
+  display: grid;
+  gap: 3px;
+}
+.acquisition-stats dt {
+  color: var(--muted);
+}
+.acquisition-stats dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.acquisition-list {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+.acquisition-list > li {
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+  min-width: 0;
+}
+.acquisition-list .acquisition-actions {
+  margin-top: 8px;
+}
+.acquisition-empty {
+  padding: 26px 16px;
+  text-align: center;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.acquisition-empty strong {
+  display: block;
+  color: #d4d9d0;
+  margin-bottom: 5px;
+}
+.acquisition-error {
+  color: #f1b6a9;
+  border: 1px solid #d1807155;
+  border-radius: 5px;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+.acquisition-feedback {
+  min-height: 24px;
+  color: #bdd4ac;
+  font-size: 13px;
+  margin: 0;
+}
+.quest-chain {
+  padding: 0 !important;
+}
+.quest-chain > summary {
+  padding: 18px 20px;
+  cursor: pointer;
+  min-height: 64px;
+}
+.quest-chain > summary strong {
+  font-size: 18px;
+}
+.quest-chain > summary .acquisition-muted {
+  display: block;
+  padding: 5px 0 0 18px;
+}
+.quest-chain-body {
+  border-top: 1px solid var(--line);
+  padding: 18px 20px;
+}
+.quest-step {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+}
+.quest-step > label {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  min-height: 44px;
+}
+.quest-step input[type="checkbox"] {
+  margin-top: 5px;
+  min-width: 18px;
+  min-height: 18px;
+  accent-color: var(--gold);
+}
+.quest-step small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.6;
+}
+.quest-step .acquisition-actions {
+  gap: 5px;
+  margin-top: 0;
+}
+.quest-step .is-complete {
+  text-decoration: line-through;
+  color: #b6bfb0;
+}
+.quest-steps {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+  display: grid;
+  gap: 10px;
+}
+.quest-steps > li {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.acquisition-quality-common,
+.acquisition-quality-unknown {
+  color: #e8e6dd;
+}
+.acquisition-quality-uncommon {
+  color: #a5d981;
+}
+.acquisition-quality-rare {
+  color: #91b9f4;
+}
+.acquisition-quality-epic {
+  color: #cca5ef;
+}
+.acquisition-quality-legendary {
+  color: #f1b978;
+}
+.acquisition-quality-poor {
+  color: #b3b9b7;
+}
+.acquisition-source-list {
+  padding-left: 19px;
+  color: #c8d0c5;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.acquisition-source-list li {
+  margin: 8px 0;
+}
+.acquisition-source-list small {
+  display: block;
+  color: var(--muted);
+}
+@media (max-width: 1000px) {
+  .acquisition-grid {
+    grid-template-columns: 1fr;
+  }
+  .acquisition-filters,
+  .acquisition-filters.secondary-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .acquisition-page .panel {
+    padding: 17px;
+  }
+  .acquisition-form-grid,
+  .acquisition-filters,
+  .acquisition-filters.secondary-filters {
+    grid-template-columns: 1fr;
+  }
+  .acquisition-form-grid .full-width {
+    grid-column: auto;
+  }
+  .acquisition-toolbar > button {
+    flex: 1;
+  }
+  .quest-step {
+    flex-wrap: wrap;
+  }
+  .quest-step > label {
+    flex-basis: 100%;
+  }
+  .quest-chain > summary,
+  .quest-chain-body {
+    padding: 16px;
+  }
+}

@@ -14,7 +14,7 @@ const saved = (page, username = "Explorer") =>
 async function enter(page, username = "Explorer") {
   await page.goto("./");
   await page.getByLabel("Username", { exact: true }).fill(username);
-  await page.getByRole("button", { name: "Open my journal" }).click();
+  await page.getByRole("button", { name: "Open my planner" }).click();
   await expect(
     page.getByRole("heading", { name: "The company you keep." }),
   ).toBeVisible();
@@ -49,10 +49,10 @@ async function create(page, name = "Zala", options = {}) {
 
 async function open(page, name = "Zala") {
   await page
-    .getByRole("button", { name: `Open ${name}'s journal`, exact: true })
+    .getByRole("button", { name: `Open ${name}'s overview`, exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Your quest journal." }),
+    page.getByRole("heading", { name: "Your overview." }),
   ).toBeVisible();
 }
 
@@ -98,7 +98,7 @@ test("username entry validates empty input, explains local access, and opens an 
   await expect(
     page.getByText("This is not secure sign-in.", { exact: false }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Open my journal" }).click();
+  await page.getByRole("button", { name: "Open my planner" }).click();
   await expect(page.getByLabel("Username")).toBeVisible();
   expect(
     await page
@@ -106,10 +106,10 @@ test("username entry validates empty input, explains local access, and opens an 
       .evaluate((input) => input.validity.valueMissing),
   ).toBe(true);
   await page.getByLabel("Username").fill("   ");
-  await page.getByRole("button", { name: "Open my journal" }).click();
+  await page.getByRole("button", { name: "Open my planner" }).click();
   await expect(page.getByRole("alert")).toContainText("Username is required");
   await page.getByLabel("Username").fill("Explorer");
-  await page.getByRole("button", { name: "Open my journal" }).click();
+  await page.getByRole("button", { name: "Open my planner" }).click();
   await expect(page.getByText("Your first story awaits.")).toBeVisible();
   await expect(page.locator(".character-card")).toHaveCount(0);
 });
@@ -131,7 +131,7 @@ test("creates a Troll Priest with opted-in sample objectives and keeps it after 
   for (const text of ["Troll Priest", "Holy", "0 / 3 objectives"])
     await expect(page.locator(".character-card")).toContainText(text);
   const before = await saved(page);
-  expect(before.schemaVersion).toBe(2);
+  expect(before.schemaVersion).toBe(3);
   expect(before.characters[0].id).toMatch(/^[a-f0-9-]{36}$/);
   await page.reload();
   await expect(
@@ -224,7 +224,7 @@ test("character form rejects invalid levels before saving", async ({
   expect((await saved(page)).characters).toEqual([]);
 });
 
-test("section URLs, browser back, mock talent previews and item details are interactive", async ({
+test("section URLs, browser back, talent previews and reviewed item details are interactive", async ({
   page,
 }) => {
   await enter(page);
@@ -232,9 +232,9 @@ test("section URLs, browser back, mock talent previews and item details are inte
   await open(page);
   const characterId = (await saved(page)).characters[0].id;
   await expect(page).toHaveURL(
-    new RegExp(`#\/character\/${characterId}\/journal$`),
+    new RegExp(`#\/character\/${characterId}\/overview$`),
   );
-  await section(page, "Leveling").click();
+  await section(page, "Leveling Route").click();
   await expect(
     page.getByRole("heading", { name: "Your roadmap" }),
   ).toBeVisible();
@@ -242,7 +242,7 @@ test("section URLs, browser back, mock talent previews and item details are inte
   await expect(page.locator("#main-content")).toBeFocused();
   await section(page, "Dungeons").click();
   await expect(
-    page.getByRole("heading", { name: "Into the unknown." }),
+    page.getByRole("heading", { name: "Dungeons", exact: true }),
   ).toBeVisible();
   await section(page, "Talents").click();
   const node = page.getByRole("button", { name: /Preview fictional/ }).first();
@@ -252,10 +252,13 @@ test("section URLs, browser back, mock talent previews and item details are inte
     page.getByText("Fictional node.", { exact: false }),
   ).toBeVisible();
   await section(page, "Equipment").click();
-  await page.getByText("Item details", { exact: true }).click();
+  const orb = page.locator("article").filter({ has: page.getByRole("heading", { name: "Ponderous Orb", exact: true }) });
+  await orb.getByText("Item details and sources", { exact: true }).click();
   await expect(
-    page.getByText("No real item ID, stats, or drop rate."),
+    orb.getByText("Game item ID", { exact: true }),
   ).toBeVisible();
+  await expect(orb).toContainText("273052");
+  await expect(orb).toContainText("Shade of the Archmage");
   await page.goBack();
   await expect(page).toHaveURL(/\/talents$/);
   await expect(
@@ -339,12 +342,12 @@ test("profiles remain isolated and usernames reopen case insensitively", async (
   const original = await saved(page);
   await page.locator(".profile-switch").click();
   await page.getByLabel("Username").fill("Friend");
-  await page.getByRole("button", { name: "Open my journal" }).click();
+  await page.getByRole("button", { name: "Open my planner" }).click();
   await expect(page.locator(".character-card")).toHaveCount(0);
   await create(page, "Bram");
   await page.locator(".profile-switch").click();
   await page.getByLabel("Username").fill("  EXPLORER  ");
-  await page.getByRole("button", { name: "Open my journal" }).click();
+  await page.getByRole("button", { name: "Open my planner" }).click();
   await expect(
     page.getByRole("heading", { name: "Zala", exact: true }),
   ).toBeVisible();
@@ -451,7 +454,7 @@ test("another tab cannot overwrite a newer saved profile and explicit reopening 
   expect((await saved(page)).characters[0].level).toBe(20);
   await page.locator(".profile-switch").click();
   await page.getByLabel("Username").fill("Explorer");
-  await page.getByRole("button", { name: "Open my journal" }).click();
+  await page.getByRole("button", { name: "Open my planner" }).click();
   await expect(page.locator(".character-card .level-seal")).toContainText("20");
   await expect(page.locator(".save-bar")).toContainText(
     "Saved in this browser",
@@ -544,7 +547,7 @@ test("automated accessibility covers entry, roster, creation, journal, notes and
   await open(page);
   await accessible(page);
   for (const name of [
-    "Leveling",
+    "Leveling Route",
     "Dungeons",
     "Talents",
     "Equipment",
@@ -554,7 +557,7 @@ test("automated accessibility covers entry, roster, creation, journal, notes and
     await expect(section(page, name)).toHaveAttribute("aria-current", "page");
     await accessible(page);
     if (name === "Equipment") {
-      await page.getByText("Item details", { exact: true }).click();
+      await page.getByText("Item details and sources", { exact: true }).first().click();
       await accessible(page);
     }
   }
@@ -621,11 +624,11 @@ for (const width of [320, 390, 768, 1440]) {
       await noOverflow(page);
     }
     if (width === 390 || width === 1440) {
-      await section(page, "Quest journal").click();
+      await section(page, "Overview").click();
       await expect(
-        page.getByRole("heading", { name: "Your quest journal." }),
+        page.getByRole("heading", { name: "Your overview." }),
       ).toBeVisible();
-      await expect(section(page, "Quest journal")).toHaveAttribute(
+      await expect(section(page, "Overview")).toHaveAttribute(
         "aria-current",
         "page",
       );
