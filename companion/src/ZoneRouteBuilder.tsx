@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { Character } from "./domain";
 import type {
   CharacterPlanner,
@@ -9,7 +9,6 @@ import type {
 import { Icon, Modal } from "./components";
 import { LegacyObjectives } from "./LevelingPlanner";
 import {
-  zoneCatalogue,
   startingZoneFor,
   catalogueMetadata,
   type ZoneRecord,
@@ -26,68 +25,19 @@ import {
   startBlankRoute,
 } from "./routeBuilder";
 import { moveEntry, removeEntry, setEntryStatus, updateEntry } from "./planner";
-import { travelPathNames, type TravelResult } from "./travel";
+import { ZoneBrowser } from "./ZoneBrowser";
+import { LevelRangeBadge, LocationMark, TravelLabel, ZoneEvidence, rangeText } from "./routePresentation";
 import "./zoneRoute.css";
 
 type ChangePlanner = (
   change: (planner: CharacterPlanner) => CharacterPlanner,
 ) => Promise<boolean>;
-const rangeText = (range?: LevelRange) =>
-  range ? `${range.min}–${range.max}` : "Unknown";
 const statusNames: Record<PlannerStatus, string> = {
   planned: "Planned",
   active: "Current",
   completed: "Completed",
   skipped: "Skipped",
 };
-const difficultyRank = { easy: 0, moderate: 1, long: 2, unknown: 3 };
-
-export function TravelLabel({
-  travel,
-  first = false,
-}: {
-  travel: TravelResult;
-  first?: boolean;
-}) {
-  return (
-    <div className="travel-summary" data-difficulty={travel.difficulty}>
-      <span className={`travel-label travel-${travel.difficulty}`}>
-        <span aria-hidden="true">
-          {first ? "◎" : travel.difficulty === "unknown" ? "?" : "↳"}
-        </span>
-        {first
-          ? "Starting point"
-          : travel.difficulty === "easy"
-            ? "Easy travel"
-            : travel.difficulty === "moderate"
-              ? "Moderate travel"
-              : travel.difficulty === "long"
-                ? "Long travel"
-                : "Travel unknown"}
-      </span>
-      <small>{travel.explanation}</small>
-      {!!travel.edges.length && (
-        <details className="travel-path">
-          <summary>View travel route</summary>
-          <p>{travelPathNames(travel).join(" → ")}</p>
-          <ul>
-            {travel.sourceIds.map((id) => {
-              const source = catalogueMetadata.sources.find((s) => s.id === id);
-              return source ? (
-                <li key={id}>
-                  <a href={source.url} target="_blank" rel="noreferrer">
-                    {source.title} ↗
-                  </a>
-                </li>
-              ) : null;
-            })}
-          </ul>
-        </details>
-      )}
-    </div>
-  );
-}
-
 export function LevelingPlanner({
   character,
   saving,
@@ -142,13 +92,16 @@ export function LevelingPlanner({
   const activeIndex = progress.current
     ? stops.findIndex((s) => s.id === progress.current!.id)
     : -1;
+  const focus = progress.current || progress.next;
+  const next = progress.current ? progress.next : undefined;
+  const finished = stops.length > 0 && !focus;
   return (
     <div className="zone-planner">
       <div className="dashboard-title zone-title">
         <div>
-          <p className="eyebrow">LEVELING / ROUTE BUILDER</p>
+          <p className="eyebrow">AZEROTH / LEVELING JOURNAL</p>
           <h2>Your roadmap</h2>
-          <p>Plan zones and level ranges.</p>
+          <p>A route of your own. One zone at a time.</p>
         </div>
         <div className="zone-level">
           <span>LEVEL</span>
@@ -158,38 +111,50 @@ export function LevelingPlanner({
           </button>
         </div>
       </div>
-      <div className="route-overview panel">
-        <div>
+      <section className="route-overview panel" aria-label="Journey overview">
+        <div className="overview-location">
+          <LocationMark continent={focus ? resolveEntryZone(focus)?.continent : undefined} />
+          <div>
           <span className="eyebrow">
             {progress.current?.status === "active"
               ? "CURRENT ZONE"
               : progress.current
                 ? "NEXT ZONE"
-                : "YOUR ROUTE"}
+                : progress.next ? "NEXT ZONE" : finished ? "JOURNEY PLANNED & RECORDED" : "YOUR ADVENTURE STARTS HERE"}
           </span>
           <strong>
-            {progress.current?.title ||
-              progress.next?.title ||
-              "No zone selected"}
+            {focus?.title || (finished ? "Route finished" : "Choose your first zone")}
           </strong>
           <small>
-            {progress.current?.targetLevel
-              ? `Your plan ${rangeText(progress.current.targetLevel)}`
-              : "Build a personal route from the zone browser."}
+            {focus?.targetLevel
+              ? <>Your plan <b>{rangeText(focus.targetLevel)}</b></>
+              : finished ? "Add another destination whenever you’re ready." : "Discover destinations below."}
           </small>
+          </div>
+        </div>
+        <div className="overview-next">
+          <span className="eyebrow">UP NEXT</span>
+          <strong>{next?.title || (finished ? "Open horizons" : focus ? "Choose the next stop" : "Your first destination")}</strong>
+          {next?.targetLevel && <small>Planned {rangeText(next.targetLevel)}</small>}
+          {next && <span className={`overview-travel travel-${transitions.get(next.id)?.travel.difficulty || "unknown"}`}>
+            {transitions.get(next.id)?.travel.label || "Travel unknown"}
+          </span>}
         </div>
         <div className="route-count">
           <strong>
             {progress.completed}
             <span> / {stops.length}</span>
           </strong>
-          <small>stops completed · {progress.skipped} skipped</small>
+          <small>stops completed{progress.skipped > 0 && <> · {progress.skipped} skipped</>}</small>
+          <div className="route-progress-track" role="img" aria-label={`${progress.completed} of ${stops.length} route stops completed; ${progress.skipped} skipped. Stop count, not XP progress.`}>
+            {stops.map((stop) => <span key={stop.id} data-state={stop.status} />)}
+          </div>
         </div>
         <button className="primary" onClick={() => browse()}>
           <Icon name="plus" size={17} />
           Add zone
         </button>
-      </div>
+      </section>
       {!!progress.earlierUnfinished.length && (
         <p className="route-unfinished">
           {progress.earlierUnfinished.length} earlier{" "}
@@ -207,7 +172,7 @@ export function LevelingPlanner({
               <p className="eyebrow">01 / YOUR PLAN</p>
               <h3>My Route</h3>
             </div>
-            <span>{stops.length} stops</span>
+            <button className="text-button route-discover" onClick={() => browse()}><Icon name="plus" size={16} /> Add zone</button>
           </div>
           <form
             className="zone-route-name"
@@ -236,13 +201,10 @@ export function LevelingPlanner({
           </form>
           {!stops.length ? (
             <div className="route-empty panel">
-              <span className="empty-route-symbol" aria-hidden="true">
-                ◎<span>┊</span>◇
-              </span>
+              <LocationMark />
               <h4>Build your route</h4>
               <p>
-                Add zones in the order you want to visit. Planned levels can
-                overlap or leave gaps.
+                Pick a starting point. Set your levels. Make the journey yours.
               </p>
               {suggestion && (
                 <div className="race-suggestion">
@@ -282,11 +244,17 @@ export function LevelingPlanner({
                     (e) => e.id === entry.id,
                   );
                   const current = progress.current?.id === entry.id;
+                  const earlier = progress.earlierUnfinished.some((stop) => stop.id === entry.id);
                   return (
                     <li
                       className={`zone-stop stop-${entry.status}${current ? " stop-current" : ""}`}
                       key={entry.id}
                     >
+                      <article aria-label={`Route stop: ${entry.title}`} data-route-state={entry.status === "planned" ? earlier ? "earlier" : "upcoming" : entry.status === "active" ? "current" : entry.status}>
+                        {transition && <div className="route-connector" aria-label={`Travel into ${entry.title}`}>
+                          <TravelLabel travel={transition.travel} first={!transition.previousEntryId} />
+                        </div>}
+                        <div className="stop-card">
                       <span className="zone-stop-number" aria-hidden="true">
                         {entry.status === "completed"
                           ? "✓"
@@ -294,35 +262,31 @@ export function LevelingPlanner({
                             ? "—"
                             : String(index + 1).padStart(2, "0")}
                       </span>
-                      <article aria-label={`Route stop: ${entry.title}`}>
                         <div className="stop-topline">
                           <span>
                             {entry.kind === "dungeon"
                               ? "DUNGEON MILESTONE"
                               : zone?.continent || "PERSONAL ZONE"}
                           </span>
-                          <span className={`stop-state state-${entry.status}`}>
+                          <span className={`stop-state state-${earlier && entry.status === "planned" ? "earlier" : entry.status}`}>
                             {entry.status === "planned" && current
                               ? "Next zone"
-                              : statusNames[entry.status]}
+                              : entry.status === "planned" ? earlier ? "Earlier unfinished" : "Upcoming" : entry.status === "active" ? "Current zone" : statusNames[entry.status]}
                           </span>
                         </div>
-                        <h4>{entry.title}</h4>
+                        <div className="stop-destination">
+                          <div><h4>{entry.title}</h4>
+                            <span className="stop-region">{entry.kind === "dungeon" ? "Dungeon milestone" : "Zone stop"} · {String(index + 1).padStart(2, "0")} / {String(stops.length).padStart(2, "0")}</span>
+                          </div>
+                          <LocationMark continent={zone?.continent} />
+                        </div>
                         <div className="stop-ranges">
-                          <span>
-                            <small>Recommended</small>
-                            <strong>{rangeText(zone?.recommendedLevel)}</strong>
-                          </span>
-                          <span className="personal-range">
-                            <small>Your plan</small>
-                            <strong>
-                              {entry.targetLevel
-                                ? rangeText(entry.targetLevel)
-                                : "Not set"}
-                            </strong>
-                          </span>
+                          <LevelRangeBadge range={entry.targetLevel} personal />
+                          <div className="stop-recommendation">
+                            <LevelRangeBadge range={zone?.recommendedLevel} />
+                            {zone && <ZoneEvidence zone={zone} compact />}
+                          </div>
                         </div>
-                        {zone && <ZoneEvidence zone={zone} compact />}
                         {warning && (
                           <p className="range-warning">△ {warning}</p>
                         )}
@@ -330,14 +294,7 @@ export function LevelingPlanner({
                           <p className="planner-help">
                             Skipped · travel continues from the previous stop.
                           </p>
-                        ) : (
-                          transition && (
-                            <TravelLabel
-                              travel={transition.travel}
-                              first={!transition.previousEntryId}
-                            />
-                          )
-                        )}
+                        ) : null}
                         {entry.notes && (
                           <p className="stop-notes">{entry.notes}</p>
                         )}
@@ -355,11 +312,25 @@ export function LevelingPlanner({
                           </div>
                         )}
                         <div className="stop-controls">
+                          <div className="stop-primary-actions">
+                            <button className={entry.status === "active" || current ? "primary" : "secondary"}
+                              disabled={saving}
+                              aria-label={`${entry.status === "completed" || entry.status === "skipped" ? "Reactivate zone" : "Complete zone"}: ${entry.title}`}
+                              onClick={() => void mutate((p) => setEntryStatus(p, entry.id,
+                                entry.status === "completed" || entry.status === "skipped" ? "active" : "completed"),
+                                entry.status === "completed" || entry.status === "skipped" ? `${entry.title}: Current.` : `${entry.title}: Completed.`)}>
+                              <Icon name={entry.status === "completed" || entry.status === "skipped" ? "route" : "check"} size={17} />
+                              {entry.status === "completed" || entry.status === "skipped" ? "Reactivate zone" : "Complete zone"}
+                            </button>
+                            <button className="secondary" aria-label={`Edit planned levels for ${entry.title}`} onClick={() => setEditing(entry)}>
+                              <Icon name="edit" size={16} /> Edit plan
+                            </button>
+                          </div>
+                          <div className="stop-management">
                           <label>
-                            <span className="sr-only">
-                              Route status for {entry.title}
-                            </span>
+                            <span className="stop-status-label" aria-hidden="true">Status</span>
                             <select
+                              aria-label={`Route status for ${entry.title}`}
                               value={entry.status}
                               disabled={saving}
                               onChange={(e) =>
@@ -383,13 +354,6 @@ export function LevelingPlanner({
                               )}
                             </select>
                           </label>
-                          <button
-                            className="text-button"
-                            aria-label={`Edit planned levels for ${entry.title}`}
-                            onClick={() => setEditing(entry)}
-                          >
-                            Edit plan
-                          </button>
                           <div className="stop-order">
                             <button
                               className="icon-button"
@@ -437,9 +401,12 @@ export function LevelingPlanner({
                               disabled={saving}
                               onClick={() => setRemoving(entry)}
                             >
-                              <Icon name="close" size={15} />
+                              <Icon name="close" size={18} />
                             </button>
                           </div>
+                          </div>
+                        </div>
+                        {zone && <ZoneEvidence zone={zone} />}
                         </div>
                       </article>
                       <button
@@ -631,372 +598,6 @@ export function LevelingPlanner({
   );
 }
 
-function ZoneBrowser({
-  character,
-  insertionIndex,
-  insertAt,
-  setInsertAt,
-  plan,
-  saving,
-  browserRef,
-  searchRef,
-}: {
-  character: Character;
-  insertionIndex: number;
-  insertAt: number | null;
-  setInsertAt: (index: number | null) => void;
-  plan: (zone: ZoneRecord) => void;
-  saving: boolean;
-  browserRef: React.RefObject<HTMLElement | null>;
-  searchRef: React.RefObject<HTMLInputElement | null>;
-}) {
-  const [search, setSearch] = useState("");
-  const [faction, setFaction] = useState(character.faction);
-  const [continent, setContinent] = useState("");
-  const [suitability, setSuitability] = useState("");
-  const [travelFilter, setTravelFilter] = useState("");
-  const [level, setLevel] = useState(character.level);
-  useEffect(() => setLevel(character.level), [character.level]);
-  useEffect(() => setFaction(character.faction), [character.faction]);
-  const candidates = useMemo(
-    () =>
-      zoneCatalogue
-        .map((zone) => ({
-          zone,
-          travel: getInsertionTravel(
-            character.planner,
-            zone.id,
-            insertionIndex,
-            character.faction,
-          ),
-        }))
-        .filter(({ zone, travel }) => {
-          if (
-            search &&
-            !`${zone.name} ${zone.region} ${zone.continent}`
-              .toLowerCase()
-              .includes(search.trim().toLowerCase())
-          )
-            return false;
-          if (
-            faction &&
-            zone.faction !== "Both" &&
-            zone.faction !== "Unknown" &&
-            zone.faction !== faction
-          )
-            return false;
-          if (continent && zone.continent !== continent) return false;
-          if (travelFilter && travel.incoming.difficulty !== travelFilter)
-            return false;
-          const r = zone.recommendedLevel;
-          if (suitability === "now" && (!r || level < r.min || level > r.max))
-            return false;
-          if (suitability === "later" && (!r || r.min <= level)) return false;
-          if (suitability === "unknown" && r) return false;
-          return true;
-        })
-        .sort((a, b) => {
-          const distance = (z: ZoneRecord) =>
-            !z.recommendedLevel
-              ? 100
-              : level < z.recommendedLevel.min
-                ? z.recommendedLevel.min - level
-                : level > z.recommendedLevel.max
-                  ? level - z.recommendedLevel.max
-                  : 0;
-          return (
-            distance(a.zone) - distance(b.zone) ||
-            difficultyRank[a.travel.incoming.difficulty] -
-              difficultyRank[b.travel.incoming.difficulty] ||
-            a.zone.name.localeCompare(b.zone.name, "en")
-          );
-        }),
-    [
-      search,
-      faction,
-      continent,
-      suitability,
-      travelFilter,
-      level,
-      insertionIndex,
-      character.planner,
-      character.faction,
-    ],
-  );
-  const stops = character.planner.entries.filter((e) => e.kind !== "custom");
-  const context = getInsertionTravel(
-    character.planner,
-    zoneCatalogue[0].id,
-    insertionIndex,
-    character.faction,
-  );
-  return (
-    <section
-      className="zone-browser"
-      aria-label="Zone Browser"
-      ref={browserRef}
-    >
-      <div className="zone-section-heading">
-        <div>
-          <p className="eyebrow">02 / EXPLORE AZEROTH</p>
-          <h3>Zone Browser</h3>
-        </div>
-        <span>{zoneCatalogue.length} zones</span>
-      </div>
-      <div className="zone-browser-tools panel">
-        <label className="zone-search">
-          Search zones
-          <input
-            ref={searchRef}
-            type="search"
-            value={search}
-            placeholder="Zone or region…"
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </label>
-        <div className="zone-filter-grid">
-          <label>
-            Browser level
-            <input
-              type="number"
-              min={1}
-              max={60}
-              value={level}
-              onChange={(e) =>
-                setLevel(Math.max(1, Math.min(60, Number(e.target.value) || 1)))
-              }
-            />
-          </label>
-          <label>
-            Level suitability
-            <select
-              value={suitability}
-              onChange={(e) => setSuitability(e.target.value)}
-            >
-              <option value="">All levels</option>
-              <option value="now">Suitable now</option>
-              <option value="later">Suitable later</option>
-              <option value="unknown">Range unknown</option>
-            </select>
-          </label>
-          <label>
-            Zone faction
-            <select
-              value={faction}
-              onChange={(e) => setFaction(e.target.value)}
-            >
-              <option value="">All factions</option>
-              <option>Alliance</option>
-              <option>Horde</option>
-            </select>
-          </label>
-          <label>
-            Continent
-            <select
-              value={continent}
-              onChange={(e) => setContinent(e.target.value)}
-            >
-              <option value="">All continents</option>
-              {[...new Set(zoneCatalogue.map((z) => z.continent))]
-                .sort()
-                .map((name) => (
-                  <option key={name}>{name}</option>
-                ))}
-            </select>
-          </label>
-          <label className="full-filter">
-            Travel difficulty
-            <select
-              value={travelFilter}
-              onChange={(e) => setTravelFilter(e.target.value)}
-            >
-              <option value="">Any travel</option>
-              <option value="easy">Easy</option>
-              <option value="moderate">Moderate</option>
-              <option value="long">Long</option>
-              <option value="unknown">Unknown</option>
-            </select>
-          </label>
-        </div>
-        <label className="zone-insert">
-          Insert at
-          <select
-            value={insertAt === null ? "end" : String(insertionIndex)}
-            onChange={(e) =>
-              setInsertAt(
-                e.target.value === "end" ? null : Number(e.target.value),
-              )
-            }
-          >
-            <option value="end">End of route</option>
-            <option value="0">Beginning of route</option>
-            {stops.map((entry) => (
-              <option
-                key={entry.id}
-                value={
-                  character.planner.entries.findIndex(
-                    (e) => e.id === entry.id,
-                  ) + 1
-                }
-              >
-                After {entry.title}
-              </option>
-            ))}
-          </select>
-        </label>
-        <p className="insertion-context">
-          {context.before ? (
-            <>
-              Travel from <strong>{context.before.title}</strong>
-            </>
-          ) : (
-            "Choose your starting location"
-          )}
-          {context.after && (
-            <>
-              {" "}
-              · then to <strong>{context.after.title}</strong>
-            </>
-          )}
-        </p>
-      </div>
-      <p className="zone-results" role="status">
-        {candidates.length} zones · closest level ranges first
-      </p>
-      <div className="zone-candidates">
-        {candidates.map(({ zone, travel }) => (
-          <article
-            className="zone-candidate"
-            aria-label={`Zone: ${zone.name}`}
-            key={zone.id}
-          >
-            <div className="candidate-heading">
-              <span
-                className={`continent-mark continent-${zone.continent === "Kalimdor" ? "west" : "east"}`}
-                aria-hidden="true"
-              >
-                ◇
-              </span>
-              <div>
-                <span className="candidate-region">
-                  {zone.continent} ·{" "}
-                  {zone.faction === "Both"
-                    ? "Both factions"
-                    : zone.faction === "Unknown"
-                      ? "Faction unverified"
-                      : zone.faction}
-                </span>
-                <h4>{zone.name}</h4>
-              </div>
-            </div>
-            <div className="candidate-level">
-              <strong>Recommended {rangeText(zone.recommendedLevel)}</strong>
-              {zone.recommendedLevel &&
-                level >= zone.recommendedLevel.min &&
-                level <= zone.recommendedLevel.max && <span>Suitable now</span>}
-            </div>
-            <ZoneEvidence zone={zone} compact />
-            <TravelLabel travel={travel.incoming} first={!travel.before} />
-            {travel.outgoing && (
-              <div className="outgoing-travel">
-                <small>Then to {travel.after!.title}</small>
-                <TravelLabel travel={travel.outgoing} />
-              </div>
-            )}
-            <div className="candidate-footer">
-              <ZoneEvidence zone={zone} />
-              <button
-                className="secondary"
-                disabled={saving}
-                aria-label={`Plan ${zone.name}`}
-                onClick={() => plan(zone)}
-              >
-                Add to route <span aria-hidden="true">+</span>
-              </button>
-            </div>
-          </article>
-        ))}
-        {!candidates.length && (
-          <div className="panel route-empty">
-            <h4>No matching zones</h4>
-            <p>Change a filter to see more zones.</p>
-            <button
-              className="secondary"
-              onClick={() => {
-                setSearch("");
-                setSuitability("");
-                setContinent("");
-                setTravelFilter("");
-                setFaction(character.faction);
-              }}
-            >
-              Reset filters
-            </button>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function ZoneEvidence({
-  zone,
-  compact = false,
-}: {
-  zone: ZoneRecord;
-  compact?: boolean;
-}) {
-  const evidence = zone.evidence.levels;
-  const label =
-    evidence.kind === "forever-confirmed"
-      ? "Forever confirmed"
-      : evidence.kind === "client-derived"
-        ? "Client-derived · provisional"
-        : evidence.kind === "classic-derived"
-          ? "Classic-derived · provisional"
-          : evidence.kind === "editorial"
-            ? "Editorial estimate"
-            : "Range unresolved";
-  if (compact)
-    return (
-      <span className={`zone-evidence evidence-${evidence.kind}`}>{label}</span>
-    );
-  const sources = [
-    ...new Set(
-      Object.values(zone.evidence).flatMap((field) => field.sourceIds),
-    ),
-  ];
-  return (
-    <details className="zone-source">
-      <summary>Sources &amp; confidence</summary>
-      <p>{evidence.note}</p>
-      <p>
-        {evidence.confidence} range confidence · reviewed {zone.reviewedAt}
-        {zone.gameRevision
-          ? ` · ${zone.gameRevision}`
-          : " · build not established"}
-      </p>
-      <p>Faction: {zone.evidence.faction.note}</p>
-      {!!zone.startingRaces.length && (
-        <p>Starting association: {zone.evidence.startingRaces.note}</p>
-      )}
-      <ul>
-        {sources.map((id) => {
-          const source = catalogueMetadata.sources.find((s) => s.id === id);
-          return source ? (
-            <li key={id}>
-              <a href={source.url} target="_blank" rel="noreferrer">
-                {source.title} ↗
-              </a>
-            </li>
-          ) : null;
-        })}
-      </ul>
-      <p>{zone.region}</p>
-    </details>
-  );
-}
-
 function PlanEditor({
   zone,
   entry,
@@ -1074,6 +675,7 @@ function PlanEditor({
         <div className="plan-recommendation">
           <span>RECOMMENDED LEVELS</span>
           <strong>{rangeText(zone?.recommendedLevel)}</strong>
+          {zone && <ZoneEvidence zone={zone} compact />}
           {zone && <ZoneEvidence zone={zone} />}
         </div>
         <p className="dialog-description">

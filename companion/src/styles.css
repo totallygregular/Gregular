@@ -1,5 +1,6 @@
 :root {
   font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 15px;
   color: #e8e6dd;
   background: #101719;
   font-synthesis: none;
@@ -9,6 +10,10 @@
   --muted: #a6b1af;
   --line: #ffffff17;
   --surface: #192225;
+  --surface-raised: #202c2d;
+  --type-body: 15px;
+  --type-control: 14px;
+  --type-small: 13px;
   --class-color: #d8b66d;
   color-scheme: dark;
 }
@@ -656,7 +661,7 @@ button:hover:not(:disabled) {
   display: block;
   letter-spacing: 2.8px;
   font:
-    9px/1.5 "Segoe UI",
+    12px/1.5 "Segoe UI",
     sans-serif;
   color: var(--muted);
   margin-top: 7px;
@@ -667,7 +672,7 @@ button:hover:not(:disabled) {
   gap: 30px;
 }
 .prototype-tag {
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 1.4px;
   color: var(--gold);
@@ -694,7 +699,7 @@ button:hover:not(:disabled) {
 }
 .profile-switch small {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 4px;
 }
@@ -709,14 +714,14 @@ button:hover:not(:disabled) {
   font-family: Georgia, serif;
 }
 .eyebrow {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   font-weight: 600;
   color: var(--gold);
   line-height: 1.6;
 }
 .caption {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 1.6px;
   color: var(--muted);
   line-height: 1.8;
@@ -724,7 +729,7 @@ button:hover:not(:disabled) {
 .chapter {
   display: block;
   color: var(--gold);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   margin-bottom: 20px;
 }
@@ -766,7 +771,7 @@ button:hover:not(:disabled) {
 }
 .text-button {
   padding: 8px 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--gold);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -874,7 +879,7 @@ button:hover:not(:disabled) {
   margin-top: 3px;
 }
 .privacy-note p {
-  font-size: 11px;
+  font-size: 12px;
 }
 .privacy-note strong {
   font-weight: 500;
@@ -930,7 +935,7 @@ input[type="checkbox"]:checked:after {
 }
 .save-bar {
   padding: 10px 5.8%;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.3px;
   display: flex;
   align-items: center;
@@ -1015,7 +1020,7 @@ input[type="checkbox"]:checked:after {
   color: #d6c9a9;
 }
 .roster-tally span {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: #b9bfae;
   line-height: 1.8;
@@ -1031,7 +1036,7 @@ input[type="checkbox"]:checked:after {
   margin-bottom: 28px;
 }
 .section-heading .eyebrow {
-  font-size: 9px;
+  font-size: 12px;
   margin-bottom: 8px;
 }
 .section-heading h2 {
@@ -1079,7 +1084,7 @@ input[type="checkbox"]:checked:after {
   z-index: 1;
 }
 .faction {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.6px;
   text-transform: uppercase;
   color: #c9b593;
@@ -1134,7 +1139,7 @@ input[type="checkbox"]:checked:after {
 .level-seal small {
   display: block;
   font:
-    8px "Segoe UI",
+    12px "Segoe UI",
     sans-serif;
   color: #b7c1b7;
   letter-spacing: 1.5px;
@@ -1146,7 +1151,7 @@ input[type="checkbox"]:checked:after {
 }
 .class-label {
   color: var(--class-color);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.8px;
   text-transform: uppercase;
 }
@@ -1168,13 +1173,13 @@ input[type="checkbox"]:checked:after {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: 9px;
+  font-size: 12px;
   color: #9eaea4;
   margin: 20px 0 16px;
   flex-wrap: wrap;
 }
 .status-pill {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.6px;
   text-transform: capitalize;
   background: #b0c99e12;
@@ -1201,7 +1206,7 @@ input[type="checkbox"]:checked:after {
   margin-left: -25px;
   padding: 16px 25px;
   border-top: 1px solid #ffffff13;
-  font-size: 11px;
+  font-size: 12px;
   color: #d5d8cb;
   background: #ffffff02;
 }
@@ -1258,7 +1263,7 @@ input[type="checkbox"]:checked:after {
 }
 .text-gold {
   color: var(--gold);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 24px;
 }
 .text-gold span {
@@ -1273,7 +1278,7 @@ input[type="checkbox"]:checked:after {
 .roster-empty > span {
   position: absolute;
   top: 25px;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   color: #a8b7a4;
 }
@@ -1303,11 +1308,11 @@ input[type="checkbox"]:checked:after {
   margin-bottom: 5px;
 }
 .roster-bottom p {
-  font-size: 11px;
+  font-size: 12px;
   color: #9caea3;
 }
 .roster-bottom > span {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.6px;
   color: #b3baa8;
 }
@@ -1326,7 +1331,7 @@ footer {
   background: #0e1517;
 }
 footer > span {
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1.3px;
   color: #b7bda8;
   white-space: nowrap;
@@ -1336,11 +1341,11 @@ footer > span {
   padding: 0 10px;
 }
 footer p {
-  font-size: 9px;
+  font-size: 12px;
   color: #9aaba2;
 }
 footer button {
-  font-size: 9px !important;
+  font-size: 12px !important;
   white-space: nowrap;
 }
 .character-banner {
@@ -1358,7 +1363,7 @@ footer button {
   gap: 6px;
   align-items: center;
   color: #b1c0b3;
-  font-size: 10px;
+  font-size: 12px;
   margin-bottom: 23px;
   padding: 4px 0;
 }
@@ -1382,7 +1387,7 @@ footer button {
 }
 .character-heading .eyebrow {
   color: var(--class-color);
-  font-size: 9px;
+  font-size: 12px;
 }
 .character-heading p span {
   color: #6f8278;
@@ -1405,7 +1410,7 @@ footer button {
   padding-right: 22px;
 }
 .character-sidebar > .eyebrow {
-  font-size: 9px;
+  font-size: 12px;
   color: #99aa9c;
   padding: 5px 13px;
   margin-bottom: 18px;
@@ -1463,7 +1468,7 @@ footer button {
   margin-bottom: 27px;
 }
 .dashboard-title .eyebrow {
-  font-size: 9px;
+  font-size: 12px;
   margin-bottom: 9px;
 }
 .dashboard-title h2 {
@@ -1506,7 +1511,7 @@ footer button {
   pointer-events: none;
 }
 .next-up .eyebrow {
-  font-size: 9px;
+  font-size: 12px;
   position: relative;
   display: flex;
   align-items: center;
@@ -1515,7 +1520,7 @@ footer button {
 .user-plan {
   margin-left: auto;
   color: #a6b29e;
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1px;
 }
 .next-up h3 {
@@ -1524,19 +1529,19 @@ footer button {
   overflow-wrap: anywhere;
 }
 .next-up > p:not(.eyebrow) {
-  font-size: 11px;
+  font-size: 12px;
   color: #a9b5a7;
   margin-bottom: 25px;
   max-width: 320px;
 }
 .next-up .primary {
-  font-size: 10px;
+  font-size: 12px;
   padding: 10px 14px;
   min-height: 38px;
 }
 .progress-panel .eyebrow {
   color: #a3b4a4;
-  font-size: 9px;
+  font-size: 12px;
 }
 .progress-value {
   font:
@@ -1550,7 +1555,7 @@ footer button {
   color: #829886;
 }
 .progress-panel > p {
-  font-size: 10px;
+  font-size: 12px;
   color: #a8b7a6;
 }
 .progress-track {
@@ -1567,7 +1572,7 @@ footer button {
   transition: width 0.2s;
 }
 .progress-panel .caption {
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1.1px;
 }
 .panel-heading {
@@ -1582,7 +1587,7 @@ footer button {
 }
 .panel-heading > span,
 .panel-heading p {
-  font-size: 10px;
+  font-size: 12px;
   color: #9daf9e;
 }
 .objectives {
@@ -1617,13 +1622,13 @@ footer button {
 }
 .objective-list small {
   display: block;
-  font-size: 9px;
+  font-size: 12px;
   color: #9cac9b;
   margin-top: 5px;
 }
 .objective-list li > span {
   color: #859a77;
-  font-size: 11px;
+  font-size: 12px;
 }
 .objective-list .is-complete label > span {
   text-decoration: line-through;
@@ -1640,11 +1645,11 @@ footer button {
   margin-top: 4px;
 }
 .add-objective input {
-  font-size: 11px;
+  font-size: 12px;
   min-width: 0;
 }
 .add-objective button {
-  font-size: 10px;
+  font-size: 12px;
   white-space: nowrap;
   padding: 10px 13px;
 }
@@ -1656,7 +1661,7 @@ footer button {
   color: #99ad99;
 }
 .journal-footnote p {
-  font-size: 10px;
+  font-size: 12px;
   max-width: 600px;
 }
 .inline-empty {
@@ -1675,14 +1680,14 @@ footer button {
   margin-bottom: 8px;
 }
 .inline-empty span {
-  font-size: 11px;
+  font-size: 12px;
 }
 .mock-label {
   display: inline-flex;
   color: #c7b17a;
   border: 1px solid #c7b17a44;
   background: #bba0540a;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.4px;
   padding: 6px 9px;
   border-radius: 3px;
@@ -1713,7 +1718,7 @@ footer button {
   padding: 20px;
 }
 .milestone .chapter {
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1px;
   line-height: 1.7;
 }
@@ -1722,12 +1727,12 @@ footer button {
   margin-bottom: 14px;
 }
 .milestone p {
-  font-size: 11px;
+  font-size: 12px;
   color: #a4b2a1;
   margin-bottom: 20px;
 }
 .placeholder-label {
-  font-size: 9px;
+  font-size: 12px;
   color: #b8b398;
   border: 1px solid #ffffff17;
   padding: 5px 8px;
@@ -1736,7 +1741,7 @@ footer button {
   line-height: 1.6;
 }
 .data-explanation {
-  font-size: 10px;
+  font-size: 12px;
   color: #9ead9d;
   line-height: 1.8;
   margin-top: 18px;
@@ -1760,18 +1765,18 @@ footer button {
   border-right: 1px solid var(--line);
 }
 .dungeon-art span {
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1.5px;
 }
 .dungeon-feature .eyebrow {
-  font-size: 8px;
+  font-size: 12px;
 }
 .dungeon-feature h3 {
   font-size: 29px;
   margin: 12px 0;
 }
 .dungeon-feature p {
-  font-size: 11px;
+  font-size: 12px;
   color: #abb7a7;
 }
 .dungeon-tags {
@@ -1781,7 +1786,7 @@ footer button {
   margin-top: 17px;
 }
 .dungeon-tags span {
-  font-size: 9px;
+  font-size: 12px;
   color: #afbaa6;
   background: #ffffff05;
   padding: 6px 8px;
@@ -1809,7 +1814,7 @@ footer button {
   color: #d5d8c6;
 }
 .example-steps p {
-  font-size: 10px;
+  font-size: 12px;
   color: #9dae99;
   margin-top: 5px;
 }
@@ -1840,11 +1845,11 @@ footer button {
   margin-bottom: 7px;
 }
 .item-row p {
-  font-size: 10px;
+  font-size: 12px;
   color: #b9c4b1;
 }
 .item-row > div > span {
-  font-size: 9px;
+  font-size: 12px;
   color: #96aa93;
   display: block;
   line-height: 1.7;
@@ -1852,7 +1857,7 @@ footer button {
 }
 .item-details {
   margin-left: auto;
-  font-size: 10px;
+  font-size: 12px;
 }
 .item-details summary {
   cursor: pointer;
@@ -1874,11 +1879,11 @@ footer button {
 }
 .item-tooltip p {
   margin-top: 7px;
-  font-size: 11px;
+  font-size: 12px;
   color: #ccd4db;
 }
 .item-tooltip small {
-  font-size: 9px;
+  font-size: 12px;
   color: #c4b784;
   display: block;
   margin-top: 10px;
@@ -1935,7 +1940,7 @@ footer button {
   right: -7px;
   background: #101719;
   border: 1px solid #8a8f7055;
-  font-size: 9px;
+  font-size: 12px;
   padding: 3px 5px;
   color: #c3bea0;
 }
@@ -1956,7 +1961,7 @@ footer button {
   color: #d6c590;
 }
 .talent-description p {
-  font-size: 11px;
+  font-size: 12px;
   color: #a5b49e;
   margin-top: 9px;
 }
@@ -1983,11 +1988,11 @@ footer button {
   margin-top: 19px;
 }
 .notes-actions > span {
-  font-size: 10px;
+  font-size: 12px;
   color: #9cae97;
 }
 .notes-panel > p {
-  font-size: 10px;
+  font-size: 12px;
   color: #b3bf9b;
   margin-top: 15px;
 }
@@ -2074,7 +2079,7 @@ dialog::backdrop {
   margin-bottom: 25px;
 }
 .dialog-head .eyebrow {
-  font-size: 8px;
+  font-size: 12px;
   margin-bottom: 8px;
 }
 .dialog-head h2 {
@@ -2094,7 +2099,7 @@ dialog::backdrop {
   border: 1px solid #ffffff0c;
 }
 .editor-preview p {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--class-color);
 }
 .editor-preview strong {
@@ -2115,14 +2120,14 @@ dialog::backdrop {
   display: flex;
   flex-direction: column;
   gap: 9px;
-  font-size: 11px;
+  font-size: 12px;
   min-width: 0;
 }
 .full-field {
   grid-column: 1/-1;
 }
 .field-help {
-  font-size: 10px;
+  font-size: 12px;
   color: #abb7a6;
   line-height: 1.75;
   margin: 18px 0;
@@ -2133,11 +2138,11 @@ dialog::backdrop {
   gap: 11px;
   background: #ffffff04;
   padding: 13px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .checkbox-option small {
   display: block;
-  font-size: 9px;
+  font-size: 12px;
   color: #a2b09b;
   margin-top: 5px;
   line-height: 1.6;
@@ -2154,12 +2159,12 @@ dialog::backdrop {
 .dialog-actions .remove-link {
   margin-right: auto;
   color: #e2a393;
-  font-size: 10px;
+  font-size: 12px;
 }
 .dialog-actions .primary,
 .dialog-actions .secondary,
 .dialog-actions .danger {
-  font-size: 11px;
+  font-size: 12px;
   padding: 12px 16px;
 }
 .dialog-description {
@@ -2254,7 +2259,7 @@ dialog::backdrop {
   .character-sidebar nav a {
     padding-inline: 10px;
     gap: 10px;
-    font-size: 11px;
+    font-size: 12px;
   }
   .panel {
     padding: 22px;
@@ -2289,7 +2294,7 @@ dialog::backdrop {
     font-size: 22px;
   }
   .progress-panel .eyebrow {
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 1.5px;
   }
   footer {
@@ -2303,7 +2308,7 @@ dialog::backdrop {
     letter-spacing: 3px;
   }
   .wordmark small {
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 2px;
   }
   .site-header {
@@ -2314,7 +2319,7 @@ dialog::backdrop {
     font-size: 12px;
   }
   .draft-link {
-    font-size: 10px;
+    font-size: 12px;
   }
   .character-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2350,7 +2355,7 @@ dialog::backdrop {
   }
   .character-heading .edit-character {
     padding: 10px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .character-layout {
     display: block;
@@ -2376,7 +2381,7 @@ dialog::backdrop {
   .character-sidebar nav a {
     white-space: nowrap;
     padding: 10px 13px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .character-sidebar nav a > span {
     display: none;
@@ -2408,7 +2413,7 @@ dialog::backdrop {
     margin: 18px 0;
   }
   .welcome-copy > .eyebrow {
-    font-size: 8px;
+    font-size: 12px;
   }
   .welcome-form {
     padding: 36px 8% 40px;
@@ -2437,7 +2442,7 @@ dialog::backdrop {
   }
   .save-bar {
     padding-inline: 5%;
-    font-size: 9px;
+    font-size: 12px;
   }
   .header-actions {
     gap: 14px;
@@ -2460,7 +2465,7 @@ dialog::backdrop {
     font-size: 21px;
   }
   .wordmark small {
-    font-size: 6px;
+    font-size: 12px;
     letter-spacing: 1.9px;
     margin-top: 5px;
   }
@@ -2471,7 +2476,7 @@ dialog::backdrop {
     display: none;
   }
   .profile-switch {
-    font-size: 11px;
+    font-size: 12px;
     padding-left: 10px;
     gap: 7px;
     max-width: 145px;
@@ -2483,7 +2488,7 @@ dialog::backdrop {
     max-width: 85px;
   }
   .profile-switch small {
-    font-size: 8px;
+    font-size: 12px;
     white-space: nowrap;
   }
   .avatar {
@@ -2502,11 +2507,11 @@ dialog::backdrop {
     margin-bottom: 17px;
   }
   .roster-hero .eyebrow {
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 1.8px;
   }
   .roster-hero p:not(.eyebrow) {
-    font-size: 11px;
+    font-size: 12px;
   }
   .roster-hero .landscape {
     width: 140%;
@@ -2526,12 +2531,12 @@ dialog::backdrop {
     max-width: 170px;
   }
   .section-heading .eyebrow {
-    font-size: 7px;
+    font-size: 12px;
     letter-spacing: 1.2px;
     max-width: 180px;
   }
   .section-heading .secondary {
-    font-size: 9px;
+    font-size: 12px;
     padding: 9px;
     gap: 7px;
     min-height: 38px;
@@ -2567,10 +2572,10 @@ dialog::backdrop {
     padding: 14px 20px 0;
   }
   .card-progress {
-    font-size: 10px;
+    font-size: 12px;
   }
   .class-label {
-    font-size: 10px;
+    font-size: 12px;
   }
   .spec-line {
     font-size: 12px;
@@ -2598,7 +2603,7 @@ dialog::backdrop {
     font-size: 17px;
   }
   .roster-bottom p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .roster-bottom > div {
     gap: 13px;
@@ -2632,10 +2637,10 @@ dialog::backdrop {
     margin-bottom: 25px;
   }
   .welcome-form label {
-    font-size: 11px;
+    font-size: 12px;
   }
   .privacy-note p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .privacy-note svg {
     width: 17px;
@@ -2661,11 +2666,11 @@ dialog::backdrop {
     font-size: 34px;
   }
   .character-heading .eyebrow {
-    font-size: 7px;
+    font-size: 12px;
     letter-spacing: 1.3px;
   }
   .character-heading > div > p:not(.eyebrow) {
-    font-size: 10px;
+    font-size: 12px;
   }
   .character-heading .edit-character {
     margin: 3px 0 0 75px;
@@ -2686,14 +2691,14 @@ dialog::backdrop {
     gap: 8px;
   }
   .dashboard-title .eyebrow {
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 1.4px;
   }
   .dashboard-title h2 {
     font-size: 30px;
   }
   .dashboard-title > p:last-child {
-    font-size: 11px;
+    font-size: 12px;
   }
   .journal-top {
     grid-template-columns: 1fr;
@@ -2712,7 +2717,7 @@ dialog::backdrop {
   }
   .next-up .primary {
     min-height: 40px;
-    font-size: 11px;
+    font-size: 12px;
   }
   .progress-panel {
     position: relative;
@@ -2734,13 +2739,13 @@ dialog::backdrop {
     margin-bottom: 3px;
   }
   .progress-panel > p {
-    font-size: 11px;
+    font-size: 12px;
   }
   .panel-heading h3 {
     font-size: 22px;
   }
   .panel-heading > span {
-    font-size: 9px;
+    font-size: 12px;
   }
   .objective-list label > span {
     font-size: 12px;
@@ -2770,7 +2775,7 @@ dialog::backdrop {
     margin-top: 4px;
   }
   .journal-footnote p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .leveling-overview {
     padding: 24px;
@@ -2781,17 +2786,17 @@ dialog::backdrop {
     height: 95px;
   }
   .leveling-overview .eyebrow {
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 1px;
   }
   .leveling-overview h3 {
     font-size: 37px;
   }
   .leveling-overview p {
-    font-size: 11px;
+    font-size: 12px;
   }
   .leveling-overview button {
-    font-size: 10px;
+    font-size: 12px;
     padding: 10px;
     gap: 9px;
   }
@@ -2823,11 +2828,11 @@ dialog::backdrop {
     font-size: 28px;
   }
   .dungeon-feature .eyebrow {
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 1.3px;
   }
   .example-steps p {
-    font-size: 11px;
+    font-size: 12px;
   }
   .item-row {
     gap: 12px;
@@ -2846,17 +2851,17 @@ dialog::backdrop {
     line-height: 1.5;
   }
   .item-row > div > span {
-    font-size: 10px;
+    font-size: 12px;
   }
   .item-row p {
-    font-size: 11px;
+    font-size: 12px;
   }
   .item-details {
     flex-basis: 100%;
     margin-left: 56px;
   }
   .item-details summary {
-    font-size: 11px;
+    font-size: 12px;
   }
   .item-tooltip {
     max-width: 100%;
@@ -2866,7 +2871,7 @@ dialog::backdrop {
     gap: 10px;
   }
   .equipment-panel .panel-heading > span {
-    font-size: 8px;
+    font-size: 12px;
     white-space: nowrap;
     margin-top: 6px;
   }
@@ -2891,7 +2896,7 @@ dialog::backdrop {
     padding: 16px;
   }
   .talent-description p {
-    font-size: 11px;
+    font-size: 12px;
   }
   .notes-panel {
     padding: 20px;
@@ -2905,16 +2910,16 @@ dialog::backdrop {
     align-items: flex-start;
   }
   .notes-actions > span {
-    font-size: 9px;
+    font-size: 12px;
     margin-top: 10px;
   }
   .notes-actions .primary {
-    font-size: 10px;
+    font-size: 12px;
     padding: 10px 13px;
     gap: 10px;
   }
   .notes-panel > p {
-    font-size: 10px;
+    font-size: 12px;
   }
   dialog {
     padding: 23px;
@@ -2928,7 +2933,7 @@ dialog::backdrop {
     gap: 10px;
   }
   .dialog-head .eyebrow {
-    font-size: 7px;
+    font-size: 12px;
     letter-spacing: 1.5px;
   }
   .dialog-head .icon-button {
@@ -2950,7 +2955,7 @@ dialog::backdrop {
     gap: 16px 12px;
   }
   .form-grid label {
-    font-size: 10px;
+    font-size: 12px;
   }
   .form-grid input,
   .form-grid select {
@@ -2969,41 +2974,41 @@ dialog::backdrop {
   .dialog-actions .primary,
   .dialog-actions .secondary,
   .dialog-actions .danger {
-    font-size: 10px;
+    font-size: 12px;
     padding: 12px;
     gap: 8px;
   }
   .field-help {
-    font-size: 9px;
+    font-size: 12px;
   }
   .checkbox-option {
-    font-size: 10px;
+    font-size: 12px;
     padding: 12px;
   }
   .checkbox-option small {
-    font-size: 9px;
+    font-size: 12px;
   }
   footer {
     padding: 20px 24px;
     gap: 10px;
   }
   footer > span {
-    font-size: 7px;
+    font-size: 12px;
     letter-spacing: 1.1px;
   }
   footer p {
-    font-size: 8px;
+    font-size: 12px;
     line-height: 1.8;
   }
   footer button {
-    font-size: 8px !important;
+    font-size: 12px !important;
   }
   .save-bar {
     padding: 9px 24px;
-    font-size: 8px;
+    font-size: 12px;
   }
   .has-problem {
-    font-size: 10px;
+    font-size: 12px;
   }
   .empty-page h1 {
     font-size: 29px;
@@ -3018,7 +3023,7 @@ dialog::backdrop {
     gap: 8px;
   }
   .wordmark small {
-    font-size: 5px;
+    font-size: 12px;
   }
   .profile-switch {
     padding-left: 8px;
@@ -3041,7 +3046,7 @@ dialog::backdrop {
   }
   .section-heading .secondary {
     padding-inline: 7px;
-    font-size: 8px;
+    font-size: 12px;
     gap: 5px;
   }
   .panel {
@@ -3060,7 +3065,7 @@ dialog::backdrop {
     font-size: 29px;
   }
   .character-heading .eyebrow {
-    font-size: 6px;
+    font-size: 12px;
   }
   .welcome {
     margin-inline: 16px;
@@ -3089,7 +3094,7 @@ dialog::backdrop {
     height: 75px;
   }
   .leveling-overview button {
-    font-size: 9px;
+    font-size: 12px;
   }
   .panel-heading h3 {
     font-size: 20px;
@@ -3141,7 +3146,7 @@ dialog::backdrop {
 .class-label,
 .faction,
 .status-pill {
-  font-size: 11px;
+  font-size: 12px;
 }
 .spec-line,
 .add-character-card p,
@@ -3179,7 +3184,7 @@ dialog::backdrop {
 .placeholder-label,
 .mock-label,
 .notes-actions > span {
-  font-size: 11px;
+  font-size: 12px;
 }
 .add-objective button,
 .item-details summary,
@@ -3191,7 +3196,7 @@ dialog::backdrop {
 }
 @media (max-width: 520px) {
   .section-heading .secondary {
-    font-size: 11px;
+    font-size: 12px;
   }
   .section-heading h2 {
     font-size: 24px;
@@ -3220,14 +3225,14 @@ dialog::backdrop {
 }
 @media (max-width: 355px) {
   .section-heading .secondary {
-    font-size: 10px;
+    font-size: 12px;
   }
   .section-heading h2 {
     font-size: 22px;
   }
   .dialog-actions .primary,
   .dialog-actions .secondary {
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 .class-label,
@@ -3237,7 +3242,7 @@ dialog::backdrop {
   overflow-wrap: anywhere;
 }
 .footer-draft-link {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--gold);
   white-space: nowrap;
 }
@@ -3363,7 +3368,7 @@ dialog::backdrop {
 .build-info {
   flex-basis: 100%;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 @media (max-width: 780px) {
@@ -3397,5 +3402,406 @@ dialog::backdrop {
     grid-column: 2;
     justify-self: start;
     margin: 0;
+  }
+}
+
+/* Shared presentation: clear reading sizes, quiet surfaces and dependable controls. */
+.eyebrow,
+.caption,
+.chapter {
+  font-size: 12px;
+  letter-spacing: 1.4px;
+}
+.primary,
+.secondary,
+.danger,
+.enter-character {
+  font-size: var(--type-control);
+  min-height: 44px;
+  border-radius: 6px;
+  gap: 10px;
+}
+.primary {
+  box-shadow: inset 0 1px #f6deb355, 0 2px 8px #0002;
+}
+.secondary {
+  background: #ffffff05;
+  border-color: #77877d55;
+}
+.text-button,
+.back-link,
+.draft-link {
+  font-size: var(--type-small);
+  min-height: 44px;
+}
+.draft-link {
+  display: inline-flex;
+  align-items: center;
+}
+.icon-button,
+.dialog-head .icon-button,
+.entry-actions .icon-button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+}
+:focus-visible {
+  outline: 3px solid #e8c781;
+  outline-offset: 4px;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+label,
+.form-grid label,
+.welcome-form label,
+.notes-panel label {
+  font-size: var(--type-control);
+  line-height: 1.5;
+}
+input:not([type="checkbox"]),
+textarea,
+select,
+.form-grid input,
+.form-grid select,
+.welcome-form input,
+.add-objective input {
+  font-size: var(--type-body);
+  border-color: #7a8c8055;
+  border-radius: 5px;
+  line-height: 1.5;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #a0ada7;
+}
+.welcome-form > p,
+.welcome-copy > p:not(.eyebrow):not(.caption),
+.roster-hero p:not(.eyebrow),
+.character-heading > div > p:not(.eyebrow),
+.dashboard-title > p:last-child,
+.next-up > p:not(.eyebrow),
+.objective-list label > span,
+.inline-empty > span,
+.dungeon-feature p,
+.milestone p,
+.talent-description p,
+.item-tooltip p,
+.notes-panel textarea {
+  font-size: var(--type-body);
+  line-height: 1.65;
+}
+.spec-line,
+.add-character-card p,
+.roster-empty p,
+.roster-bottom p,
+.objective-list small,
+.journal-footnote p,
+.example-steps p,
+.item-row p,
+.item-row > div > span,
+.notes-panel > p,
+.field-help,
+.checkbox-option small,
+.dialog-description,
+.data-explanation,
+.privacy-note p,
+.panel-heading > span,
+.panel-heading p,
+.notes-actions > span,
+.next-list small {
+  font-size: var(--type-small);
+  line-height: 1.65;
+}
+.checkbox-option {
+  font-size: var(--type-control);
+  min-height: 44px;
+}
+.card-progress,
+.class-label,
+.faction,
+.status-pill,
+.save-bar,
+.profile-switch small,
+.prototype-tag,
+.user-plan,
+.mock-label,
+.placeholder-label,
+.dungeon-tags span,
+.build-info {
+  font-size: 12px;
+}
+.class-label,
+.character-heading .eyebrow {
+  letter-spacing: 1.2px;
+}
+.level-seal {
+  width: 48px;
+  height: 58px;
+}
+.level-seal small {
+  font-size: 12px;
+  letter-spacing: 0.8px;
+}
+.character-layout {
+  width: 100%;
+  max-width: 1680px;
+  grid-template-columns: 190px minmax(0, 1fr);
+  padding: 32px clamp(24px, 3vw, 48px) 60px;
+  gap: 28px;
+}
+.character-sidebar {
+  padding-right: 18px;
+}
+.character-sidebar > .eyebrow {
+  font-size: 12px;
+  letter-spacing: 1.4px;
+}
+.character-sidebar nav a {
+  font-size: var(--type-control);
+  border-radius: 6px;
+  padding: 12px 10px;
+  gap: 10px;
+}
+.character-sidebar nav a[aria-current] {
+  background: linear-gradient(90deg, #d8b66d1c, #d8b66d08);
+  border-color: #d8b66d55;
+  box-shadow: inset 2px 0 var(--gold);
+}
+.dashboard-title {
+  margin-bottom: 24px;
+}
+.dashboard-title .eyebrow {
+  font-size: 12px;
+  letter-spacing: 1.5px;
+}
+.panel,
+.character-card {
+  border-radius: 8px;
+  border-color: #8a9c812a;
+}
+.panel-heading {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+.panel-heading h3 {
+  font-size: 24px;
+}
+.next-up h3 {
+  font-size: 28px;
+  line-height: 1.3;
+}
+.next-up > p:not(.eyebrow) {
+  max-width: 44ch;
+}
+.next-up .primary,
+.add-objective button,
+.dialog-actions .primary,
+.dialog-actions .secondary,
+.dialog-actions .danger {
+  font-size: var(--type-control);
+  min-height: 44px;
+}
+.progress-panel .eyebrow,
+.progress-panel .caption,
+.progress-panel > p {
+  font-size: 12px;
+}
+.objective-list li > label {
+  min-height: 44px;
+}
+.item-row h4 {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.item-details summary,
+.dialog-actions .remove-link {
+  font-size: var(--type-small);
+  min-height: 44px;
+  align-content: center;
+}
+footer > span,
+footer p,
+footer button {
+  font-size: 12px !important;
+  line-height: 1.6;
+}
+.wordmark small {
+  font-size: 12px;
+  letter-spacing: 1.6px;
+}
+.header-actions {
+  min-width: 0;
+  gap: 20px;
+}
+.profile-switch {
+  font-size: var(--type-control);
+}
+.profile-switch > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1100px) {
+  .character-layout {
+    display: block;
+    padding: 0 28px 48px;
+  }
+  .character-sidebar {
+    border: 0;
+    padding: 0;
+    margin: 0 -28px 28px;
+    background: #121c1e;
+    border-bottom: 1px solid var(--line);
+  }
+  .character-sidebar > .eyebrow,
+  .sidebar-note {
+    display: none;
+  }
+  .character-sidebar nav {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 12px 28px;
+    scrollbar-width: thin;
+  }
+  .character-sidebar nav a {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 10px 14px;
+  }
+  .character-sidebar nav a > span {
+    display: none;
+  }
+  .character-sidebar nav a[aria-current] {
+    box-shadow: inset 0 -2px var(--gold);
+  }
+  .header-actions {
+    gap: 14px;
+  }
+}
+@media (max-width: 650px) {
+  .site-header {
+    padding-inline: 20px;
+  }
+  .wordmark {
+    letter-spacing: 1.8px;
+  }
+  .wordmark small {
+    display: none;
+  }
+  .header-actions {
+    gap: 6px;
+  }
+  .profile-switch {
+    padding-left: 8px;
+    gap: 6px;
+    min-width: 44px;
+  }
+  .profile-switch > span:last-child {
+    max-width: 82px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .profile-switch small {
+    display: none;
+  }
+  .character-layout {
+    padding-inline: 20px;
+  }
+  .character-sidebar {
+    margin-inline: -20px;
+  }
+  .character-sidebar nav {
+    padding-inline: 20px;
+  }
+  .character-sidebar nav a {
+    font-size: 14px;
+  }
+  .character-heading .edit-character {
+    min-height: 44px;
+    font-size: 13px;
+  }
+  .character-heading .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.8px;
+  }
+  .section-heading {
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .section-heading h2 {
+    max-width: none;
+  }
+  .section-heading .secondary {
+    min-height: 44px;
+    font-size: 13px;
+    padding-inline: 12px;
+  }
+  .section-heading .eyebrow {
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  .journal-top {
+    grid-template-columns: 1fr;
+  }
+  .progress-panel .caption {
+    position: static;
+    text-align: left;
+    max-width: none;
+    margin-top: 8px;
+  }
+  .panel {
+    padding: 20px;
+  }
+  .form-grid input,
+  .form-grid select,
+  .welcome-form input,
+  .notes-panel textarea,
+  .add-objective input {
+    font-size: 16px;
+  }
+  .form-grid label,
+  .checkbox-option {
+    font-size: 14px;
+  }
+  .add-objective {
+    flex-wrap: wrap;
+  }
+  .add-objective button {
+    margin-left: auto;
+  }
+  .notes-actions {
+    align-items: center;
+  }
+  .notes-actions .primary {
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .roster-bottom {
+    flex-wrap: wrap;
+  }
+  footer {
+    padding-inline: 20px;
+  }
+  footer > span {
+    white-space: normal;
+  }
+}
+@media (max-width: 355px) {
+  .site-header {
+    padding-inline: 16px;
+    gap: 6px;
+  }
+  .wordmark {
+    font-size: 14px;
+    gap: 8px;
+  }
+  .profile-switch > span:last-child {
+    max-width: 54px;
+  }
+  .profile-switch .avatar {
+    display: none;
   }
 }
