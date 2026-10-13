@@ -119,7 +119,7 @@ test("reviewed dungeon and shared quest rewards connect, stay independent and ex
   expect(current.characters[0].planner).toEqual(original.characters[0].planner);
   expect(current.characters[1].acquisition.wishlist).toEqual([]);
   const exported = await exportProfile(page);
-  expect(exported.schemaVersion).toBe(3);
+  expect(exported.schemaVersion).toBe(4);
   await mkdir("artifacts/pass-5", { recursive: true });
   await writeFile("artifacts/pass-5/connected-demo-profile.json", JSON.stringify(exported, null, 2) + "\n");
   const otherContext = await browser.newContext();
@@ -143,6 +143,7 @@ test("equipment filters, unknown sources, duplicate prevention and manual notes 
   await page.getByRole("combobox", { name: "Acquisition", exact: true }).selectOption("dungeon");
   await expect(page.locator("article.acquisition-card")).toHaveCount(1);
   await expect(card(page, "Ponderous Orb")).toBeVisible();
+  await page.getByText("More item filters", { exact: true }).click();
   await page.getByLabel("Maximum required level", { exact: true }).fill("20");
   await expect(page.getByText("No matching items", { exact: true })).toBeVisible();
   await page.getByRole("combobox", { name: "Acquisition", exact: true }).selectOption("unknown");

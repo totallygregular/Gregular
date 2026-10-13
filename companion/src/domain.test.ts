@@ -223,7 +223,7 @@ describe("profile and character domain", () => {
     };
     const raw = JSON.stringify(legacy);
     const migrated = migrateProfile(JSON.parse(raw));
-    expect(migrated).toMatchObject({ ...legacy, schemaVersion: 3 });
+    expect(migrated).toMatchObject({ ...legacy, schemaVersion: 4 });
     expect(migrated.characters[0].objectives[0].completed).toBe(true);
     expect(migrated.characters.map((character) => character.id)).toEqual(
       profile.characters.map((character) => character.id),
@@ -261,7 +261,7 @@ describe("profile and character domain", () => {
         ],
       }),
     ).toThrow("completion");
-    expect(() => migrateProfile({ ...profile, schemaVersion: 4 })).toThrow(
+    expect(() => migrateProfile({ ...profile, schemaVersion: 5 })).toThrow(
       "unsupported",
     );
   });

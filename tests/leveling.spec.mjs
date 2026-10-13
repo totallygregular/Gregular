@@ -621,7 +621,7 @@ test("real v1 JSON migrates on first edit with IDs, notes, completion and raw ba
   ).toBeVisible();
   await addObjective(page, "My first route goal", { min: 24, max: 30 });
   const migrated = await saved(page);
-  expect(migrated.schemaVersion).toBe(3);
+  expect(migrated.schemaVersion).toBe(4);
   expect(migrated.id).toBe(legacy.id);
   expect(migrated.characters[0]).toMatchObject(legacy.characters[0]);
   expect(

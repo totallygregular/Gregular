@@ -175,10 +175,10 @@ export function ProfileSettings({
             </p>
           )}
           <p className="transfer-detail">
-            {counts.completedEntries} completed · {counts.skippedEntries}{" "}
+            {counts.professions} professions · {counts.craftingGoals} crafting goals. {counts.completedEntries} completed · {counts.skippedEntries}{" "}
             skipped route entries.
-            {preparation.sourceSchemaVersion !== 3 &&
-              ` Version ${preparation.sourceSchemaVersion} will be upgraded to version 3.`}{" "}
+            {preparation.sourceSchemaVersion !== 4 &&
+              ` Version ${preparation.sourceSchemaVersion} will be upgraded to version 4.`}{" "}
             Character IDs, notes and supported progression will be kept.
           </p>
           <div className="transfer-warning">

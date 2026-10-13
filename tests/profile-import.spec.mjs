@@ -10,6 +10,7 @@ const demo = JSON.parse(
 );
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const migratedCharacters = (characters) => characters.map((character) => ({ ...character,
+  crafting: { professions: [], goals: [], manualRecipes: [], manualMaterials: [] },
   acquisition: { wishlist: [], questProgress: [], manualItems: [], manualSources: [], manualDungeons: [], manualQuests: [], manualChains: [], dungeonProgress: [] },
 }));
 const keyFor = (username = demo.username) =>
@@ -201,7 +202,7 @@ test("replacement requires confirmation and keeps an exact recoverable saved bac
   expect(await readFile(await backupFile.path(), "utf8")).toBe(before);
 });
 
-test("version-2 profile exports as version 3 and imports into a separate browser with all supported character data", async ({
+test("version-2 profile exports as version 4 and imports into a separate browser with all supported character data", async ({
   page,
   browser,
 }) => {
@@ -212,7 +213,7 @@ test("version-2 profile exports as version 3 and imports into a separate browser
     .click();
   const download = await exportedPromise;
   const exported = JSON.parse(await readFile(await download.path(), "utf8"));
-  expect(exported).toEqual({ ...demo, schemaVersion: 3, characters: migratedCharacters(demo.characters) });
+  expect(exported).toEqual({ ...demo, schemaVersion: 4, characters: migratedCharacters(demo.characters) });
   const independent = await browser.newContext();
   try {
     const other = await independent.newPage();
@@ -288,7 +289,7 @@ test("version-1 import migrates safely and preserves IDs, completed goals and ex
   await page.goto("./");
   await chooseFile(page, legacy);
   await expect(preview(page)).toContainText(
-    "Version 1 will be upgraded to version 3.",
+    "Version 1 will be upgraded to version 4.",
   );
   expect(await rawSaved(page, legacy.username)).toBeNull();
   await preview(page)
@@ -296,7 +297,7 @@ test("version-1 import migrates safely and preserves IDs, completed goals and ex
     .click();
   await expect(page.getByRole("dialog")).toBeHidden();
   const migrated = await saved(page, legacy.username);
-  expect(migrated.schemaVersion).toBe(3);
+  expect(migrated.schemaVersion).toBe(4);
   expect(migrated.id).toBe(legacy.id);
   expect(migrated.characters[0]).toMatchObject(legacy.characters[0]);
   expect(migrated.characters[0].planner.entries).toEqual([]);

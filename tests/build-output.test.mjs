@@ -26,6 +26,20 @@ after(async () => {
   );
 });
 
+test("optional tooltip sandbox assets resolve under the compiled companion path", async () => {
+  const page = await fetch(origin + "/companion/tooltip-frame.html?provider=foreverdb&ids=6335");
+  assert.equal(page.status, 200);
+  assert.match(page.headers.get("content-type"), /text\/html/);
+  const html = await page.text();
+  assert.match(html, /Content-Security-Policy/);
+  assert.match(html, /default-src 'none'/);
+  assert.match(html, /src="\.\/tooltip-frame.js"/);
+  const script = await fetch(origin + "/companion/tooltip-frame.js");
+  assert.equal(script.status, 200);
+  assert.match(script.headers.get("content-type"), /javascript/);
+  assert.doesNotMatch(await script.text(), /localStorage|sessionStorage|parent\.document/);
+});
+
 test("combined output preserves original class draft and domain files", async () => {
   const originalIndex = await readFile(resolve(root, "index.html"), "utf8");
   assert.equal(

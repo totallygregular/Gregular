@@ -230,9 +230,9 @@ test("imported legacy labels and their route survive unrelated character edits",
   const importedKey = `gregular:forever:profile:${encodeURIComponent(profile.usernameKey)}`;
   const after = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)), importedKey);
   const blankAcquisition = { wishlist: [], questProgress: [], manualItems: [], manualSources: [], manualDungeons: [], manualQuests: [], manualChains: [], dungeonProgress: [] };
-  expect(after.schemaVersion).toBe(3);
-  expect(after.characters[0]).toEqual({ ...profile.characters[0], name: "Saved traveller updated", level: 18, acquisition: blankAcquisition });
-  expect(after.characters.slice(1)).toEqual(profile.characters.slice(1).map((character) => ({ ...character, acquisition: blankAcquisition })));
+  expect(after.schemaVersion).toBe(4);
+  expect(after.characters[0]).toEqual({ ...profile.characters[0], name: "Saved traveller updated", level: 18, acquisition: blankAcquisition, crafting: { professions: [], goals: [], manualRecipes: [], manualMaterials: [] } });
+  expect(after.characters.slice(1)).toEqual(profile.characters.slice(1).map((character) => ({ ...character, acquisition: blankAcquisition, crafting: { professions: [], goals: [], manualRecipes: [], manualMaterials: [] } })));
   await page.reload();
   await expect(page.getByRole("heading", { name: "Saved traveller updated", exact: true })).toBeVisible();
 });

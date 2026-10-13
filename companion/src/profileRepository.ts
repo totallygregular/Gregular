@@ -25,7 +25,7 @@ export interface TransferPreparation {
   readonly token: string;
   readonly kind: "import" | "restore";
   readonly profile: Profile;
-  readonly sourceSchemaVersion: 1 | 2 | 3;
+  readonly sourceSchemaVersion: 1 | 2 | 3 | 4;
   readonly summary: ProfileTransferSummary;
   readonly targetMode: "missing" | "ready" | "protected";
   readonly existingProfile?: Profile;
@@ -69,9 +69,14 @@ export function profileV1BackupKey(username: string): string {
   return `${profileStorageKey(username)}:backup:v1`;
 }
 
-/** The original v2 planner profile is retained exactly before its first v3 save. */
+/** The original v2 planner profile is retained exactly before its first migrated save. */
 export function profileV2BackupKey(username: string): string {
   return `${profileStorageKey(username)}:backup:v2`;
+}
+
+/** The original v3 connected plan is retained exactly before its first v4 save. */
+export function profileV3BackupKey(username: string): string {
+  return `${profileStorageKey(username)}:backup:v3`;
 }
 
 /** The last replaced record is retained verbatim, separately from v1 migration. */
@@ -144,14 +149,14 @@ export class BrowserProfileRepository implements ProfileRepository {
         typeof parsed === "object" &&
         parsed !== null &&
         "schemaVersion" in parsed &&
-        (parsed.schemaVersion === 1 || parsed.schemaVersion === 2);
+        (parsed.schemaVersion === 1 || parsed.schemaVersion === 2 || parsed.schemaVersion === 3);
       return {
         profile,
         mode: "ready",
         ...(migrated
           ? {
               message:
-                "Your existing profile is ready for connected progression planning. Its original data will be backed up when you next save a change.",
+                "Your existing profile is ready for equipment and crafting planning. Its original data will be backed up when you next save a change.",
             }
           : {}),
       };
@@ -400,9 +405,9 @@ export class BrowserProfileRepository implements ProfileRepository {
         message: "The profile revision limit was reached. Nothing was saved.",
       };
     const raw = JSON.stringify(saved);
-    if (currentRaw !== null && (currentVersion === 1 || currentVersion === 2)) {
+    if (currentRaw !== null && (currentVersion === 1 || currentVersion === 2 || currentVersion === 3)) {
       try {
-        const backupKey = currentVersion === 1 ? profileV1BackupKey(profile.usernameKey) : profileV2BackupKey(profile.usernameKey);
+        const backupKey = currentVersion === 1 ? profileV1BackupKey(profile.usernameKey) : currentVersion === 2 ? profileV2BackupKey(profile.usernameKey) : profileV3BackupKey(profile.usernameKey);
         if (storage.getItem(backupKey) === null) {
           storage.setItem(backupKey, currentRaw);
         }

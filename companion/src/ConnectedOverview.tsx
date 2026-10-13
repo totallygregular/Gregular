@@ -1,3 +1,4 @@
+import { getCraftingGoals } from "./crafting";
 import type { Character } from "./domain";
 import { getDungeonGoals, getQuestGoals } from "./acquisition";
 import { acquisitionDataset } from "./data/acquisitionCatalogue";
@@ -6,6 +7,8 @@ import { getRouteProgress } from "./routeBuilder";
 import "./connectedOverview.css";
 
 export function ConnectedOverview({ character }: { character: Character }) {
+  const crafting = getCraftingGoals(character, acquisitionDataset).filter(g => g.goal.tracked || g.wishlistEntry?.status === "wanted");
+  const outstandingCrafting = crafting.filter(g => g.wishlistEntry?.status !== "acquired");
   const state = character.acquisition;
   const quests = getQuestGoals(state, acquisitionDataset, character.level);
   const pending = quests.filter((q) => q.progress.status !== "completed");
@@ -131,6 +134,12 @@ export function ConnectedOverview({ character }: { character: Character }) {
           </p>
         )}
         <span className="text-gold">Open Dungeons →</span>
+      </a>
+      <a className="panel overview-summary" href={`#${characterHash(character.id, "professions")}`}>
+        <span className="eyebrow">CRAFTING PREPARATION</span><strong>{outstandingCrafting.length}<small> outstanding crafting goals</small></strong>
+        <p>{character.crafting.professions.length} professions recorded · {crafting.filter(g => g.goal.crafted).length} crafts completed</p>
+        <p className="summary-preview">{outstandingCrafting.slice(0, 2).map(g => g.item?.name ?? g.recipe?.name ?? "Unresolved recipe").join(" · ") || "Plan crafted equipment and materials"}</p>
+        <span className="text-gold">Open Professions →</span>
       </a>
     </section>
   );

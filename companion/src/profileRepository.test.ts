@@ -231,7 +231,7 @@ describe("browser profile repository", () => {
     const repository = new BrowserProfileRepository(storage);
     const loaded = await repository.load("Greg");
     expect(loaded.mode).toBe("ready");
-    expect(loaded.profile?.schemaVersion).toBe(3);
+    expect(loaded.profile?.schemaVersion).toBe(4);
     expect(loaded.message).toContain("backed up");
     expect(storage.getItem(key)).toBe(raw);
     expect(storage.values.size).toBe(1);
@@ -244,7 +244,7 @@ describe("browser profile repository", () => {
     expect(saved.ok).toBe(true);
     expect(saved.profile?.revision).toBe(5);
     expect(storage.getItem(profileV1BackupKey("Greg"))).toBe(raw);
-    expect(JSON.parse(storage.getItem(key)!).schemaVersion).toBe(3);
+    expect(JSON.parse(storage.getItem(key)!).schemaVersion).toBe(4);
     const reloaded = (await new BrowserProfileRepository(storage).load("Greg"))
       .profile!;
     expect(reloaded.characters[1].objectives).toEqual(
@@ -395,7 +395,7 @@ describe("profile import and recovery", () => {
     expect(preview).toMatchObject({
       kind: "import",
       targetMode: "missing",
-      sourceSchemaVersion: 3,
+      sourceSchemaVersion: 4,
     });
     expect(preview.summary.characters).toBe(1);
     expect(storage.values.size).toBe(0);
@@ -481,7 +481,7 @@ describe("profile import and recovery", () => {
     expect(result.preparation?.sourceSchemaVersion).toBe(1);
     expect(storage.values.size).toBe(0);
     const applied = await repository.applyTransfer(result.preparation!.token);
-    expect(applied.profile?.schemaVersion).toBe(3);
+    expect(applied.profile?.schemaVersion).toBe(4);
     expect(applied.profile?.revision).toBe(5);
     expect(applied.profile?.characters[1]).toMatchObject(
       JSON.parse(raw).characters[1],
@@ -818,7 +818,7 @@ describe("profile import and recovery", () => {
   it.each([
     "not JSON",
     "",
-    JSON.stringify({ schemaVersion: 4 }),
+    JSON.stringify({ schemaVersion: 5 }),
     JSON.stringify(populatedProfile("Another player")),
   ])(
     "keeps corrupt, unsupported or mismatched backups downloadable and rejects restore",

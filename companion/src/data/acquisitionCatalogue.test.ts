@@ -18,6 +18,8 @@ describe("reviewed acquisition starter catalogue", () => {
       acquisitionDataset.quests,
       acquisitionDataset.dungeons,
       acquisitionDataset.npcs,
+      acquisitionDataset.recipes ?? [],
+      acquisitionDataset.materials ?? [],
     ]) {
       expect(new Set(records.map((record) => record.id)).size).toBe(
         records.length,
@@ -59,10 +61,25 @@ describe("reviewed acquisition starter catalogue", () => {
             ),
           ).toBe(true);
         if (source?.zoneId) expect(getZone(source.zoneId)).toBeDefined();
+        if (source?.method === "craft") {
+          const recipe = acquisitionDataset.recipes?.find(
+            (record) => record.id === source.recipeId,
+          );
+          expect(recipe?.itemId).toBe(item.id);
+          expect(source.itemIds).toContain(item.id);
+        }
       }
     }
     for (const dungeon of acquisitionDataset.dungeons)
       if (dungeon.zoneId) expect(getZone(dungeon.zoneId)).toBeDefined();
+    for (const recipe of acquisitionDataset.recipes ?? []) {
+      expect(acquisitionDataset.items.some((item) => item.id === recipe.itemId)).toBe(true);
+      for (const requirement of recipe.materials) {
+        expect(acquisitionDataset.materials?.some((material) => material.id === requirement.materialId)).toBe(true);
+        expect(Number.isSafeInteger(requirement.quantity)).toBe(true);
+        expect(requirement.quantity).toBeGreaterThan(0);
+      }
+    }
   });
 
   it("shares one reward quest for both reviewed reward choices", () => {
@@ -127,6 +144,49 @@ describe("reviewed acquisition starter catalogue", () => {
       searchItems(state, acquisitionDataset, { maxLevel: 20 }).map(
         (item) => item.gameId,
       ),
-    ).toEqual([273088]);
+    ).toEqual([273088, 10421, 250482]);
+    expect(
+      searchItems(state, acquisitionDataset, {
+        method: "craft",
+        equipmentType: "Mail",
+        slot: "Feet",
+        maxLevel: 10,
+        quality: "rare",
+      }).map((item) => item.gameId),
+    ).toEqual([250482]);
+  });
+
+  it("retains a bounded six-item sample with two reviewed Forever craft sources", () => {
+    expect(acquisitionDataset.items).toHaveLength(6);
+    expect(acquisitionDataset.recipes).toHaveLength(2);
+    expect(acquisitionDataset.materials).toHaveLength(3);
+    const vest = acquisitionDataset.items.find((item) => item.gameId === 10421)!;
+    expect(vest).toMatchObject({ quality: "uncommon", requiredLevel: 2, slot: "Chest", equipmentType: "Mail" });
+    expect(vest.stats).toEqual([{ label: "Armor", value: "108" }, { label: "Stamina", value: "+1" }]);
+    const boots = acquisitionDataset.items.find((item) => item.gameId === 250482)!;
+    expect(boots).toMatchObject({ quality: "rare", requiredLevel: 10, slot: "Feet", equipmentType: "Mail" });
+    expect(boots.evidence.note).toContain("bind-on-pickup");
+    expect(vest.classRestrictions).toEqual([]);
+    expect(boots.classRestrictions).toEqual([]);
+  });
+
+  it("shares material identity while preserving verified per-recipe quantities and unknown learning sources", () => {
+    const vest = acquisitionDataset.recipes?.find((recipe) => recipe.id === "forever:recipe:rough-copper-vest")!;
+    const boots = acquisitionDataset.recipes?.find((recipe) => recipe.id === "forever:recipe:glowing-copper-boots")!;
+    expect(vest).toMatchObject({ profession: "Blacksmithing", requiredSkill: 1, materialCompleteness: "complete" });
+    expect(vest.materials).toEqual([{ materialId: "forever:material:copper-bar", quantity: 4 }]);
+    expect(boots).toMatchObject({ profession: "Blacksmithing", requiredSkill: 35, materialCompleteness: "complete" });
+    expect(boots.materials).toEqual([
+      { materialId: "forever:material:copper-bar", quantity: 2 },
+      { materialId: "forever:material:lesser-magic-essence", quantity: 4 },
+      { materialId: "forever:material:light-leather", quantity: 2 },
+    ]);
+    for (const recipe of [vest, boots]) {
+      expect(recipe.sourceIds).toEqual([]);
+      expect(recipe.recipeItemId).toBeUndefined();
+      expect(recipe.specialRequirements).toBeUndefined();
+    }
+    for (const material of acquisitionDataset.materials ?? []) expect(material.gameId).toBeUndefined();
+    for (const source of acquisitionDataset.sources.filter((source) => source.method === "craft")) expect(source.availability).toBe("unknown");
   });
 });

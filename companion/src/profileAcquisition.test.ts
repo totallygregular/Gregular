@@ -69,7 +69,7 @@ function oldV2(profile = profileFixture()) {
     ...profile,
     schemaVersion: 2,
     characters: profile.characters.map(
-      ({ acquisition: _acquisition, ...character }) => character,
+      ({ acquisition: _acquisition, crafting: _crafting, ...character }) => character,
     ),
   };
 }
@@ -120,11 +120,11 @@ describe("schema 3 connected plans and compatibility", () => {
     const previous = oldV2(),
       raw = JSON.stringify(previous, null, 2);
     const migrated = migrateProfile(JSON.parse(raw));
-    expect(migrated.schemaVersion).toBe(3);
+    expect(migrated.schemaVersion).toBe(4);
     expect(migrated.characters[0].acquisition).toEqual(
       createBlankAcquisition(),
     );
-    const { acquisition: _acquisition, ...preserved } = migrated.characters[0];
+    const { acquisition: _acquisition, crafting: _crafting, ...preserved } = migrated.characters[0];
     expect(preserved).toEqual(previous.characters[0]);
     expect(JSON.stringify(previous, null, 2)).toBe(raw);
     expect(parseProfileTransfer(raw).sourceSchemaVersion).toBe(2);

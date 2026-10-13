@@ -18,6 +18,7 @@ describe("character navigation compatibility", () => {
       "quests",
       "dungeons",
       "equipment",
+      "professions",
       "talents",
       "notes",
     ]);

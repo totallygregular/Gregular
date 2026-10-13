@@ -4,6 +4,7 @@ export const characterSections = [
   { id: "quests", name: "Quests", icon: "journal" },
   { id: "dungeons", name: "Dungeons", icon: "dungeon" },
   { id: "equipment", name: "Equipment", icon: "equipment" },
+  { id: "professions", name: "Professions", icon: "equipment" },
   { id: "talents", name: "Talents", icon: "talent" },
   { id: "notes", name: "Notes", icon: "notes" },
 ] as const;

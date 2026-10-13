@@ -1,0 +1,23 @@
+.item-icon-bridge{position:absolute;width:1px;height:1px;border:0;clip-path:inset(100%);pointer-events:none}
+.equipment-results{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))!important;align-items:start}
+.equipment-results.is-list{grid-template-columns:1fr!important}
+.equipment-card-heading{display:flex;gap:13px;align-items:center;min-width:0}
+.equipment-card-heading h4{overflow-wrap:anywhere}
+.item-portrait-wrap{position:relative;flex:0 0 60px}
+.acquisition-page button.item-portrait{width:60px;height:60px;padding:4px;background:#090d10;border:1px solid currentColor;border-radius:5px;box-shadow:inset 0 0 12px #000,0 2px 4px #0005;display:grid;place-items:center}
+.item-portrait img{object-fit:contain;border-radius:3px;width:48px;height:48px}
+.item-placeholder{display:grid;place-items:center;gap:2px;color:#b0baae}
+.item-placeholder small{font:9px system-ui}
+.item-local-tooltip{position:absolute;top:66px;left:0;z-index:12;width:240px;max-width:calc(100vw - 75px);background:#080c0f;border:1px solid #b89a5d;padding:13px;box-shadow:0 8px 24px #0009;display:grid;gap:5px;color:#dadfd4;font-size:13px;pointer-events:none}
+.item-local-tooltip small{color:#b4beaf}
+.equipment-source-summary{font-size:12px;color:#c7d0c0;min-height:18px;margin:10px 0}
+.equipment-controls{display:flex;align-items:end;flex-wrap:wrap;gap:12px;margin-top:14px}
+.equipment-controls label{display:grid;gap:5px;font-size:13px;flex:1;min-width:180px}
+.equipment-controls button[aria-pressed=true]{border-color:#c9ac70;background:#c9ac701c}
+.equipment-extra-filters{margin:10px 0}
+.equipment-extra-filters>summary{cursor:pointer;min-height:44px;align-content:center;color:var(--gold);font-size:13px}
+.provider-inspector iframe{display:block;width:100%;height:370px;border:1px solid #65735d55;border-radius:6px;background:#101719}
+.item-inspection{min-width:0}.item-inspection>details{margin-top:12px}.item-inspection>details>summary{min-height:44px;align-content:center;color:var(--gold);cursor:pointer}
+@media(max-width:600px){.equipment-results{grid-template-columns:1fr!important}.provider-inspector iframe{height:410px}.equipment-controls label{flex-basis:100%}}
+
+@media(max-width:600px){.equipment-controls+.acquisition-muted+.acquisition-filters{grid-template-columns:1fr 1fr}.equipment-controls+.acquisition-muted+.acquisition-filters>label:first-child{grid-column:1/-1}}

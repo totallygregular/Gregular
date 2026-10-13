@@ -1,4 +1,4 @@
-# Connected acquisition model (profile schema 3)
+# Connected acquisition model (profile schema 4)
 
 ## Canonical records and character state
 
@@ -81,7 +81,7 @@ counts for an existing route stop. It resolves known source, quest and dungeon
 zone associations, or an explicitly supplied matching zone name. These views
 never insert zones, reorder routes, complete content or change existing plans.
 
-## Migration, backups and portable profiles
+## Pass 5 migration history (schema 3)
 
 `domain.ts` advances the profile version from 2 to 3. Version-1 profiles retain
 their existing deterministic blank-route migration; version-2 routes are
@@ -118,3 +118,91 @@ safe links, limits and a 12,000-record deep prerequisite graph.
 failure behavior, multi-tab conflicts, independent characters, complete
 relationship export/import into separate storage and non-destructive failures.
 Existing version-1, route, objective, backup and recovery tests remain active.
+
+## Pass 6: professions and crafting
+
+Profile schema **4** adds independent `character.crafting` state. The original
+acquisition object and its wishlist remain the ownership authority for every
+finished item. There is no separate crafted-equipment wishlist.
+
+The shared reference graph now supports:
+
+```text
+Item.sourceIds → craft acquisition source.recipeId
+               → CraftingRecipe.itemId / profession / materials
+               → CraftingMaterial reference + required quantity
+```
+
+The versioned catalogue adds `recipes` and `materials` arrays. These arrays are
+optional for older catalogue snapshots. A craft source references a recipe; the
+recipe references its finished item, optional profession/required skill,
+recipe-learning source IDs, optional recipe-item reference, material
+requirements, explicit requirement completeness and optional special
+requirements. Missing recipe IDs, skill, learning locations or special
+requirements remain unknown. Empty `sourceIds` does not assert that a recipe is
+learned automatically, and an empty unknown material list does not assert a
+free craft. Recipe IDs are local stable identities, not invented game spell IDs.
+
+The curated snapshot is `forever-acquisition-2026-10-14.2`: the previous four
+items plus Rough Copper Vest (10421) and Glowing Copper Boots (250482), two
+Blacksmithing recipes and three shared material references. Field evidence,
+client build, reviewed quantities and limitations are documented in
+[the integration report](item-data-integration.md). No bulk dataset was imported.
+The Boots provider record says bind-on-pickup, so another-crafter planning is
+not proof that the finished item can be transferred.
+
+### Personal state and independent progress
+
+| Property | Purpose |
+| --- | --- |
+| `crafting.professions` | Character-specific profession IDs/names, primary/secondary category, optional recorded skill |
+| `crafting.goals` | One progress record per recipe, recipe status, per-goal collected materials, crafted flag, crafter choice/name, notes and explicit tracking |
+| `crafting.manualRecipes` | User-supplied recipe definitions referencing the existing manual item/source graph |
+| `crafting.manualMaterials` | User-supplied material identities, reusable across goals without sharing collected quantities |
+
+Profession selection records intentions and skill without imposing an
+unverified Forever profession limit, skill cap, prerequisite or trade rule.
+Crafting goals can use self, another crafter or undecided regardless of the
+character's selected professions.
+
+`crafting.ts` supplies validation and immutable commands. `getCraftingGoals`
+combines selected crafted wishlist sources with saved recipe progress. Repeated
+items/sources referencing the same recipe do not create duplicated persistent
+goals. Changing a preferred acquisition source changes the derived views while
+retaining saved recipe progress. Removing a wishlist entry does not delete
+crafting progress or manual recipes. Manual crafting creates a normal item,
+craft source and wishlist entry plus its user-supplied recipe/material records.
+Imports cannot impersonate reviewed provenance with these personal records.
+
+Learning a recipe, collecting its materials, marking it crafted and acquiring
+the finished item are four independent states. No one action advances another.
+The finished item state is the existing wishlist entry. A material's collected
+quantity belongs to a recipe goal on one character, not its shared material
+reference or a global inventory. Two goals requiring Copper Bar therefore show
+independent collected values even though they use one material identity. This
+is manual preparation tracking; it never reads an in-game inventory.
+
+### Migration and portable profiles
+
+Versions 1–3 remain importable. Migration to schema 4 adds blank crafting state
+while preserving character IDs, profile revision, objectives, notes, route and
+completion, and existing acquisition state. The earlier v1 blank-route and
+v1/v2 blank-acquisition migrations retain their established behavior.
+Migration is read-only until a user save. Before replacing schema-3 storage, the
+repository saves the exact previous JSON once under `:backup:v3`; existing
+migration backups are not overwritten. Backup failure prevents replacement.
+The existing raw-record/revision guards continue to reject stale-tab saves.
+
+Schema-4 exports include professions, manual materials/recipes and goal
+progress. Import previews count persisted profession and crafting-goal records,
+independent of the receiving catalogue. Unresolved recipe/item/material IDs
+survive validation and catalogue updates so reference churn cannot erase
+personal history. The existing import preview, one-use confirmation,
+replacement/restore backups and failure protections remain in effect.
+
+Validation checks bounded lists/text, valid safe IDs and URLs, unique recipe
+goals/material requirements, positive required quantities, nonnegative collected
+quantities and known status/crafter enums. Optional fields remain absent rather
+than being filled with guessed Classic values. Catalogue tests resolve the
+reviewed recipe outputs and material references and preserve the documented
+unknown learning sources.
