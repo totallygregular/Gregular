@@ -8,6 +8,7 @@ export default defineConfig({
     "leveling.spec.mjs",
     "profile-import.spec.mjs",
     "zone-route.spec.mjs",
+    "visual-journey.spec.mjs",
   ],
   workers: 1,
   timeout: 45_000,
