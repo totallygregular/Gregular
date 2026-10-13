@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { Character } from "./domain";
+import { getDungeonGoals, getZoneAcquisitionGoals } from "./acquisition";
+import { acquisitionDataset } from "./data/acquisitionCatalogue";
+import { characterHash } from "./navigation";
 import type {
   CharacterPlanner,
   LevelRange,
@@ -246,6 +249,8 @@ export function LevelingPlanner({
                   const goals = zone
                     ? outstandingZoneObjectives(planner, zone)
                     : [];
+                  const linkedGoals = zone ? getZoneAcquisitionGoals(character.acquisition, acquisitionDataset, zone.id, zone.name) : undefined;
+                  const dungeonGoal = entry.kind === "dungeon" && entry.recordId ? getDungeonGoals(character.acquisition, acquisitionDataset).find((goal) => goal.dungeonId === entry.recordId) : undefined;
                   const actualIndex = planner.entries.findIndex(
                     (e) => e.id === entry.id,
                   );
@@ -319,6 +324,12 @@ export function LevelingPlanner({
                             </ul>
                           </div>
                         )}
+                        {(!!linkedGoals?.quests || !!linkedGoals?.desiredItems || !!linkedGoals?.dungeonGoals || !!dungeonGoal?.items.length) && <div className="route-acquisition-goals" role="group" aria-label={`Connected goals for ${entry.title}`}>
+                          {!!linkedGoals?.quests && <a href={`#${characterHash(character.id, "quests")}`}>{linkedGoals.quests} outstanding quests</a>}
+                          {!!linkedGoals?.desiredItems && <a href={`#${characterHash(character.id, "equipment")}`}>{linkedGoals.desiredItems} desired items</a>}
+                          {!!linkedGoals?.dungeonGoals && <a href={`#${characterHash(character.id, "dungeons")}`}>{linkedGoals.dungeonGoals} dungeon goals</a>}
+                          {!!dungeonGoal?.items.length && <a href={`#${characterHash(character.id, "dungeons")}`}>{dungeonGoal.items.length} wishlisted items</a>}
+                        </div>}
                         <div className="stop-controls">
                           <div className="stop-primary-actions">
                             <button className={entry.status === "active" || current ? "primary" : "secondary"}

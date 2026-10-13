@@ -1,0 +1,91 @@
+# Acquisition data: Pass 5 feasibility and review
+
+Reviewed **14 October 2026, Pacific/Auckland**. This updates the acquisition-specific conclusions in [the earlier feasibility report](game-data-feasibility.md). Source pages were read through web tools; ForeverDB's current quest/dungeon pages and the wow-forever.gg tooltip demonstration were also inspected in a browser. No game client was inspected.
+
+## Shipping decision
+
+Ship an explicitly limited, versioned **four-item editorial catalogue**, with character-authored items and relationships as the permanent fallback. This pass records sparse names, identifiers, numeric facts and source relationships manually, with links and review notes. It does not import a database dump, provider prose, quest dialogue, maps, icons or third-party scripts. There is no claim of comprehensive coverage or a blanket content redistribution licence.
+
+No inspected source established a supported, adequately licensed, complete Forever item/quest/acquisition export suitable for this application. Do not scale this manual review into bulk extraction without resolving a particular input's rights, variant, field provenance and update contract. The open-source Questie ecosystem is a promising separate investigation, with important inherited-data and licence boundaries below.
+
+`reviewed-forever` means Gregular reviewed an explicitly Forever-labelled source for those particular fields. It does **not** mean Gregular reproduced the provider's extraction or independently observed the reward/drop in the game. Two sites agreeing is corroboration, not in-client verification. Provider observation labels and build numbers remain provider claims.
+
+## Starter snapshot
+
+The canonical records live in `companion/src/data/acquisitionCatalogue.ts`, dataset `forever-acquisition-2026-10-14.1`. Reference IDs use separate item, quest, source, NPC and dungeon namespaces. Character state stores references, progress, preferences and notes separately.
+
+| Record | Facts included and evidence | Deliberate omissions |
+| --- | --- | --- |
+| Ponderous Orb, item **273052** | Name, off-hand slot, required level 30 and the included stats agree between [Wowhead Forever](https://www.wowhead.com/forever/item=273052/ponderous-orb) and [ForeverDB](https://foreverdb.net/item/273052). ForeverDB's item snapshot names NPC 246020 as an observed drop; Wowhead names Shade of the Archmage. | No drop percentage, class restriction assertion or character-access guarantee. |
+| Shade of the Archmage → City of Dalaran | The current [dungeon page](https://foreverdb.net/dungeon/2959-city-of-dalaran) places Ponderous Orb under this boss's observed loot. [Blizzard's panel recap](https://worldofwarcraft.blizzard.com/en-us/news/24303862/world-of-warcraft-forever-whats-next-panel-recap) independently identifies City of Dalaran as a Forever dungeon. NPC ID is source-derived; the dungeon's Gregular ID is a local stable ID. | No entry minimum, boss strategy, spawn coordinate or unconditional availability. No route zone is attached; see the geographic conflict below. |
+| Tattered Mittens, item **270030** | New Forever identity, cloth hands and armor 29 are corroborated by [Wowhead Forever](https://www.wowhead.com/forever/item=270030/tattered-mittens) and [ForeverDB](https://foreverdb.net/item/270030). ForeverDB identifies The Book of Ur as an observed reward choice. | Stamina, spirit and healing/damage values disagree across inspected pages. Only matching armor is retained. Required level and class restrictions remain unknown. |
+| Grizzled Boots, item **6335** | [ForeverDB](https://foreverdb.net/item/6335) distinguishes changed Forever values from Classic, gives leather feet, uncommon quality, armor 82 and stamina 7, and explicitly labels The Book of Ur reward as observed in Forever. | No inferred required level, unrestricted-class claim or inherited Classic strength value. This record has one reviewed provider. |
+| The Book of Ur, quest **1013** | The live [quest page](https://foreverdb.net/quest/1013-the-book-of-ur) labels its reward choices as observed by three players and the Undercity pickup with Keeper Bel'dugur as confirmed by two. Quest level 26 is recorded as a planning level, separately from a minimum. Both reviewed reward items share this one quest record. | Minimum level 16, faction/race requirements, the objective's dungeon location, quest dialogue and prerequisite completeness are not imported from Classic fallback sections. The reward list includes only Gregular's reviewed items. |
+| Snake Eye Kaleidoscope, item **273088** | [ForeverDB](https://foreverdb.net/item/273088) identifies a rare neck item, required level 17, in client build 1.60.1.70338. | The provider explicitly does not know its source. No source is invented. Stats are outside this starter record; client presence does not establish obtainability. |
+
+The Book of Ur has `prerequisiteStatus: "unknown"`, not a verified empty chain. No sufficiently supported Forever prerequisite links were established for this starter quest. Manual chains prove ordered progression; dependency fixtures prove missing, shared, branching and cyclic relationship handling without presenting fixture content as real game facts.
+
+All acquisition-source availability remains unknown because observed drops/rewards do not establish a particular character's access. These goals appear in their detailed sections, while incomplete prerequisites/access keep them out of urgent recommendations.
+
+### Conflicts encountered
+
+Search-readable snapshots, direct text-reader pages and current browser pages differed materially. An older ForeverDB Book of Ur page exposed only Classic rewards; the live page explicitly marked three rewards as observed. The live page was used to review reward relationships, while unlabelled/inherited prerequisite facts were excluded.
+
+The live City of Dalaran page labels the dungeon Silverpine Forest and pins a Horde entrance there. Its [Dalaran lore page](https://foreverdb.net/lore/place/dalaran) places the city in the Alterac Mountains. A city region and a faction entrance are different relationships; the current contract does not express that distinction. Both zone references are therefore omitted from the starter dungeon/source. Players can add an explicit personal route association. Gregular does not silently select one geographic label for everyone.
+
+The inspected Ponderous Orb loot percentages differed greatly, and the current provider dungeon page had only one recorded boss kill. Neither a percentage nor a guaranteed drop is shipped. Completion of a run or quest never acquires a wishlist item.
+
+## Source and reuse assessment
+
+| Source, inspected 14 October 2026 | Structured data and acquisition coverage | Reuse and update suitability |
+| --- | --- | --- |
+| [Wowhead Forever](https://www.wowhead.com/forever/database) and the concrete item links above | Explicit Forever item and NPC pages provide IDs, equipment fields and some drop relationships. New Forever records can be distinguished from inherited comments. | External reference and manual cross-check. [Tooltip documentation](https://www.wowhead.com/tooltips) authorizes the documented embed pattern. A bulk item/quest API, export licence, refresh SLA and general database redistribution grant were not established. Do not call internal endpoints or copy historical comments as Forever evidence. |
+| [ForeverDB's provenance description](https://foreverdb.net/about) | The provider describes client/hotfix extraction plus player observations. Its quest details and loot tables can retain explicitly labelled CMaNGOS Classic fallback data. The current item and quest pages demonstrated field/section observation markers. | External reference and bounded editorial review. The [downloadable addon](https://foreverdb.net/addons) is a distribution, not an established licence for republishing all of its embedded data. No supported general export/API or blanket redistribution grant was found. Provider rebuilds follow patches; no service/update guarantee was established. |
+| [wow-forever.gg developer tools](https://wow-forever.gg/developers/) | A documented talent file, build-code format and provider statistics exist. The page explicitly excludes item/quest/zone database pages from its offered files. | Its CC BY 4.0 grant is for its compilation/arrangement and owned statistics, with Blizzard names, text, icons and images excluded. Retain credit and build identity for permitted exports. This is not a reusable acquisition-data dump. Documented tooltip embedding is a separate permission. |
+| [QuestieDB Forever maintenance guide](https://github.com/Questie/QuestieDB/blob/master/docs/forever.md) | Dedicated Forever inputs, corrections, generated deltas and trace layers exist. The guide explicitly distinguishes inherited baseline from Forever corrections and warns that this is not complete new Forever content. | Promising structured candidate, **not selected for import**. Pin a commit and inspect the effective corrected field plus its origin; a Forever directory does not certify every inherited fact. Establish licence/notice coverage for the specific QuestieDB files before redistribution. Its root `LICENSE` probe returned 404; that alone neither grants permission nor determines all applicable terms. |
+| [Questie's published addon](https://www.curseforge.com/wow/addons/questie) and [QuestieDB provenance](https://github.com/Questie/QuestieDB/blob/master/PROVENANCE.md) | Questie's release advertises Forever support and GPLv3. QuestieDB documents its historical Questie lineage separately from current owned inputs. | A credible GPL-licensed upstream lead. A future derived-data distribution must preserve applicable notices/source obligations and confirm the exact files' licence and underlying content rights; the upstream listing is not a blanket new licence for every descendant dependency or game asset. No Questie code/data is bundled in this pass. |
+| [Warcraft Forever item browser](https://warcraftforever.games/items) | Searchable client-derived names and stats; the provider says hidden-until-drop fields are absent. | External cross-check. No documented acquisition export/API, bulk reuse grant or update guarantee was established. |
+| [Warcraft DB Forever](https://forever.warcraftdb.com/) | Dedicated Forever categories include items, quests, NPCs, zones and dungeons. The inspected page was largely a JavaScript shell. | External reference/candidate only. Its footer states reserved rights; no supported export or reuse grant was found. Do not reverse-engineer its internal requests for this pass. |
+| [WCLBox dungeon-quest guide](https://wowforever.wclbox.com/en/fuben-renwu) | A useful source lead and a provider-authored guide, with upstream Wowhead/Questie lineage discussed in the earlier feasibility report. | Reference only until the particular facts, upstream provenance and rights are reviewed. Derived XP or inherited quest rules are not independent Forever observations. No dump was imported. |
+| [Blizzard Forever panel recap](https://worldofwarcraft.blizzard.com/en-us/news/24303862/world-of-warcraft-forever-whats-next-panel-recap) | Authoritative for Blizzard's named features and dungeons; not a full loot/prerequisite dataset. | Link and record the specific sparse announcement facts. Does not establish every item-to-boss relationship or license unrelated third-party datasets. |
+| [Blizzard Classic Game Data API documentation](https://develop.battle.net/documentation/world-of-warcraft-classic/game-data-apis) | The reader redirected to an inaccessible developer portal page. No tested Forever beta namespace/endpoint contract was established. | Leave an adapter seam; do not promise Forever API support or embed application credentials in a static site. An official authenticated API spike remains necessary. |
+
+The sources above are primary evidence for their own service capabilities, provenance claims and licence statements. Fan-site observations are not Blizzard certification. This report records engineering/reuse findings, not a legal opinion.
+
+## Answers for catalogue scaling
+
+1. **Structured Forever items:** candidate client tables and addon datasets exist, but no selected, fully permitted acquisition export was established. Keep the current local contract and manual fallback.
+2. **Boss and quest relationships:** partial, explicitly observed page-level relationships are available, as demonstrated by the starter records. Client item existence alone is insufficient.
+3. **Complete prerequisite chains:** not established. Keep stable prerequisite IDs, completeness status and unresolved references; never equate a missing list with no prerequisites.
+4. **NPC and zone IDs:** some are exposed. NPC 246020 is retained; a provider dungeon URL number is not silently promoted into another identifier namespace. Existing Gregular zone IDs must be used when a geographic relationship is supported.
+5. **Names, stats, levels:** field-specific and build-dependent. Corroborate where possible, record the particular source, and omit disputed values. Item level, equip minimum, quest level, entry minimum and announced testing band remain distinct.
+6. **Suitable documented API:** none verified for the full acquisition planner. The documented developer talent export and tooltip services solve narrower problems.
+7. **Downloadable public-static dataset:** Questie is a promising licensed lead; a file-specific review is required for the independent QuestieDB dataset. A downloadable addon or public page does not establish general database copying rights.
+8. **Attribution/redistribution:** preserve exact applicable notices, licence, source obligations and build identity for a chosen input. Separate provider-owned compilation/code from Blizzard content. No imported dataset/assets means no new third-party dataset licence is claimed by this pass.
+9. **Update cadence:** review on relevant beta patches or provider corrections. Provider rebuild descriptions are not SLAs. Gregular updates remain explicit, reviewed commits with a pinned snapshot version.
+10. **Classic fallback:** ForeverDB explicitly labels inherited fields; QuestieDB describes inherited raw/correction layers. Wowhead comments and unchanged drop rows can be historical. No fallback relationship in this report was silently turned into a Forever fact.
+
+## Tooltip investigation
+
+Gregular uses local item-detail panels as the core interface. They expose labels, unknown values, acquisition links and wishlist actions without a third-party request. External reference links remain ordinary links. No tooltip provider is loaded by the shipped application.
+
+| Provider | Documented embed permission and behavior | Verification and remaining gaps |
+| --- | --- | --- |
+| [wow-forever.gg](https://wow-forever.gg/developers/#tooltips) | Documented script, ordinary item/spell links, free use on commercial/noncommercial sites, required provider link attribution. Describes focus, Escape, first/second touch taps and plain-link fallback. | **Browser observed:** focusing the documented Lionheart Helm demo link rendered its tooltip; the link had `aria-describedby="wf-tooltip"`; Escape visibly hid it. This was a keyboard smoke check on the provider's demo, not a screen-reader audit. Touch, cross-origin embedding, CSP, blocked-network fallback and privacy/network claims were not verified. |
+| [ForeverDB](https://foreverdb.net/embed) | The live browser page offers a free script without a key/account. It documents link/data-attribute integration, optional link modifications, focus/Escape and touch behavior, and its own privacy claims. | Documentation was verified in the browser. No actual cross-origin integration, touch test, screen-reader audit or outage test was performed. The embed page did not supply a live demo link to test there. |
+| [Wowhead](https://www.wowhead.com/tooltips) | Official documentation offers a script and link/data-attribute integration, with mobile support described. | The examined documentation did not explicitly describe a Forever domain value. Correct variant selection, focus/Escape, touch, failure fallback, CSP and accessibility remain unverified. Keep every record link on `/forever/`. |
+
+An optional enhancement must first prove the Forever variant with shared IDs whose stats differ from Classic/Retail, keyboard focus and dismissal, screen-reader association, real touch interaction, no navigation trap, missing-record/error fallback, CSP/privacy compatibility and acceptable request cost. It must never replace local detail content or alter saved state. A provider failure should leave the same accessible local detail and plain external link usable.
+
+## Repeatable update contract
+
+The current snapshot is editorial and intentionally small. Its schema and reference tests are the ingestion boundary; it is not a web scraper disguised as an importer. When a permitted structured source is selected:
+
+1. Pin the upstream revision/build/locale and archive permitted input hashes with licence evidence. Reject the wrong game variant before normalizing.
+2. Normalize into the shared item/source/quest/dungeon/NPC records. Preserve source URLs and per-field origins, including inherited Classic values in a separate non-authoritative namespace when needed.
+3. Validate unique stable IDs, typed edges, reciprocal rewards, known zone IDs, numeric bounds and allowed URLs. Preserve missing references for review. Reject dependency cycles and malformed input; keep unknown completeness explicit.
+4. Produce a reviewable field/edge diff against the last accepted snapshot. Review acquisition changes independently from stat changes. Remove unverified probabilities and unresolved inferred facts.
+5. Run catalogue, relationship, profile round-trip and browser checks. Never rewrite the player's quest progress, wishlist status, preferred source or personal route while updating reference data.
+6. Publish the reviewed local snapshot through the development preview workflow. A removed record must remain visible as an unresolved saved reference; catalogue churn must not delete character history.
+
+No undocumented API, bulk scrape, protected dataset import or automatic update job was used in this pass.

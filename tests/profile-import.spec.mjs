@@ -9,6 +9,9 @@ const demo = JSON.parse(
   ),
 );
 const clone = (value) => JSON.parse(JSON.stringify(value));
+const migratedCharacters = (characters) => characters.map((character) => ({ ...character,
+  acquisition: { wishlist: [], questProgress: [], manualItems: [], manualSources: [], manualDungeons: [], manualQuests: [], manualChains: [], dungeonProgress: [] },
+}));
 const keyFor = (username = demo.username) =>
   `gregular:forever:profile:${encodeURIComponent(username.normalize("NFKC").trim().toLowerCase())}`;
 const backupKey = (username = demo.username) =>
@@ -80,7 +83,7 @@ async function importProfile(page, profile = demo) {
 
 async function openCharacter(page, name = "Zala") {
   await page
-    .getByRole("button", { name: `Open ${name}'s journal`, exact: true })
+    .getByRole("button", { name: `Open ${name}'s overview`, exact: true })
     .click();
   await expect(
     page.getByRole("heading", { name, exact: true, level: 1 }),
@@ -143,7 +146,7 @@ test("demo import is opt-in, previews its contents and saves only after confirma
   await expect(page.locator(".character-card")).toHaveCount(3);
   const imported = await saved(page);
   expect(imported.id).toBe(demo.id);
-  expect(imported.characters).toEqual(demo.characters);
+  expect(imported.characters).toEqual(migratedCharacters(demo.characters));
   await openCharacter(page);
   const next = page.getByRole("region", { name: "Next Up", exact: true });
   await expect(next).toContainText("Review abilities with the group");
@@ -187,7 +190,7 @@ test("replacement requires confirmation and keeps an exact recoverable saved bac
   expect(
     await page.evaluate((key) => localStorage.getItem(key), backupKey()),
   ).toBe(before);
-  expect((await saved(page)).characters).toEqual(replacement.characters);
+  expect((await saved(page)).characters).toEqual(migratedCharacters(replacement.characters));
   expect((await saved(page)).revision).toBeGreaterThan(demo.revision);
   await settings(page);
   const backupDownload = page.waitForEvent("download");
@@ -198,7 +201,7 @@ test("replacement requires confirmation and keeps an exact recoverable saved bac
   expect(await readFile(await backupFile.path(), "utf8")).toBe(before);
 });
 
-test("version-2 export imports into a separate browser context with all supported character data", async ({
+test("version-2 profile exports as version 3 and imports into a separate browser with all supported character data", async ({
   page,
   browser,
 }) => {
@@ -209,7 +212,7 @@ test("version-2 export imports into a separate browser context with all supporte
     .click();
   const download = await exportedPromise;
   const exported = JSON.parse(await readFile(await download.path(), "utf8"));
-  expect(exported).toEqual(demo);
+  expect(exported).toEqual({ ...demo, schemaVersion: 3, characters: migratedCharacters(demo.characters) });
   const independent = await browser.newContext();
   try {
     const other = await independent.newPage();
@@ -285,7 +288,7 @@ test("version-1 import migrates safely and preserves IDs, completed goals and ex
   await page.goto("./");
   await chooseFile(page, legacy);
   await expect(preview(page)).toContainText(
-    "Version 1 will be upgraded to version 2.",
+    "Version 1 will be upgraded to version 3.",
   );
   expect(await rawSaved(page, legacy.username)).toBeNull();
   await preview(page)
@@ -293,7 +296,7 @@ test("version-1 import migrates safely and preserves IDs, completed goals and ex
     .click();
   await expect(page.getByRole("dialog")).toBeHidden();
   const migrated = await saved(page, legacy.username);
-  expect(migrated.schemaVersion).toBe(2);
+  expect(migrated.schemaVersion).toBe(3);
   expect(migrated.id).toBe(legacy.id);
   expect(migrated.characters[0]).toMatchObject(legacy.characters[0]);
   expect(migrated.characters[0].planner.entries).toEqual([]);
@@ -331,7 +334,7 @@ test("recovery previews the previous profile and preserves the replaced data as 
   await expect(page.locator(".save-bar")).toContainText(
     "Backup created. Profile restored.",
   );
-  expect((await saved(page)).characters).toEqual(demo.characters);
+  expect((await saved(page)).characters).toEqual(migratedCharacters(demo.characters));
   expect(
     await page.evaluate((key) => localStorage.getItem(key), backupKey()),
   ).toBe(replacedRaw);
@@ -351,7 +354,7 @@ test("an intervening save in another tab blocks stale import confirmation", asyn
   await other.goto("./");
   await other.getByLabel("Username", { exact: true }).fill(demo.username);
   await other
-    .getByRole("button", { name: "Open my journal", exact: true })
+    .getByRole("button", { name: "Open my planner", exact: true })
     .click();
   await other.getByRole("button", { name: "Edit Zala", exact: true }).click();
   await other
@@ -444,11 +447,11 @@ test("import opens its own username and preserves other profiles through switchi
   await expect(
     page.getByRole("heading", { name: "Your roadmap", exact: true }),
   ).toBeVisible();
-  expect((await saved(page)).characters).toEqual(demo.characters);
+  expect((await saved(page)).characters).toEqual(migratedCharacters(demo.characters));
   await page.getByRole("button", { name: /Switch profile/ }).click();
   await page.getByLabel("Username", { exact: true }).fill(personal.username);
   await page
-    .getByRole("button", { name: "Open my journal", exact: true })
+    .getByRole("button", { name: "Open my planner", exact: true })
     .click();
   await expect(page.locator(".character-card")).toHaveCount(1);
   await expect(

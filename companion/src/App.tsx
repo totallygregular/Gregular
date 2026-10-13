@@ -28,15 +28,18 @@ import { NextUpPanel } from "./LevelingPlanner";
 import { LevelingPlanner } from "./ZoneRouteBuilder";
 import { ProfileSettings } from "./ProfileSettings";
 import { buildInfo } from "./buildInfo";
+import { characterHash, characterSections as SECTIONS, parseRoute, type CharacterSection } from "./navigation";
+import { EquipmentPage, QuestsPage, DungeonsPage } from "./AcquisitionPages";
+import { ConnectedOverview } from "./ConnectedOverview";
+import { setCharacterAcquisition } from "./domain";
 import { progressionDataset } from "./data/progression";
+import { acquisitionDataset } from "./data/acquisitionCatalogue";
 import { setEntryStatus } from "./planner";
 import { addPlannedCharacter } from "./characterCreation";
 import { raceOptions, raceOptionFor, classesForRace, specialisationsForClass } from "./data/characterOptions";
 import { getZone, startingZoneFor, zoneCatalogue } from "./data/zones";
 import {
   DATA_NOTICE,
-  sampleDungeon,
-  sampleItem,
   talentNodes,
 } from "./mockData";
 
@@ -51,14 +54,6 @@ const COLORS: Record<string, string> = {
   Warlock: "#bba4e4",
   Druid: "#e7aa6c",
 };
-const SECTIONS = [
-  { id: "journal", name: "Quest journal", icon: "journal" },
-  { id: "leveling", name: "Leveling", icon: "route" },
-  { id: "dungeons", name: "Dungeons", icon: "dungeon" },
-  { id: "talents", name: "Talents", icon: "talent" },
-  { id: "equipment", name: "Equipment", icon: "equipment" },
-  { id: "notes", name: "Notes", icon: "notes" },
-];
 const classStyle = (c: Character): CSSProperties =>
   ({ "--class-color": COLORS[c.className] || "#d8b66d" }) as CSSProperties;
 const completedCount = (c: Character) =>
@@ -66,20 +61,9 @@ const completedCount = (c: Character) =>
 const draftLink = import.meta.env.DEV
   ? "https://gregular.org/"
   : "../index.html";
-type Route = { characterId?: string; section: string };
-function readRoute(): Route {
-  const parts = location.hash.slice(1).split("/").filter(Boolean);
-  return parts[0] === "character"
-    ? {
-        characterId: parts[1],
-        section: SECTIONS.some((s) => s.id === parts[2]) ? parts[2] : "journal",
-      }
-    : { section: "roster" };
-}
-function go(characterId?: string, section = "journal") {
-  location.hash = characterId
-    ? `/character/${characterId}/${section}`
-    : "/roster";
+const readRoute = () => parseRoute(location.hash);
+function go(characterId?: string, section: CharacterSection = "overview") {
+  location.hash = characterHash(characterId, section);
 }
 function sessionUsername(): string {
   try {
@@ -299,7 +283,7 @@ export function App() {
           className="loading-view"
         >
           <span className="eyebrow">LOCAL PROFILE</span>
-          <h1>Opening your journal…</h1>
+          <h1>Opening your planner…</h1>
         </main>
       ) : !profile ? (
         <main id="main-content" ref={mainRef} tabIndex={-1} className="welcome">
@@ -354,7 +338,7 @@ export function App() {
                 </p>
               )}
               <button className="primary full" type="submit">
-                Open my journal <Icon name="arrow" />
+                Open my planner <Icon name="arrow" />
               </button>
             </form>
             <button
@@ -381,7 +365,7 @@ export function App() {
             role="status"
           >
             <span className="save-dot" />
-            {saving ? "Saving your journal…" : message}
+            {saving ? "Saving your plan…" : message}
             {problem && (
               <button className="text-button" onClick={downloadBackup}>
                 Download backup
@@ -460,7 +444,7 @@ export function App() {
                       >
                         <Icon name={s.icon} />
                         {s.name}
-                        <span>›</span>
+                        <span aria-hidden="true">›</span>
                       </a>
                     ))}
                   </nav>
@@ -469,8 +453,8 @@ export function App() {
                   className="dashboard-content"
                   key={`${character.id}-${route.section}`}
                 >
-                  {route.section === "journal" && (
-                    <Journal
+                  {route.section === "overview" && (
+                    <Overview
                       character={character}
                       saving={saving}
                       commit={commit}
@@ -495,11 +479,12 @@ export function App() {
                       }
                     />
                   )}
-                  {route.section === "dungeons" && <Dungeons />}
+                  {route.section === "quests" && <QuestsPage character={character} saving={saving} onChange={(state) => commit((p) => setCharacterAcquisition(p, character.id, state))} />}
+                  {route.section === "dungeons" && <DungeonsPage character={character} saving={saving} onChange={(state) => commit((p) => setCharacterAcquisition(p, character.id, state))} />}
                   {route.section === "talents" && (
                     <Talents character={character} />
                   )}
-                  {route.section === "equipment" && <Equipment />}
+                  {route.section === "equipment" && <EquipmentPage character={character} saving={saving} onChange={(state) => commit((p) => setCharacterAcquisition(p, character.id, state))} />}
                   {route.section === "notes" && (
                     <Notes
                       character={character}
@@ -600,7 +585,7 @@ export function App() {
                         <button
                           className="enter-character"
                           onClick={() => go(c.id)}
-                          aria-label={`Open ${c.name}'s journal`}
+                          aria-label={`Open ${c.name}'s overview`}
                         >
                           Continue adventure <Icon name="arrow" />
                         </button>
@@ -667,8 +652,8 @@ export function App() {
           JOURNEY
         </span>
         <p>
-          Unofficial companion · Not affiliated with Blizzard · Talent and item
-          previews use mock data
+          Unofficial companion · Not affiliated with Blizzard · Talent preview
+          uses mock data · Equipment catalogue has limited reviewed coverage
         </p>
         <a
           className="footer-draft-link"
@@ -695,7 +680,7 @@ export function App() {
         {buildInfo.displayLabel && (
           <small className="build-info">
             {buildInfo.displayLabel} · App {buildInfo.version} · Data{" "}
-            {progressionDataset.version}
+            {progressionDataset.version} · {acquisitionDataset.version}
           </small>
         )}
       </footer>
@@ -1033,13 +1018,13 @@ function SectionTitle({
 function MockLabel() {
   return <span className="mock-label">{DATA_NOTICE}</span>;
 }
-function Journal({ character, saving, commit }: DashboardProps) {
+function Overview({ character, saving, commit }: DashboardProps) {
   const [title, setTitle] = useState("");
   return (
     <>
       <SectionTitle
         eyebrow="OVERVIEW"
-        title="Your quest journal."
+        title="Your overview."
         description={`Level ${character.level} · ${character.planner.name}`}
       />
       <div className="journal-top">
@@ -1064,7 +1049,7 @@ function Journal({ character, saving, commit }: DashboardProps) {
           }
         />
         <section className="progress-panel panel">
-          <span className="eyebrow">JOURNAL PROGRESS</span>
+          <span className="eyebrow">PERSONAL OBJECTIVES</span>
           <div className="progress-value">
             {completedCount(character)}
             <span> / {character.objectives.length}</span>
@@ -1085,6 +1070,7 @@ function Journal({ character, saving, commit }: DashboardProps) {
           </button>
         </section>
       </div>
+      <ConnectedOverview character={character} />
       <section className="panel objectives">
         <div className="panel-heading">
           <h3>On the horizon</h3>
@@ -1126,7 +1112,7 @@ function Journal({ character, saving, commit }: DashboardProps) {
         ) : (
           <div className="inline-empty">
             <Icon name="journal" size={30} />
-            <p>No journal objectives.</p>
+            <p>No personal objectives.</p>
             <span>Your objectives will appear here.</span>
           </div>
         )}
@@ -1158,59 +1144,10 @@ function Journal({ character, saving, commit }: DashboardProps) {
       <div className="journal-footnote">
         <Icon name="route" />
         <p>
-          Leveling routes and milestones are in your roadmap. Journal objectives
+          Leveling routes and milestones are in your roadmap. Personal objectives
           remain available here.
         </p>
       </div>
-    </>
-  );
-}
-function Dungeons() {
-  return (
-    <>
-      <SectionTitle
-        eyebrow="BETTER TOGETHER"
-        title="Into the unknown."
-        description="Prepare the run. Remember the quests. Find something worth keeping."
-      />
-      <MockLabel />
-      <section className="panel dungeon-feature">
-        <div className="dungeon-art">
-          <Icon name="dungeon" size={110} />
-          <span>EXPEDITION / 01</span>
-        </div>
-        <div>
-          <span className="eyebrow">{sampleDungeon.label}</span>
-          <h3>{sampleDungeon.name}</h3>
-          <p>{sampleDungeon.description}</p>
-          <div className="dungeon-tags">
-            <span>Level range pending</span>
-            <span>Quest data pending</span>
-          </div>
-        </div>
-      </section>
-      <section className="panel">
-        <div className="panel-heading">
-          <h3>A prepared party</h3>
-          <span>Example workflow</span>
-        </div>
-        <ol className="example-steps">
-          {sampleDungeon.objectives.map((o, i) => (
-            <li key={o}>
-              <span>0{i + 1}</span>
-              <div>
-                <strong>{o}</strong>
-                <p>
-                  {i === 0
-                    ? "Future shared planning will find overlapping objectives."
-                    : "Verified data will be linked here in a later pass."}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-      <Equipment compact />
     </>
   );
 }
@@ -1259,53 +1196,6 @@ function Talents({ character }: { character: Character }) {
         The future planner will use a pinned Forever dataset with rank-aware
         allocation, validated prerequisites, and a level-by-level plan.
       </p>
-    </>
-  );
-}
-function Equipment({ compact = false }: { compact?: boolean }) {
-  return (
-    <>
-      {!compact && (
-        <>
-          <SectionTitle
-            eyebrow="SOMETHING WORTH THE JOURNEY"
-            title="The spoils ahead."
-            description="A home for your wishlist, drop sources, and the items you finally find."
-          />
-          <MockLabel />
-        </>
-      )}
-      <section className="panel equipment-panel">
-        <div className="panel-heading">
-          <h3>{compact ? "A glimpse of the loot" : "Wishlist preview"}</h3>
-          <span>Fictional item</span>
-        </div>
-        <div className="item-row">
-          <span className="item-icon">
-            <Icon name="equipment" size={30} />
-          </span>
-          <div>
-            <h4>{sampleItem.name}</h4>
-            <p>{sampleItem.slot}</p>
-            <span>{sampleItem.source}</span>
-          </div>
-          <details className="item-details">
-            <summary>Item details</summary>
-            <div className="item-tooltip">
-              <strong>{sampleItem.name}</strong>
-              <p>{sampleItem.quality}</p>
-              <p>{sampleItem.slot}</p>
-              <hr />
-              <p>{sampleItem.description}</p>
-              <small>No real item ID, stats, or drop rate.</small>
-            </div>
-          </details>
-        </div>
-        <p className="data-explanation">
-          Personal loot tracking and verified dungeon associations are planned.
-          This preview sends no data to an external tooltip service.
-        </p>
-      </section>
     </>
   );
 }

@@ -1,5 +1,19 @@
 # Gregular repository assessment
 
+## Pass 5 assessment — 14 October 2026
+
+Before source edits, GitHub PR #6 was confirmed open and draft at `2e8a85aef0f59e5d839f6053cea6251b8fdc7698`, based on `codex/leveling-journey-visuals`. Its source `codex/route-relevance-coverage` was the newest development branch and contained the earlier stack. Pass 5 branches from that exact head as `codex/connected-progression-planner`; the draft targets PR #6's source branch, preserving PRs #1–#6. Production `main` remains `c150706`.
+
+The starting companion has six hash-routed character sections in `App.tsx`. `journal` renders the overall dashboard with existing Next Up, personal objectives and progression. Equipment and standalone Dungeons render explicitly fictional placeholders. The visual route builder is `ZoneRouteBuilder.tsx`; the legacy planner and shared Next Up presentation remain in `LevelingPlanner.tsx`. They share pure planner/travel policies and the versioned zone/progression catalogues.
+
+Profiles start at schema 2 with explicit v1 migration, an exact original v1 backup before mutation, bounded and reviewed replacement imports, replacement backup recovery, raw-content/revision conflict checks and username normalization. These boundaries are extended rather than replaced. New canonical acquisition records and character state are separate from route entries. Legacy `journal` bookmarks continue to render Overview; `quests` is the distinct actual quest log.
+
+The existing reference layer deliberately distinguishes Forever facts, provider observations, Classic-derived fallback, editorial guidance and unknown fields. No blanket public dataset redistribution grant is established. Pass 5 therefore uses a small manually reviewed factual acquisition snapshot, with field-level evidence and local manual-entry fallback. See [acquisition data feasibility](acquisition-data-feasibility.md).
+
+The combined build remains unchanged in purpose: root class draft plus `/companion/`, hash navigation, relative assets, slash redirect and true 404 output. GitHub's read-only verification workflow runs source and compiled suites. Cloudflare Pages' existing native Git integration builds feature branches; its preview check is separate from the previously failing Workers integration. No production hosting, custom-domain, DNS, `CNAME`, `main` or publishing-workflow change is required.
+
+The untouched starting branch passed **24 class-draft + 204 companion unit tests** locally. Final validation and preview evidence are recorded in [Pass 5](pass-5.md).
+
 The existing class draft is a small, well-tested static application. The companion should be added beside it, preserving the working draft and its browser saves while the new experience is evaluated. React, TypeScript and Vite are appropriate for the larger companion, but adopting them does not by itself change the current GitHub Pages publishing source.
 
 ## Baseline inspected on 13 October 2026

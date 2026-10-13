@@ -1,5 +1,11 @@
 # Gregular companion architecture
 
+## Current Pass 5 extension
+
+The current character sections are Overview (default), Leveling Route, Quests, Dungeons, Equipment, Talents and Notes. The historical `journal` hash renders Overview; `quests` has its own route. The old dashboard's personal objectives and Next Up remain intact. Functional Equipment, Quests and Dungeons replace their former placeholders; Talents remains illustrative.
+
+Profiles now use **schema 3**. [Connected acquisition model](connected-acquisition-model.md) is the current specification for canonical references, derived shared goals, personal state, safe v1/v2 migration, backups and portable imports. [Data feasibility](acquisition-data-feasibility.md) records the four-item reviewed snapshot, field provenance, licensing constraints and local tooltip choice. [Pass 5](pass-5.md) records current validation and the demonstration. The earlier sections below document the infrastructure's history; their schema-2 and placeholder descriptions apply to earlier passes.
+
 Gregular is a static React and TypeScript companion with browser-local profiles, stable character IDs and an isolated game-data layer. Pass 3 makes a visual, zone-first route builder the primary Leveling interaction, building on the planner and safe import/recovery in Passes 2 and 2.5. The class draft remains an independent application at the repository root.
 
 ## Frontend boundaries

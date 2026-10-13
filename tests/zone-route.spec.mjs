@@ -29,7 +29,7 @@ async function signIn(page, name = username) {
   await page.goto("./");
   await page.getByLabel("Username", { exact: true }).fill(name);
   await page
-    .getByRole("button", { name: "Open my journal", exact: true })
+    .getByRole("button", { name: "Open my planner", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "New character", exact: true }),
@@ -64,7 +64,7 @@ async function createCharacter(
 
 async function openCharacter(page, name = "Alden") {
   await page
-    .getByRole("button", { name: `Open ${name}'s journal`, exact: true })
+    .getByRole("button", { name: `Open ${name}'s overview`, exact: true })
     .click();
   await expect(
     page.getByRole("heading", { name, exact: true, level: 1 }),
@@ -224,7 +224,7 @@ test("Human Priest builds a personal route, recomputes travel and advances witho
       exact: true,
     })
     .selectOption("active");
-  await section(page, "journal").click();
+  await section(page, "overview").click();
   await updateLevel(page, 18);
   await expect(nextUp(page)).toContainText("Redridge Mountains");
   const after = await saved(page);

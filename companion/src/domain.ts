@@ -1,8 +1,10 @@
 import { createBlankPlanner, validatePlanner } from "./planner";
 import type { CharacterPlanner } from "./progressionTypes";
+import { createBlankAcquisition, validateAcquisition } from "./acquisition";
+import type { CharacterAcquisition } from "./acquisitionTypes";
 
 /** Saved character labels stay import-compatible; new editor choices use reviewed Forever data. */
-export const PROFILE_SCHEMA_VERSION = 2 as const;
+export const PROFILE_SCHEMA_VERSION = 3 as const;
 
 export type CharacterStatus = "planned" | "leveling" | "paused";
 export type ObjectivePriority = "high" | "normal";
@@ -29,6 +31,7 @@ export interface Character extends CharacterDraft {
   objectives: Objective[];
   notes: string;
   planner: CharacterPlanner;
+  acquisition: CharacterAcquisition;
 }
 
 export interface Profile {
@@ -185,6 +188,7 @@ export function createCharacter(
       : [],
     notes: "",
     planner: createBlankPlanner(),
+    acquisition: createBlankAcquisition(),
   };
 }
 
@@ -313,19 +317,26 @@ export function setCharacterPlanner(
   }));
 }
 
+/** Personal acquisition state is independent from route, notes and objectives. */
+export function setCharacterAcquisition(profile: Profile, characterId: string, acquisition: CharacterAcquisition): Profile {
+  const checked = validateAcquisition(acquisition);
+  return mapCharacter(profile, characterId, (character) => ({ ...character, acquisition: checked }));
+}
+
 /** Validates untrusted persisted data and returns a fresh, known-shape object. */
 export function validateProfile(value: unknown): Profile {
   return validateProfileVersion(value, PROFILE_SCHEMA_VERSION);
 }
 
-/** Explicit, lossless migration. Reading a v1 profile never writes browser storage. */
+/** Explicit, lossless migration. Reading older profiles never writes browser storage. */
 export function migrateProfile(value: unknown): Profile {
   const candidate = record(value, "Profile");
   if (candidate.schemaVersion === 1) return validateProfileVersion(value, 1);
+  if (candidate.schemaVersion === 2) return validateProfileVersion(value, 2);
   return validateProfile(value);
 }
 
-function validateProfileVersion(value: unknown, version: 1 | 2): Profile {
+function validateProfileVersion(value: unknown, version: 1 | 2 | 3): Profile {
   const candidate = record(value, "Profile");
   if (candidate.schemaVersion !== version)
     return invalid("This profile uses an unsupported storage version.");
@@ -380,6 +391,7 @@ function validateProfileVersion(value: unknown, version: 1 | 2): Profile {
         version === 1
           ? createBlankPlanner("My route", characterId)
           : validatePlanner(character.planner),
+      acquisition: version < 3 ? createBlankAcquisition() : validateAcquisition(character.acquisition),
     };
   });
   return {

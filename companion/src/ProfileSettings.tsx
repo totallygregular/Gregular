@@ -154,6 +154,10 @@ export function ProfileSettings({
             {counts.characters} characters · {counts.routeEntries} route entries
             · {counts.objectives} journal objectives
           </p>
+          <p className="transfer-detail">
+            {counts.wishlistEntries} wishlist entries · {counts.questGoals} saved quest states · {counts.questChains} personal quest chains · {counts.dungeonGoals} saved dungeon states.
+            Linked planning views are rebuilt from shared references and your preferred sources.
+          </p>
           <ul className="transfer-characters" aria-label="Characters to import">
             {preparation.profile.characters.map((character) => (
               <li key={character.id}>
@@ -173,8 +177,8 @@ export function ProfileSettings({
           <p className="transfer-detail">
             {counts.completedEntries} completed · {counts.skippedEntries}{" "}
             skipped route entries.
-            {preparation.sourceSchemaVersion === 1 &&
-              " Version 1 will be upgraded to version 2."}{" "}
+            {preparation.sourceSchemaVersion !== 3 &&
+              ` Version ${preparation.sourceSchemaVersion} will be upgraded to version 3.`}{" "}
             Character IDs, notes and supported progression will be kept.
           </p>
           <div className="transfer-warning">
@@ -277,7 +281,7 @@ export function ProfileSettings({
             disabled={working}
           />
           <small id="profile-file-help">
-            Choose a version 1 or 2 export. Review it before saving.
+            Choose a version 1, 2 or 3 export. Review it before saving.
           </small>
         </div>
         {working && <p role="status">Reading profile…</p>}
