@@ -126,11 +126,24 @@ export function NextUpPanel({
       {!!result.upcoming.length && (
         <p className="planner-help">Coming up: {result.upcoming[0].title}</p>
       )}
+      {!!result.unfinished?.length && (
+        <details className="next-up-earlier">
+          <summary>Earlier unfinished ({result.unfinished.length})</summary>
+          <ul>
+            {result.unfinished.map((item) => (
+              <li key={item.id}>
+                <strong>{item.title}</strong>
+                <small>{item.reason}</small>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </section>
   );
 }
 
-export function LevelingPlanner({
+export function LegacyObjectives({
   character,
   saving,
   change,
@@ -377,14 +390,6 @@ export function LevelingPlanner({
   }
   return (
     <>
-      <div className="dashboard-title planner-title">
-        <p className="eyebrow">LEVELING</p>
-        <h2>Your roadmap</h2>
-        <p>
-          Level {character.level}–{currentEnd} ·{" "}
-          {planner.entries.length - done - skipped} unfinished
-        </p>
-      </div>
       <section className="panel planner-summary">
         <div className="planner-level">
           <span className="eyebrow">CURRENT LEVEL</span>

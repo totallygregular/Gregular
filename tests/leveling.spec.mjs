@@ -74,6 +74,12 @@ async function roadmap(page) {
   await expect(
     page.getByRole("heading", { name: "Your roadmap", exact: true }),
   ).toBeVisible();
+  const legacy = page.locator("details").filter({
+    has: page.locator("summary", { hasText: "Objectives & dungeons" }),
+  });
+  if ((await legacy.getAttribute("open")) === null) {
+    await legacy.locator(":scope > summary").click();
+  }
 }
 
 async function addObjective(page, title, options = {}) {
@@ -286,6 +292,7 @@ test("blank routes support personal, zone and dungeon CRUD, ordering and status 
   const exported = JSON.parse(await readFile(await download.path(), "utf8"));
   expect(exported).toEqual(after);
   await page.reload();
+  await roadmap(page);
   await expect(
     entry(page, "Train and buy supplies").getByRole("combobox", {
       name: "Status for Train and buy supplies",
@@ -526,6 +533,7 @@ test("routes remain isolated across characters, usernames and reloads", async ({
   await addObjective(page, "Only Bram", { min: 50, max: 55 });
   const original = await saved(page);
   await page.reload();
+  await roadmap(page);
   await expect(entry(page, "Only Bram")).toBeVisible();
   await expect(entry(page, "Only Zala")).toHaveCount(0);
   await page.locator(".profile-switch").click();
@@ -625,6 +633,7 @@ test("real v1 JSON migrates on first edit with IDs, notes, completion and raw ba
     ),
   ).toBe(raw);
   await page.reload();
+  await roadmap(page);
   await expect(entry(page, "My first route goal")).toBeVisible();
   expect(await saved(page)).toEqual(migrated);
 });
@@ -683,6 +692,7 @@ test("another tab cannot overwrite a newer roadmap save", async ({
   await expect(other.locator(".save-bar")).toContainText("temporary");
   expect(await saved(other)).toEqual(latest);
   await other.reload();
+  await roadmap(other);
   await expect(entry(other, "Saved by first tab")).toBeVisible();
   await expect(entry(other, "Stale second tab goal")).toHaveCount(0);
   await other.close();
@@ -801,6 +811,7 @@ test("snapshot changes preserve completed goals with missing references and allo
     { key: keyFor(), profile: previous },
   );
   await page.reload();
+  await roadmap(page);
   await expect(entry(page, "Previous zone goal")).toContainText(
     "Reference no longer in this snapshot",
   );

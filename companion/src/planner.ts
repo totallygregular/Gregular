@@ -1,4 +1,6 @@
 import { getProgressionRecord, progressionDataset } from "./data/progression";
+import { getRouteProgress, resolveEntryZone } from "./routeProgress";
+import { findTravel } from "./travel";
 import type {
   CharacterPlanner,
   LevelRange,
@@ -377,11 +379,35 @@ function blockedReason(
   character: PlannerCharacter,
   dataset: ProgressionDataset,
 ): string | undefined {
-  const record = entry.recordId
+  const zone = resolveEntryZone(entry);
+  const personalZone = Boolean(zone && entry.origin === "user");
+  const knownRecord = entry.recordId
     ? getProgressionRecord(entry.recordId, dataset)
     : undefined;
-  if (entry.recordId && !record)
+  const record = entry.recordId
+    ? personalZone
+      ? undefined
+      : knownRecord
+    : undefined;
+  if (entry.recordId && !record && !personalZone)
     return "Reference missing from the current snapshot. Review or replace this entry.";
+  if (
+    zone?.accessFactions &&
+    !zone.accessFactions.some(
+      (faction) =>
+        faction.toLowerCase() === character.faction.trim().toLowerCase(),
+    )
+  )
+    return "This zone has a known faction access restriction. Review the catalogue source.";
+  if (personalZone && knownRecord?.availability === "unavailable")
+    return "Unavailable in the reviewed beta snapshot.";
+  if (
+    personalZone &&
+    knownRecord &&
+    ["Alliance", "Horde"].includes(knownRecord.faction) &&
+    knownRecord.faction.toLowerCase() !== character.faction.trim().toLowerCase()
+  )
+    return `This reference is restricted to ${knownRecord.faction}.`;
   if (record && record.kind !== entry.kind)
     return "The reference type changed. Review this entry.";
   if (record && character.level > dataset.currentLevelCap)
@@ -409,7 +435,7 @@ function blockedReason(
   if (record?.availability === "unknown")
     return "Beta availability is unverified. Check the source before planning a run.";
   if (entry.access === "unavailable") return "Marked unavailable in your plan.";
-  if (entry.access === "unknown")
+  if (entry.access === "unknown" && !personalZone)
     return "Confirm access before this becomes actionable.";
   for (const id of entry.prerequisiteEntryIds) {
     const prerequisite = character.planner.entries.find(
@@ -447,6 +473,19 @@ export function getNextUp(
     blocked: [],
   };
   const ranked: { item: Recommendation; score: number; index: number }[] = [];
+  const route = getRouteProgress(character.planner, currentLevel);
+  const earlierIds = new Set(route.earlierUnfinished.map((entry) => entry.id));
+  const futureIds = new Set(route.upcoming.map((entry) => entry.id));
+  const anchor = route.current ?? route.next;
+  const earlierVisits = character.planner.entries
+    .slice(
+      0,
+      anchor
+        ? character.planner.entries.indexOf(anchor)
+        : character.planner.entries.length,
+    )
+    .filter((entry) => entry.kind !== "custom");
+  const unfinished: Recommendation[] = [];
   character.planner.entries.forEach((entry, index) => {
     if (
       entry.status === "completed" ||
@@ -462,10 +501,49 @@ export function getNextUp(
       kind: entry.kind,
       origin: entry.origin,
     };
+    const zone = resolveEntryZone(entry);
     const blocked = blockedReason(entry, character, dataset);
     if (blocked) {
       result.blocked.push({ ...item, reason: blocked });
       return;
+    }
+    if (zone && earlierIds.has(entry.id)) {
+      unfinished.push({
+        ...item,
+        reason:
+          "Earlier route visit remains unfinished. Complete, skip or reactivate it yourself.",
+      });
+      return;
+    }
+    if (entry.kind === "custom" && entry.association?.kind === "zone") {
+      const currentZone = route.current
+        ? resolveEntryZone(route.current)
+        : undefined;
+      const matchesCurrent =
+        currentZone &&
+        (entry.association.recordId === currentZone.id ||
+          (!entry.association.recordId &&
+            entry.association.name.trim().toLowerCase() ===
+              currentZone.name.toLowerCase()));
+      const earlierZone =
+        !matchesCurrent &&
+        earlierVisits.some((previous) => {
+          const previousZone = resolveEntryZone(previous);
+          return (
+            previousZone &&
+            (entry.association!.recordId === previousZone.id ||
+              (!entry.association!.recordId &&
+                entry.association!.name.trim().toLowerCase() ===
+                  previousZone.name.toLowerCase()))
+          );
+        });
+      if (earlierZone) {
+        unfinished.push({
+          ...item,
+          reason: "Unfinished objective from an earlier route visit.",
+        });
+        return;
+      }
     }
     const record = entry.recordId
       ? getProgressionRecord(entry.recordId, dataset)
@@ -474,6 +552,13 @@ export function getNextUp(
       entry.targetLevel?.min ?? 1,
       record?.minimumLevel ?? 1,
     );
+    if (zone && futureIds.has(entry.id)) {
+      result.upcoming.push({
+        ...item,
+        reason: `Next in your saved route order${entry.targetLevel ? `; your plan ${entry.targetLevel.min}–${entry.targetLevel.max}` : ""}.`,
+      });
+      return;
+    }
     if (currentLevel < earliest) {
       if (earliest <= currentLevel + 8)
         result.upcoming.push({
@@ -488,7 +573,13 @@ export function getNextUp(
     const overdue =
       entry.targetLevel !== undefined && currentLevel > entry.targetLevel.max;
     // Old, unfinished zones stay in the roadmap; they do not displace current work.
-    if (overdue && entry.kind !== "custom" && entry.status !== "active") return;
+    if (
+      overdue &&
+      entry.kind !== "custom" &&
+      entry.status !== "active" &&
+      !zone
+    )
+      return;
     let score = entry.kind === "custom" ? 30 : entry.kind === "zone" ? 40 : 50;
     let reason = entry.targetLevel
       ? `Your level ${entry.targetLevel.min}–${entry.targetLevel.max} plan.`
@@ -517,6 +608,24 @@ export function getNextUp(
       reason += " Editable editorial window.";
     if (entry.targetLevelSource === "announced")
       reason += " Published beta testing band; entry requirements unverified.";
+    if (zone && entry.origin === "user") {
+      score = entry.status === "active" ? 10 : 15;
+      reason = `Current route stop${entry.targetLevel ? `; your plan ${entry.targetLevel.min}–${entry.targetLevel.max}` : ""}.`;
+      const previous = character.planner.entries
+        .slice(0, index)
+        .reverse()
+        .find(
+          (candidate) =>
+            candidate.kind !== "custom" && candidate.status !== "skipped",
+        );
+      const previousZone = previous ? resolveEntryZone(previous) : undefined;
+      if (previousZone) {
+        const travel = findTravel(previousZone.id, zone.id, character.faction);
+        reason += ` ${travel.label}: ${travel.explanation}`;
+      }
+      if (entry.access === "unknown")
+        reason += " Zone guidance is provisional; confirm current beta access.";
+    }
     ranked.push({ item: { ...item, reason }, score, index });
   });
   for (const [index, objective] of (character.objectives ?? []).entries()) {
@@ -547,6 +656,11 @@ export function getNextUp(
     const second = character.planner.entries.find(
       (entry) => entry.id === b.id,
     )!;
+    if (resolveEntryZone(first) || resolveEntryZone(second))
+      return (
+        character.planner.entries.indexOf(first) -
+        character.planner.entries.indexOf(second)
+      );
     return (
       (first.targetLevel?.min ??
         getProgressionRecord(first.recordId ?? "", dataset)?.minimumLevel ??
@@ -556,5 +670,6 @@ export function getNextUp(
         1)
     );
   });
+  if (unfinished.length) result.unfinished = unfinished;
   return result;
 }
