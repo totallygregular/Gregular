@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { addCharacter, createProfile, setNotes, type Profile } from "./domain";
+import {
+  addCharacter,
+  createProfile,
+  setCharacterPlanner,
+  setNotes,
+  setObjectiveComplete,
+  type Profile,
+} from "./domain";
+import { addEntry } from "./planner";
 import {
   BrowserProfileRepository,
   profileStorageKey,
+  profileV1BackupKey,
   type StorageLike,
 } from "./profileRepository";
 
@@ -25,6 +34,38 @@ function populatedProfile(username = "Greg"): Profile {
     plannedSpec: "Holy",
     level: 12,
     status: "leveling",
+  });
+}
+
+function legacyRaw(): string {
+  let profile = addCharacter(
+    populatedProfile(),
+    {
+      name: "Second character",
+      race: "Human",
+      className: "Mage",
+      faction: "Alliance",
+      plannedSpec: "Frost",
+      level: 24,
+      status: "leveling",
+    },
+    { mockObjectives: true },
+  );
+  const second = profile.characters[1];
+  profile = setObjectiveComplete(
+    profile,
+    second.id,
+    second.objectives[0].id,
+    true,
+  );
+  profile = setNotes(profile, second.id, "Preserve these notes\n  exactly.  ");
+  return JSON.stringify({
+    ...profile,
+    schemaVersion: 1,
+    revision: 4,
+    characters: profile.characters.map(
+      ({ planner: _planner, ...character }) => character,
+    ),
   });
 }
 
@@ -179,5 +220,158 @@ describe("browser profile repository", () => {
     await repository.load("Greg");
     storage.values.delete(profileStorageKey("Greg"));
     expect((await repository.save(original)).ok).toBe(false);
+  });
+
+  it("loads v1 without writes and backs up the original before a normal v2 save", async () => {
+    const storage = new MemoryStorage();
+    const key = profileStorageKey("Greg");
+    const raw = legacyRaw();
+    storage.setItem(key, raw);
+    const repository = new BrowserProfileRepository(storage);
+    const loaded = await repository.load("Greg");
+    expect(loaded.mode).toBe("ready");
+    expect(loaded.profile?.schemaVersion).toBe(2);
+    expect(loaded.message).toContain("backed up");
+    expect(storage.getItem(key)).toBe(raw);
+    expect(storage.values.size).toBe(1);
+    const migrated = loaded.profile!;
+    expect(
+      (await new BrowserProfileRepository(storage).load("Greg")).profile,
+    ).toEqual(migrated);
+    const changed = setNotes(migrated, migrated.characters[0].id, "New note");
+    const saved = await repository.save(changed);
+    expect(saved.ok).toBe(true);
+    expect(saved.profile?.revision).toBe(5);
+    expect(storage.getItem(profileV1BackupKey("Greg"))).toBe(raw);
+    expect(JSON.parse(storage.getItem(key)!).schemaVersion).toBe(2);
+    const reloaded = (await new BrowserProfileRepository(storage).load("Greg"))
+      .profile!;
+    expect(reloaded.characters[1].objectives).toEqual(
+      JSON.parse(raw).characters[1].objectives,
+    );
+    expect(reloaded.characters[1].notes).toBe(
+      JSON.parse(raw).characters[1].notes,
+    );
+    expect(reloaded.characters[1].id).toBe(JSON.parse(raw).characters[1].id);
+  });
+
+  it("never overwrites a previously retained v1 backup", async () => {
+    const storage = new MemoryStorage();
+    storage.setItem(profileStorageKey("Greg"), legacyRaw());
+    storage.setItem(
+      profileV1BackupKey("Greg"),
+      "existing backup retained verbatim",
+    );
+    const repository = new BrowserProfileRepository(storage);
+    const loaded = (await repository.load("Greg")).profile!;
+    expect((await repository.save(loaded)).ok).toBe(true);
+    expect(storage.getItem(profileV1BackupKey("Greg"))).toBe(
+      "existing backup retained verbatim",
+    );
+  });
+
+  it("does not replace v1 data when its backup cannot be written", async () => {
+    const storage = new MemoryStorage();
+    const key = profileStorageKey("Greg");
+    const raw = legacyRaw();
+    storage.setItem(key, raw);
+    const repository = new BrowserProfileRepository(storage);
+    const loaded = (await repository.load("Greg")).profile!;
+    const write = storage.setItem.bind(storage);
+    storage.setItem = (target, value) => {
+      if (target.endsWith(":backup:v1")) throw new Error("QuotaExceededError");
+      write(target, value);
+    };
+    const result = await repository.save(loaded);
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("could not be backed up");
+    expect(storage.getItem(key)).toBe(raw);
+  });
+
+  it("retains both the v1 record and its backup if the v2 write fails", async () => {
+    const storage = new MemoryStorage();
+    const key = profileStorageKey("Greg");
+    const raw = legacyRaw();
+    storage.setItem(key, raw);
+    const repository = new BrowserProfileRepository(storage);
+    const loaded = (await repository.load("Greg")).profile!;
+    const write = storage.setItem.bind(storage);
+    storage.setItem = (target, value) => {
+      if (target === key) throw new Error("QuotaExceededError");
+      write(target, value);
+    };
+    expect((await repository.save(loaded)).ok).toBe(false);
+    expect(storage.getItem(key)).toBe(raw);
+    expect(storage.getItem(profileV1BackupKey("Greg"))).toBe(raw);
+  });
+
+  it("rejects a stale v1 tab after another tab completes migration", async () => {
+    const storage = new MemoryStorage();
+    storage.setItem(profileStorageKey("Greg"), legacyRaw());
+    const tabA = new BrowserProfileRepository(storage);
+    const tabB = new BrowserProfileRepository(storage);
+    const originalA = (await tabA.load("Greg")).profile!;
+    const originalB = (await tabB.load("Greg")).profile!;
+    expect(
+      (
+        await tabA.save(
+          setNotes(originalA, originalA.characters[0].id, "Saved by A"),
+        )
+      ).ok,
+    ).toBe(true);
+    const result = await tabB.save(
+      setNotes(originalB, originalB.characters[0].id, "Stale B"),
+    );
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("another tab");
+    expect((await tabB.load("Greg")).profile?.characters[0].notes).toBe(
+      "Saved by A",
+    );
+  });
+
+  it("fails closed for v2 records with invalid planners and preserves the raw record", async () => {
+    const storage = new MemoryStorage();
+    const profile = populatedProfile();
+    const raw = JSON.stringify({
+      ...profile,
+      characters: [
+        { ...profile.characters[0], planner: { entries: "invalid" } },
+      ],
+    });
+    storage.setItem(profileStorageKey("Greg"), raw);
+    const repository = new BrowserProfileRepository(storage);
+    expect((await repository.load("Greg")).mode).toBe("protected");
+    expect((await repository.save(profile)).ok).toBe(false);
+    expect(storage.getItem(profileStorageKey("Greg"))).toBe(raw);
+  });
+
+  it("retains an independent route and missing reference IDs across dataset revisions", async () => {
+    const storage = new MemoryStorage();
+    const repository = new BrowserProfileRepository(storage);
+    const profile = populatedProfile();
+    const character = profile.characters[0];
+    const route = addEntry(
+      { ...character.planner, datasetVersion: "reviewed-previous-version" },
+      {
+        kind: "zone",
+        title: "My previous zone plan",
+        recordId: "a-record-removed-from-a-future-snapshot",
+        origin: "reference",
+        access: "unknown",
+        status: "completed",
+        notes: "Keep my progress and context even if the reference disappears.",
+        targetLevel: { min: 20, max: 30 },
+        targetLevelSource: "user",
+      },
+    );
+    const saved = await repository.save(
+      setCharacterPlanner(profile, character.id, route),
+    );
+    expect(saved.ok).toBe(true);
+    const loaded = (await new BrowserProfileRepository(storage).load("Greg"))
+      .profile!;
+    expect(loaded.characters[0].planner).toEqual(route);
+    expect(loaded.characters[0].planner.entries[0].status).toBe("completed");
+    expect(loaded.characters[0].id).toBe(character.id);
   });
 });

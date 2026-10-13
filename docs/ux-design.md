@@ -27,14 +27,26 @@ The header shows the chosen character and a clear return action. The journal are
 
 | Section | Prototype experience | Future behavior |
 | --- | --- | --- |
-| Quest journal | Character summary and next incomplete personal objectives | Evidence-backed next activities based on progression |
-| Leveling | Editable current level and illustrative milestone cards | Verified routes, milestones, unlocks and class quests |
+| Quest journal | Level-aware Next Up from route state and existing personal objectives | Broader reviewed class and travel milestones |
+| Leveling | Character-owned roadmap, editable route, zone/dungeon/personal entries, status and prerequisites | More reviewed Forever records and unlocks |
 | Dungeons | Fictional expedition card, preparation steps and example loot | Level-aware dungeon recommendations, prerequisites and rewards |
 | Talents | Clearly labelled visual planning placeholder | Rank allocation, prerequisite validation, saved builds and progression timeline |
 | Equipment | Example wishlist/item treatment with explicit mock status | Licensed item data, source links and acquisition tracking |
 | Notes | Editable personal notes; custom objectives live in the journal | Richer prioritization and session planning |
 
-“Next Up” is derived from the user's incomplete objectives in this pass. It must not imply a game recommendation engine. Illustrative game cards carry a nearby mock label, and mock tooltips identify their status in the tooltip itself. A single footer disclaimer is insufficient when a user encounters the card out of context.
+“Next Up” uses a deterministic planner engine. It prioritizes overdue high-priority personal tasks, active zones and eligible saved work, with a short reason per entry. It excludes completed, skipped, illustrative, inaccessible and blocked content. It shows an empty state when there is no eligible work. Reference readiness is confirmed by the player and never upgrades source confidence. Illustrative talent/item previews retain nearby mock labels.
+
+## Leveling roadmap
+
+The level, completion summary and Add objective action sit above route controls. Players start blank or merge a faction-specific editorial starter. Restoration adds missing starter entries while preserving existing IDs, edits, personal tasks and completed/skipped progress. Every entry is optional; route order creates no implicit quest chain.
+
+A connected vertical list shows the current level through the next eight levels. Earlier and later groups expand with native keyboard-accessible disclosure controls; untimed tasks remain visible. Status text and distinct border/node treatments identify active, completed and skipped entries without relying on color. Up/down buttons reorder entries within each level view, without requiring dragging. Target windows determine which view contains an entry.
+
+Each entry has a title, kind, target range, origin, status, optional notes and a concise readiness reason. Zones and dungeons can link to the reviewed catalogue; personal milestones can associate with either without becoming external records. The editor supports priority, readiness and explicit personal prerequisites. Skipping a prerequisite does not satisfy it; removing one leaves a visible review requirement.
+
+Published beta bands, editorial windows and user targets carry different labels beside the entry. Source details are available in the editor and a compact reference disclosure. No invented quest, loot or entrance requirement fills gaps. A blank or unsupported faction route offers personal planning actions. New character forms start with blank race/class labels rather than example user data.
+
+Dialogs preserve entered values on validation errors, support Escape and return focus. Completing a Next Up entry moves keyboard focus to another action or the panel. The roadmap wraps its controls on phones and uses the existing design tokens, with no additional animation or game artwork.
 
 ## Visual system
 

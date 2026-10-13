@@ -27,18 +27,15 @@ async function create(page, name = "Zala", options = {}) {
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await dialog.getByLabel("Character name", { exact: true }).fill(name);
-  if (options.race)
-    await dialog
-      .getByRole("combobox", { name: "Race", exact: true })
-      .fill(options.race);
-  if (options.className)
-    await dialog
-      .getByRole("combobox", { name: "Class", exact: true })
-      .fill(options.className);
-  if (options.faction)
-    await dialog
-      .getByRole("combobox", { name: "Faction", exact: true })
-      .selectOption(options.faction);
+  await dialog
+    .getByRole("combobox", { name: "Race", exact: true })
+    .fill(options.race || "Troll");
+  await dialog
+    .getByRole("combobox", { name: "Class", exact: true })
+    .fill(options.className || "Priest");
+  await dialog
+    .getByRole("combobox", { name: "Faction", exact: true })
+    .selectOption(options.faction || "Horde");
   if (options.level)
     await dialog.getByLabel("Current level").fill(String(options.level));
   if (options.spec)
@@ -74,6 +71,11 @@ async function noOverflow(page) {
 }
 async function accessible(page) {
   await page.evaluate(async () => {
+    // Native hash navigation can resolve before React commits the next screen.
+    // Flush rendering before enumerating animations, then scan settled colors.
+    await new Promise((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve)),
+    );
     await Promise.allSettled(
       document
         .getAnimations()
@@ -83,6 +85,8 @@ async function accessible(page) {
         .map((animation) => animation.finished),
     );
   });
+  const content = page.locator(".dashboard-content");
+  if (await content.count()) await expect(content).toHaveCSS("opacity", "1");
   const result = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
@@ -129,7 +133,7 @@ test("creates a Troll Priest with opted-in sample objectives and keeps it after 
   for (const text of ["Troll Priest", "Holy", "0 / 3 objectives"])
     await expect(page.locator(".character-card")).toContainText(text);
   const before = await saved(page);
-  expect(before.schemaVersion).toBe(1);
+  expect(before.schemaVersion).toBe(2);
   expect(before.characters[0].id).toMatch(/^[a-f0-9-]{36}$/);
   await page.reload();
   await expect(
@@ -187,6 +191,12 @@ test("character form rejects invalid levels before saving", async ({
   await dialog
     .getByLabel("Character name", { exact: true })
     .fill("Invalid level");
+  await dialog
+    .getByRole("combobox", { name: "Race", exact: true })
+    .fill("Troll");
+  await dialog
+    .getByRole("combobox", { name: "Class", exact: true })
+    .fill("Priest");
   for (const level of ["0", "61", "1.5"]) {
     await dialog.getByLabel("Current level").fill(level);
     await dialog
@@ -222,7 +232,7 @@ test("section URLs, browser back, mock talent previews and item details are inte
   );
   await section(page, "Leveling").click();
   await expect(
-    page.getByRole("heading", { name: "Enjoy the journey." }),
+    page.getByRole("heading", { name: "Your roadmap" }),
   ).toBeVisible();
   await expect(page).toHaveURL(/\/leveling$/);
   await expect(page.locator("#main-content")).toBeFocused();
@@ -501,12 +511,10 @@ test("keyboard dialog focus, escape and reduced motion respect user preferences"
   await expect(dialog).toBeHidden();
   await expect(newButton).toBeFocused();
   await create(page);
-  const timing = await page
-    .locator(".character-card")
-    .evaluate((card) => ({
-      duration: getComputedStyle(card).animationDuration,
-      transition: getComputedStyle(card).transitionDuration,
-    }));
+  const timing = await page.locator(".character-card").evaluate((card) => ({
+    duration: getComputedStyle(card).animationDuration,
+    transition: getComputedStyle(card).transitionDuration,
+  }));
   expect(
     timing.duration.split(",").every((value) => parseFloat(value) <= 0.001),
   ).toBe(true);
@@ -539,6 +547,7 @@ test("automated accessibility covers entry, roster, creation, journal, notes and
     "Notes",
   ]) {
     await section(page, name).click();
+    await expect(section(page, name)).toHaveAttribute("aria-current", "page");
     await accessible(page);
     if (name === "Equipment") {
       await page.getByText("Item details", { exact: true }).click();
@@ -580,16 +589,12 @@ for (const width of [320, 390, 768, 1440]) {
     await noOverflow(page);
     if (width === 390) await accessible(page);
     if (width === 1440) {
-      const cards = await page
-        .locator(".character-card")
-        .evaluateAll((cards) =>
-          cards
-            .slice(0, 3)
-            .map((card) => ({
-              x: card.getBoundingClientRect().x,
-              y: card.getBoundingClientRect().y,
-            })),
-        );
+      const cards = await page.locator(".character-card").evaluateAll((cards) =>
+        cards.slice(0, 3).map((card) => ({
+          x: card.getBoundingClientRect().x,
+          y: card.getBoundingClientRect().y,
+        })),
+      );
       expect(
         Math.max(...cards.map((card) => card.y)) -
           Math.min(...cards.map((card) => card.y)),

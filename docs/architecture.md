@@ -1,6 +1,6 @@
 # Gregular companion architecture
 
-The first pass is a static React and TypeScript companion with browser-local profiles, stable character IDs and an isolated game-data layer. It evaluates the product without committing to a backend provider or treating uncertain beta data as fact. The class draft remains an independent application at the repository root.
+Gregular is a static React and TypeScript companion with browser-local profiles, stable character IDs and an isolated game-data layer. Pass 2 adds a character-specific leveling planner and deterministic Next Up recommendations. The class draft remains an independent application at the repository root.
 
 ## Frontend boundaries
 
@@ -9,9 +9,11 @@ The first pass is a static React and TypeScript companion with browser-local pro
 | Reusable UI | Buttons, fields, dialogs, character treatments, cards, status and empty states | Storage access and game-data fetching |
 | Screens | Profile entry, character selection and character dashboard sections | Direct serialization and backend assumptions |
 | Application state | Active profile, selected character, CRUD commands, objective and note edits | DOM-specific behavior and imported game records |
-| Domain model | Versioned profile records, stable IDs, validation and mutations | React hooks and remote service details |
+| Domain model | Versioned profile records, stable IDs, validation, migrations and immutable planner mutations | React hooks and remote service details |
 | Profile repository | Asynchronous load/save boundary, serialization, revision checks and storage failures | Rendering and game recommendations |
-| Game data | Explicit mock records now; versioned normalized snapshots later | User completion state and implicit Era or Retail fallbacks |
+| Game data | A small reviewed Forever progression snapshot; explicitly illustrative talent/item previews | User completion state and implicit Era or Retail fallbacks |
+
+`companion/src/progressionTypes.ts` defines serializable planning and reference models. `planner.ts` owns route operations, validation and recommendation policy; it has no React dependency. `data/progression.ts` supplies the reviewed catalogue and editorial templates. `LevelingPlanner.tsx` renders these capabilities and passes mutations through the existing profile save boundary. The UI never edits catalogue records or writes directly to local storage.
 
 This component and state split follows React's guidance to decompose the UI into components, keep changing state minimal and derive values such as objective counts from that state. [React component and state guidance](https://react.dev/learn/thinking-in-react).
 
@@ -25,25 +27,37 @@ Use hash-based routes for the prototype. Routes identify a character by its stab
 
 A username is a convenient lookup label in one browser, not authentication. The entry and profile UI must say that anyone using the same browser can open that local profile. No password, account verification, network sync or data confidentiality is implied.
 
-The companion storage key is `gregular:forever:profile:<encoded normalized username>`, separate from the draft's `wow-forever.class-draft.v1`. The profile record has `schemaVersion: 1`, a stable UUID, display username, normalized lookup key, revision, timestamps and an array of characters. Usernames use Unicode NFKC normalization, trimming and lowercase lookup, so case variations open the same local profile. Each character has a stable UUID independent of its name, plus editable race, class, faction, planned specialization, current level, progression status, objectives and notes. Objective IDs are stable too. Arrays allow additional characters without schema changes; three desktop cards are a layout decision, not a capacity limit.
+The companion storage key remains `gregular:forever:profile:<encoded normalized username>`, separate from the draft's `wow-forever.class-draft.v1`. The current profile has `schemaVersion: 2`, a stable UUID, display username, normalized lookup key, revision, timestamps and an array of characters. Usernames use Unicode NFKC normalization, trimming and lowercase lookup, so case variations open the same local profile. Each character has a stable UUID independent of its name, plus editable race, class, faction, planned specialization, current level, progression status, existing objectives, notes and a personal planner. Arrays allow additional characters without schema changes; three desktop cards are a layout decision, not a capacity limit.
 
 Persist user-entered values separately from presentation and reference data. Do not save computed card colors, rendered tooltips or duplicated item descriptions in each character. Future references should identify both a data record and its snapshot version so a beta update cannot silently change a saved plan.
 
 The repository interface is asynchronous even when the implementation uses synchronous local storage. UI commands await a save result and surface failure. Schema validation must reject malformed or unsupported versions before mutation. A failed read must not be treated as a new empty save that can overwrite the original. A conflicting revision must stop an accidental stale-tab write and offer recovery; the local adapter is best-effort conflict protection, not a distributed transaction system.
 
-Storage may be disabled, full or cleared by the browser. An explicit visible warning is preferable to claiming a successful save. A newly created profile is saved when opened, then valid mutations are persisted. The current session remains usable after a failed save with a visible temporary-changes warning. JSON export is available through the footer and storage warning; import, schema migration and stronger recovery remain next-pass work. An export contains the current in-memory profile, including temporary changes, rather than a copy of unreadable protected storage.
+Version-1 profiles pass through an explicit validating migration. Their profile, character and objective IDs, timestamps, revision, notes and completion values are retained; each character receives an empty planner. A deterministic planner ID makes repeated migration reads stable. Loading does not overwrite the old JSON. Before the first version-2 save, the repository retains the exact original JSON once at the profile key plus `:backup:v1`; if the backup cannot be saved, the original profile is protected from mutation. Existing raw-content and revision checks still apply before and after backup creation.
+
+Storage may be disabled, full or cleared by the browser. An explicit visible warning is preferable to claiming a successful save. A newly created profile is saved when opened, then valid mutations are persisted. The current session remains usable after a failed save with a visible temporary-changes warning. JSON export includes schema 2, routes and the current in-memory profile, including temporary changes. JSON import/restore is deferred: a later pass must validate before mutation, preview replacement and preserve an existing profile on errors. The migration backup is local recovery evidence, not a cross-browser backup or an import feature.
 
 ## Character and planning model
 
 Character identity and the user's declared plan are authoritative user input. Race and class fields in the prototype support planning; they do not prove current Forever character-creation legality. The 1–60 input range is a provisional prototype bound, not a verified current beta level cap. A planned specialization is a label, not a validated build. Progression status is manually chosen from planned, leveling and paused.
 
-Objectives are user-owned records with an ID, title, completion state and high or normal priority. Sample objectives are clearly labelled illustrative examples and added deliberately. They must not silently become verified recommendations. Personal notes remain plain text, rendered safely by React rather than injected as HTML. Categories and structured game-record references can be introduced through a later schema migration when real content is available.
+Existing journal objectives keep their IDs, title, completion state and high or normal priority. Sample objectives are clearly labelled illustrative examples and added deliberately. They do not become verified recommendations. Personal notes remain plain text, rendered safely by React rather than injected as HTML.
 
-The initial sections are Quest journal, Leveling, Dungeons, Talents, Equipment and Notes. Navigation and representative interactions are real. The talent canvas and item previews demonstrate the interface only; no unverified ranks, prerequisites, item stats, rewards or dungeon level requirements are asserted.
+Each character owns one editable planner with a stable ID, name, optional originating template ID, dataset version and ordered entries. Entries distinguish zones, dungeon milestones and custom objectives. They contain stable IDs, user-owned title/notes, priority, status, optional target level window, optional reference/association, explicit prerequisite entry IDs, origin and access confirmation. Entries can be planned, active, completed or skipped. The ordered array defines the player's route without implying a quest chain.
+
+Templates copy into the character's planner with new personal entry IDs. Restoring a template adds missing template entries and retains personal entries and existing progress. It does not replace another character's route or reset completed/skipped work. Missing or changed catalogue records retain the saved personal plan for editing and review.
+
+Next Up is derived by a pure policy from current level, route order, entry state, faction, access and prerequisites. Completed/skipped entries are never actionable. Current activities and relevant unfinished plans take precedence over distant entries; overdue high-priority personal goals remain visible. Unknown access or unmet prerequisites produce a separate review/blocked result rather than an assertion that content is ready. Reference-linked entries also remain blocked when the character or the entry's starting target/verified minimum exceeds the reviewed beta cap of 30; personal plans remain editable through level 60. Upcoming plans remain distinct from immediately actionable recommendations. Reasons explain the level window, priority or gate involved. The engine consumes no AI service and invents no objectives to fill an empty panel.
+
+The sections remain Quest journal, Leveling, Dungeons, Talents, Equipment and Notes. Leveling is functional; the main journal derives Next Up from the same planner policy. The talent canvas, equipment and standalone dungeon previews remain illustrative. The planner's dungeon milestones are personal plans around a small factual reference catalogue, not loot tables or imported quest chains.
 
 ## Versioned game-data layer
 
-Prefer a reviewed local snapshot over runtime scraping. A future snapshot should record game edition, client build, source URLs, retrieval date, source license or permission status, transformation version and content checksum. Keep records typed and normalized:
+Prefer a reviewed local snapshot over runtime scraping. The Pass 2 progression snapshot records its version, Forever edition, review date, source publication/revision, per-field confidence and reuse limitation. `currentLevelCap: 30` has its own source evidence; the game build is explicitly unknown. It stores six zone names and three dungeon references from Blizzard's beta development notes; only the dungeon announcement bands are included. Zone ranges, faction quest restrictions, entry minimums and prerequisite chains remain unknown. See [progression-data.md](progression-data.md) for sources and exact boundaries.
+
+Two Horde/Alliance starter routes have visibly editorial order, audience and personal level windows. These values are separate from verified game fields. User-authored plans remain separate from both. Existing prototype examples retain their illustrative status. No Classic Era, Season of Discovery or Retail values fill gaps.
+
+A later imported snapshot should also record permitted reuse, transformation version and content checksum. Keep records typed and normalized:
 
 - Items: ID, names by locale, equipment restrictions, stats, source references and source confidence.
 - Spells and talents: spell IDs, ranks, tree positions, rank effects, points requirements and explicit prerequisite edges.
@@ -62,7 +76,7 @@ Keep the profile repository contract while replacing its adapter with an authent
 
 Use server-enforced ownership or row-level authorization for private profiles. Model groups, memberships, roles, invitations and shared session plans separately from personal character records. A group view reads only characters the owner has chosen to share; knowing a username grants no access. Protect writes with expected revisions or equivalent conditional updates and return conflicts to the UI. A backend must enforce this atomically; the browser-local revision check is not sufficient.
 
-The first cloud pass should use a simple server-authoritative model with explicit conflict recovery. Offline queues, real-time presence, collaborative editing and automatic merges can wait until there is evidence they are needed. Define retention, account deletion, backups and recovery before presenting the service as dependable shared storage.
+The first cloud pass should use a simple server-authoritative model with explicit conflict recovery. Planner/entry IDs and user-owned plan snapshots can migrate with the existing characters; the reviewed catalogue stays public reference data. Group/session records should reference character and objective IDs rather than absorbing personal routes. Offline queues, real-time presence, collaborative editing and automatic merges can wait until there is evidence they are needed. Define retention, account deletion, backups and recovery before presenting the service as dependable shared storage.
 
 ## Hosting and production approval
 
@@ -74,4 +88,4 @@ Moving production to the companion requires explicit approval, route selection, 
 
 ## Trade-offs for this pass
 
-Local storage is simple and appropriate for evaluation, but browser-local data is not a cloud backup. Hash navigation is robust on Pages, but less elegant than server-supported routes. Keeping the draft separate duplicates a small amount of shell styling, but sharply reduces migration risk. Original CSS and vector motifs avoid external artwork dependencies while leaving room for licensed art later. The mock-only data boundary delays content richness in exchange for an honest, maintainable beta foundation.
+Local storage is appropriate for the current planner, but browser-local data is not a cloud backup. Hash navigation is robust on Pages. Keeping the draft separate reduces migration risk. Original CSS and vector motifs avoid external artwork dependencies. The narrow reference catalogue deliberately leaves uncertain game facts unknown; editable plans provide utility while broader data validation and JSON restore remain later work.

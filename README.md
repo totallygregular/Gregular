@@ -1,6 +1,6 @@
-# Gregular — WoW Forever companion prototype
+# Gregular — WoW Forever companion
 
-First development pass: a character roster and personal quest journal, with browser-local profiles. The existing **Party / Roll class draft remains unchanged at the root**. This branch adds the companion; it does not release it to production.
+Character management and a functional leveling planner, with browser-local profiles. Pass 2 adds editable routes, zone/dungeon/custom objectives and level-aware Next Up recommendations. The existing **Party / Roll class draft remains unchanged at the root**. This branch does not release the companion to production.
 
 ## Run the companion
 
@@ -11,9 +11,13 @@ npm ci --ignore-scripts
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173/**. Enter any username, create a Troll Priest or your own character, then open their journal. Add objectives, complete checklists, explore the six sections, and save notes. Reloading restores this tab's active profile; entering the same username later loads the same browser-local data. Names are case-insensitive. Additional characters wrap onto another row; there is no three-character limit.
+Open **http://127.0.0.1:5173/**. Enter a username, create a character, then open **Leveling**. Start blank or choose a faction starter route; add zones, dungeon milestones and personal objectives, adjust target levels, reorder entries and mark progress. The journal's **Next Up** follows your character level and saved plan. Follow the [Troll Priest demonstration](docs/leveling-demo.md) for a complete example.
 
-Username entry is **not secure authentication**. Profiles stay in this browser and origin, are not synced, and can be opened by anyone using it. Game-specific screens are visibly marked mock data. Race/class combinations and the provisional 1–60 input range are not a promise about beta rules. JSON export is available; import/recovery is planned.
+Reloading restores this tab's active profile; entering the same username later opens the same browser-local data. Names are case-insensitive. Each character has an independent route, and there is no three-character limit. Username entry is **not secure authentication**: profiles are not synced and can be opened by anyone using this browser.
+
+The leveling catalogue contains a few sourced Forever facts; starter order and level windows are **editorial personal plans**, not verified leveling guides. Zone ranges, access rules and missing prerequisites remain explicit unknowns. Talent/item previews remain illustrative. Race/class combinations and the 1–60 planning input range do not promise beta availability. See [progression sources and limitations](docs/progression-data.md).
+
+Existing version-1 profiles migrate without losing characters, notes or objective completion. Their exact original JSON is backed up locally before the first version-2 save. JSON export includes routes and current session changes. **JSON import/restore is deferred**; keep exports outside browser storage if needed.
 
 ## Build and validate
 
@@ -37,16 +41,18 @@ npm run test:ui
 
 The verification workflow runs both unit and browser suites plus the combined build. It does not deploy. Pages currently serves the source tree from `main` `/`; an approved production migration must publish the built `dist/` artifact and verify the custom domain in Pages settings. Simply merging Vite source will not deploy a runnable companion. No DNS or hosting changes are included.
 
-## First-pass deliverables
+## Documentation
 
 - [Repository assessment](docs/repository-assessment.md)
 - [Architecture and future cloud migration](docs/architecture.md)
 - [UX and design specification](docs/ux-design.md)
 - [Forever data-source feasibility and licensing gaps](docs/game-data-feasibility.md)
+- [Leveling snapshot, provenance and update process](docs/progression-data.md)
+- [Leveling demonstration](docs/leveling-demo.md)
 - [Prioritized roadmap and acceptance criteria](docs/roadmap.md)
 - [Validation evidence and limitations](docs/validation.md)
 
-The companion lives in `companion/`. Domain validation and immutable mutations, asynchronous persistence, UI components, and mock game data are separate modules. Artwork and class crests are original SVG/CSS; no game assets or external tooltip scripts are bundled.
+The companion lives in `companion/`. Profile validation/migration, planner mutations/recommendations, asynchronous persistence, UI and reference data are separate modules. Artwork and class crests are original SVG/CSS; no game assets or external tooltip scripts are bundled.
 
 ---
 
