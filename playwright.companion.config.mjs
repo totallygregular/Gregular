@@ -9,6 +9,7 @@ export default defineConfig({
     "profile-import.spec.mjs",
     "zone-route.spec.mjs",
     "visual-journey.spec.mjs",
+    "route-relevance.spec.mjs",
   ],
   workers: 1,
   timeout: 45_000,

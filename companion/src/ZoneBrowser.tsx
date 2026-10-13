@@ -3,10 +3,11 @@ import type { Character } from "./domain";
 import { Icon } from "./components";
 import { zoneCatalogue, type ZoneRecord } from "./data/zones";
 import { getInsertionTravel } from "./routeBuilder";
-import { LocationMark, rangeText, TravelLabel, ZoneEvidence } from "./routePresentation";
+import { rangeText, TravelLabel, ZoneEvidence } from "./routePresentation";
+import { rankZoneSuggestions, getSuggestionContext } from "./zoneRelevance";
+import { ZoneCoverage } from "./ZoneCoverage";
+import { ZoneMotif } from "./ZoneMotif";
 import "./zoneBrowser.css";
-
-const difficultyRank = { easy: 0, moderate: 1, long: 2, unknown: 3 };
 
 function suitabilityFor(zone: ZoneRecord, level: number) {
   const range = zone.recommendedLevel;
@@ -45,16 +46,9 @@ export function ZoneBrowser({
   useEffect(() => setFaction(character.faction), [character.faction]);
   const candidates = useMemo(
     () =>
-      zoneCatalogue
-        .map((zone) => ({
-          zone,
-          travel: getInsertionTravel(
-            character.planner,
-            zone.id,
-            insertionIndex,
-            character.faction,
-          ),
-        }))
+      rankZoneSuggestions({
+        planner: character.planner, level, insertionIndex, faction: character.faction,
+      })
         .filter(({ zone, travel }) => {
           if (
             search &&
@@ -79,22 +73,6 @@ export function ZoneBrowser({
           if (suitability === "later" && (!r || r.min <= level)) return false;
           if (suitability === "unknown" && r) return false;
           return true;
-        })
-        .sort((a, b) => {
-          const distance = (z: ZoneRecord) =>
-            !z.recommendedLevel
-              ? 100
-              : level < z.recommendedLevel.min
-                ? z.recommendedLevel.min - level
-                : level > z.recommendedLevel.max
-                  ? level - z.recommendedLevel.max
-                  : 0;
-          return (
-            distance(a.zone) - distance(b.zone) ||
-            difficultyRank[a.travel.incoming.difficulty] -
-              difficultyRank[b.travel.incoming.difficulty] ||
-            a.zone.name.localeCompare(b.zone.name, "en")
-          );
         }),
     [
       search,
@@ -109,6 +87,9 @@ export function ZoneBrowser({
     ],
   );
   const stops = character.planner.entries.filter((e) => e.kind !== "custom");
+  const relevanceContext = getSuggestionContext({
+    planner: character.planner, level, insertionIndex, faction: character.faction,
+  });
   const context = getInsertionTravel(
     character.planner,
     zoneCatalogue[0].id,
@@ -227,30 +208,45 @@ export function ZoneBrowser({
             {context.after && <> · then to <strong>{context.after.title}</strong></>}
           </p>
         </div>
+        <p className="suggestion-context" aria-live="polite">
+          Finding fits around level <strong>{relevanceContext.planningLevel}</strong>
+          {relevanceContext.basedOnPreviousPlan ? " · uses the previous stop’s planned exit" : " · uses your browser level"}.
+          {relevanceContext.hasLevelConflict && " The surrounding planned levels overlap or run backwards; review the fit."}
+        </p>
+        <details className="suggestion-explanation">
+          <summary>How suggestions are sorted</summary>
+          <p>Best route relevance first: suitable levels and entry fit, then travel on both sides, faction suitability and repeat visits. Later and awkward options remain available. Unknown travel never counts as easy.</p>
+          <p>Recommended ranges describe relevant content, not how many levels you will gain. Coverage notes are broad editorial prompts, not quest or XP estimates.</p>
+        </details>
       </div>
       <div className="zone-results-bar">
         <p className="zone-results" role="status">
-          <strong>{candidates.length}</strong> zones <span>· closest level ranges first</span>
+          <strong>{candidates.length}</strong> zones <span>· best route relevance first</span>
         </p>
         {hasFilters && <button className="text-button" onClick={resetFilters}>Reset filters</button>}
       </div>
       <div className="zone-candidates">
-        {candidates.map(({ zone, travel }) => {
+        {candidates.map(({ zone, travel, fit, label, reasons }) => {
           const suitable = suitabilityFor(zone, level);
           return (
             <article
               className="zone-candidate"
               data-continent={zone.continent}
               data-suitability={suitable.key}
+              data-fit={fit}
               aria-label={`Zone: ${zone.name}`}
               key={zone.id}
             >
               <div className="candidate-heading">
-                <LocationMark continent={zone.continent} />
                 <div>
                   <span className="candidate-region">{zone.continent}</span>
                   <h4>{zone.name}</h4>
                 </div>
+                <ZoneMotif zone={zone} />
+              </div>
+              <div className={`candidate-fit fit-${fit}`}>
+                <strong>{label}</strong>
+                <span>{reasons.join(" · ")}</span>
               </div>
               <div className="candidate-level">
                 <div className="candidate-level-range">
@@ -259,7 +255,7 @@ export function ZoneBrowser({
                 </div>
                 <span className={`candidate-suitability suitability-${suitable.key}`}>
                   <span aria-hidden="true">{suitable.key === "now" ? "✓" : suitable.key === "later" ? "↗" : suitable.key === "unknown" ? "?" : "↶"}</span>
-                  {suitable.text}
+                  <span>{suitable.text}<small>Browser level {level}</small></span>
                 </span>
               </div>
               <div className="candidate-qualifiers">
@@ -269,6 +265,7 @@ export function ZoneBrowser({
                 </span>
                 <ZoneEvidence zone={zone} compact />
               </div>
+              <ZoneCoverage zone={zone} />
               <div className="candidate-travel">
                 <TravelLabel travel={travel.incoming} first={!travel.before} />
                 {travel.outgoing && (

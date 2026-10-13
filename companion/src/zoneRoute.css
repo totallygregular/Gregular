@@ -1270,3 +1270,9 @@
     animation:none !important;
   }
 }
+.zone-guidance { display: grid; gap: 5px; margin: 12px 0; color: #c4cbbd; line-height: 1.5; }
+.zone-guidance .coverage-label { font-size: 12px; color: #dfd2af; }
+.zone-guidance small { font-size: 12px; color: #bdc8bc; }
+.zone-guidance[data-guidance="unknown"] .coverage-label { color: #c7d0d0; }
+.stop-destination > div:first-child { flex: 1; min-width: 0; }
+.stay-warning { font-size: 13px; }

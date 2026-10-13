@@ -27,6 +27,9 @@ import {
 import { moveEntry, removeEntry, setEntryStatus, updateEntry } from "./planner";
 import { ZoneBrowser } from "./ZoneBrowser";
 import { LevelRangeBadge, LocationMark, TravelLabel, ZoneEvidence, rangeText } from "./routePresentation";
+import { ZoneMotif } from "./ZoneMotif";
+import { ZoneCoverage } from "./ZoneCoverage";
+import { longStayWarning } from "./zoneGuidance";
 import "./zoneRoute.css";
 
 type ChangePlanner = (
@@ -239,6 +242,7 @@ export function LevelingPlanner({
                   const zone = resolveEntryZone(entry);
                   const transition = transitions.get(entry.id);
                   const warning = plannedRangeWarning(entry, zone);
+                  const stayWarning = longStayWarning(entry.targetLevel, zone);
                   const goals = zone
                     ? outstandingZoneObjectives(planner, zone)
                     : [];
@@ -280,7 +284,7 @@ export function LevelingPlanner({
                           <div><h4>{entry.title}</h4>
                             <span className="stop-region">{entry.kind === "dungeon" ? "Dungeon milestone" : "Zone stop"} · {String(index + 1).padStart(2, "0")} / {String(stops.length).padStart(2, "0")}</span>
                           </div>
-                          <LocationMark continent={zone?.continent} />
+                          <ZoneMotif zone={zone} />
                         </div>
                         <div className="stop-ranges">
                           <LevelRangeBadge range={entry.targetLevel} personal />
@@ -289,6 +293,8 @@ export function LevelingPlanner({
                             {zone && <ZoneEvidence zone={zone} compact />}
                           </div>
                         </div>
+                        <ZoneCoverage zone={zone} />
+                        {stayWarning && <p className="range-warning stay-warning">△ {stayWarning}</p>}
                         {warning && (
                           <p className="range-warning">△ {warning}</p>
                         )}
@@ -644,6 +650,7 @@ function PlanEditor({
         zone,
       )
     : undefined;
+  const stayWarning = longStayWarning({ min: Number(min), max: Number(max) }, zone);
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError("");
@@ -680,8 +687,9 @@ function PlanEditor({
           {zone && <ZoneEvidence zone={zone} compact />}
           {zone && <ZoneEvidence zone={zone} />}
         </div>
+        <ZoneCoverage zone={zone} />
         <p className="dialog-description">
-          Choose your planned levels. You can return to the same zone later.
+          Recommended levels describe suitable content, not a promised stay. Choose your own planned levels; you can return later.
         </p>
         <div className="plan-level-fields">
           <label>
@@ -709,6 +717,7 @@ function PlanEditor({
           </label>
         </div>
         {warning && <p className="range-warning">△ {warning}</p>}
+        {stayWarning && <p className="range-warning stay-warning">△ {stayWarning}</p>}
         {zone &&
           zone.faction !== "Both" &&
           zone.faction !== "Unknown" &&
