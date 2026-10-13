@@ -26,6 +26,9 @@ import {
 } from "./profileRepository";
 import { ClassCrest, Icon, Landscape, Modal } from "./components";
 import { LevelingPlanner, NextUpPanel } from "./LevelingPlanner";
+import { ProfileSettings } from "./ProfileSettings";
+import { buildInfo } from "./buildInfo";
+import { progressionDataset } from "./data/progression";
 import { setEntryStatus } from "./planner";
 import {
   DATA_NOTICE,
@@ -119,6 +122,7 @@ export function App() {
   const [error, setError] = useState("");
   const [editor, setEditor] = useState<Character | "new" | null>(null);
   const [removing, setRemoving] = useState<Character | null>(null);
+  const [profileSettings, setProfileSettings] = useState(false);
   const busy = useRef(false);
   const opening = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
@@ -216,6 +220,7 @@ export function App() {
     }
   }
   function switchProfile() {
+    setProfileSettings(false);
     setProfile(null);
     setUsername("");
     setError("");
@@ -276,6 +281,17 @@ export function App() {
           >
             Class draft ↗
           </a>
+          {profile && (
+            <button
+              className="text-button profile-settings-link"
+              aria-label="Profile settings"
+              onClick={() => setProfileSettings(true)}
+              disabled={saving}
+            >
+              <Icon name="shield" size={18} />
+              <span>Profile settings</span>
+            </button>
+          )}
           {profile && (
             <button
               className="profile-switch"
@@ -359,6 +375,12 @@ export function App() {
                 Open my journal <Icon name="arrow" />
               </button>
             </form>
+            <button
+              className="secondary full welcome-import"
+              onClick={() => setProfileSettings(true)}
+            >
+              Import profile
+            </button>
             <div className="privacy-note">
               <Icon name="shield" />
               <p>
@@ -676,10 +698,48 @@ export function App() {
         </a>
         {profile && (
           <button className="text-button" onClick={downloadBackup}>
-            Export local profile
+            Export profile
           </button>
         )}
+        {profile && (
+          <button
+            className="text-button"
+            disabled={saving}
+            onClick={() => setProfileSettings(true)}
+          >
+            Import profile
+          </button>
+        )}
+        {buildInfo.displayLabel && (
+          <small className="build-info">
+            {buildInfo.displayLabel} · App {buildInfo.version} · Data{" "}
+            {progressionDataset.version}
+          </small>
+        )}
       </footer>
+      {profileSettings && (
+        <ProfileSettings
+          repository={repository}
+          profile={profile}
+          temporaryChanges={problem}
+          exportProfile={downloadBackup}
+          close={() => setProfileSettings(false)}
+          imported={(next, notice) => {
+            setProfile(next);
+            setUsername(next.username);
+            setProfileSettings(false);
+            setProblem(false);
+            setMessage(notice);
+            setError("");
+            go();
+            try {
+              sessionStorage.setItem("gregular.active-profile", next.username);
+            } catch {
+              /* The imported profile is saved even if tab memory is unavailable. */
+            }
+          }}
+        />
+      )}
       {editor && profile && (
         <CharacterEditor
           character={editor === "new" ? undefined : editor}

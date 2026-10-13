@@ -3,7 +3,11 @@ import { defineConfig } from "@playwright/test";
 const built = process.env.COMPANION_BUILT === "1";
 export default defineConfig({
   testDir: "./tests",
-  testMatch: ["companion.spec.mjs", "leveling.spec.mjs"],
+  testMatch: [
+    "companion.spec.mjs",
+    "leveling.spec.mjs",
+    "profile-import.spec.mjs",
+  ],
   workers: 1,
   timeout: 45_000,
   reporter: [["list"]],

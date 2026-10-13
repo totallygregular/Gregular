@@ -3241,6 +3241,152 @@ dialog::backdrop {
   color: var(--gold);
   white-space: nowrap;
 }
+.profile-settings-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 44px;
+  min-height: 44px;
+}
+.welcome-import {
+  margin-top: 12px;
+}
+.profile-transfer {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.transfer-target {
+  font-family: Georgia, serif;
+  font-size: 25px;
+  color: var(--gold);
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+}
+.transfer-file {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0 16px;
+  font-weight: 600;
+}
+.transfer-file input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: #10191b;
+  color: #e8e6dd;
+  border-radius: 4px;
+  padding: 12px;
+  font: inherit;
+}
+.transfer-file input::file-selector-button {
+  background: #2a3735;
+  color: #eee9da;
+  border: 1px solid #65716a;
+  border-radius: 3px;
+  font: inherit;
+  padding: 8px 12px;
+  margin-right: 12px;
+  cursor: pointer;
+}
+.transfer-file small,
+.transfer-detail,
+.transfer-demo,
+.transfer-backup p {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+.transfer-characters {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  max-height: 230px;
+  overflow: auto;
+  border-block: 1px solid var(--line);
+}
+.transfer-characters li {
+  display: grid;
+  gap: 2px;
+  padding: 11px 0;
+  overflow-wrap: anywhere;
+}
+.transfer-characters li + li {
+  border-top: 1px solid var(--line);
+}
+.transfer-characters strong {
+  color: #e8e6dd;
+  font-weight: 600;
+}
+.transfer-characters span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.transfer-warning {
+  border-left: 2px solid var(--gold);
+  background: #b69a5310;
+  padding: 13px 16px;
+  margin: 20px 0;
+}
+.transfer-warning p {
+  margin: 0;
+}
+.transfer-warning p + p,
+.transfer-warning strong + p {
+  margin-top: 8px;
+}
+.transfer-backup {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  margin-top: 24px;
+}
+.transfer-backup h3 {
+  font-size: 17px;
+  margin: 0;
+}
+.transfer-actions {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.transfer-demo {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  margin-top: 24px;
+}
+.transfer-demo a {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.build-info {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 780px) {
+  .profile-settings-link span {
+    display: none;
+  }
+  .header-actions {
+    gap: 8px;
+  }
+}
+@media (max-width: 520px) {
+  .profile-transfer .dialog-actions {
+    flex-wrap: wrap;
+  }
+  .profile-transfer .dialog-actions button {
+    flex: 1 1 auto;
+    min-height: 44px;
+  }
+  .transfer-file input {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
 @media (max-width: 520px) {
   .character-heading {
     display: grid;

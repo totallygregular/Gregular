@@ -16,13 +16,17 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version-file: '.node-version'
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:ui
       - run: npm run build
+      - run: npm run test:build
+      - run: npm run test:companion
+        env:
+          COMPANION_BUILT: '1'
   # The live site currently uses branch publishing. This workflow verifies changes;
   # it does not switch Pages source or introduce a second deployment mechanism.
   # There is deliberately no cron and no trading-data writer.

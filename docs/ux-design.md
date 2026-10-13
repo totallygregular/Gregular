@@ -11,7 +11,11 @@ Gregular should feel like a quiet place to prepare the next adventure. The inter
 5. Complete or add planning objectives, edit notes, and return to the character selection screen. Saves report their actual status.
 6. Edit a character without changing its identity; confirm removal with the character's name and the scope of deletion.
 
-A persistent link exposes the preserved class draft as a secondary tool. A profile control allows returning to local username entry. JSON profile export is available in the footer and beside a storage warning; import and restoration are planned next. Group planning is described as future scope without an active invitation or multiplayer control.
+A persistent link exposes the preserved class draft as a secondary tool. The existing profile control returns to local username entry; Profile settings opens export, file import and previous-profile recovery. Export and Import are also available in the footer, and import is available before username entry. Group planning remains future scope.
+
+File selection opens a separate review state showing the file's username, characters, levels and progress counts. No save occurs until the user confirms Import profile or Replace current profile. The review identifies which saved username will be replaced, promises a backup only where a saved target exists, and warns about temporary changes. Importing another username preserves the current saved profile and opens the imported one. Errors retain the current profile; a failed confirmation requires a fresh review. Recovery uses the same review/confirm flow and retains the replaced record as the next backup. Backup download is available even for unreadable original data.
+
+The opt-in demo download uses a distinct Gregular Demo username. New profiles always start empty. A short portability note explains that JSON can move data between browsers and preview origins, while local profiles do not synchronize. Development/Cloudflare footer metadata identifies the build and dataset without altering ordinary static screens. Existing cards, roadmap, colors, typography and navigation remain intact.
 
 ## Character selection
 
@@ -25,14 +29,14 @@ Hover gently lifts the card and strengthens its border; focus receives an equall
 
 The header shows the chosen character and a clear return action. The journal area uses a calm reading hierarchy: page title, current context, then primary planning cards. Side navigation becomes a compact, horizontally scrollable navigation strip on small screens without creating page overflow.
 
-| Section | Prototype experience | Future behavior |
-| --- | --- | --- |
-| Quest journal | Level-aware Next Up from route state and existing personal objectives | Broader reviewed class and travel milestones |
-| Leveling | Character-owned roadmap, editable route, zone/dungeon/personal entries, status and prerequisites | More reviewed Forever records and unlocks |
-| Dungeons | Fictional expedition card, preparation steps and example loot | Level-aware dungeon recommendations, prerequisites and rewards |
-| Talents | Clearly labelled visual planning placeholder | Rank allocation, prerequisite validation, saved builds and progression timeline |
-| Equipment | Example wishlist/item treatment with explicit mock status | Licensed item data, source links and acquisition tracking |
-| Notes | Editable personal notes; custom objectives live in the journal | Richer prioritization and session planning |
+| Section       | Prototype experience                                                                             | Future behavior                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| Quest journal | Level-aware Next Up from route state and existing personal objectives                            | Broader reviewed class and travel milestones                                    |
+| Leveling      | Character-owned roadmap, editable route, zone/dungeon/personal entries, status and prerequisites | More reviewed Forever records and unlocks                                       |
+| Dungeons      | Fictional expedition card, preparation steps and example loot                                    | Level-aware dungeon recommendations, prerequisites and rewards                  |
+| Talents       | Clearly labelled visual planning placeholder                                                     | Rank allocation, prerequisite validation, saved builds and progression timeline |
+| Equipment     | Example wishlist/item treatment with explicit mock status                                        | Licensed item data, source links and acquisition tracking                       |
+| Notes         | Editable personal notes; custom objectives live in the journal                                   | Richer prioritization and session planning                                      |
 
 “Next Up” uses a deterministic planner engine. It prioritizes overdue high-priority personal tasks, active zones and eligible saved work, with a short reason per entry. It excludes completed, skipped, illustrative, inaccessible and blocked content. It shows an empty state when there is no eligible work. Reference readiness is confirmed by the player and never upgrades source confidence. Illustrative talent/item previews retain nearby mock labels.
 
@@ -50,17 +54,17 @@ Dialogs preserve entered values on validation errors, support Escape and return 
 
 ## Visual system
 
-| Token or treatment | Direction |
-| --- | --- |
-| Main background | Deep blue-green charcoal, approximately `#101718` |
-| Surfaces | Warm charcoal stone with gently varied values |
-| Accent | Muted gold, approximately `#d8b66d`, used for primary action and selected navigation |
-| Text | Warm off-white for primary copy; readable muted stone for supporting text |
-| Typography | A restrained editorial or fantasy-influenced display treatment paired with a readable system sans-serif; no required remote font download |
-| Borders and texture | Fine inset lines, low-opacity CSS grain or gradients; preserve text contrast |
-| Class identity | Consistent class accents and original glyphs, always paired with text |
-| Shape and spacing | Detailed but restrained cards, generous internal padding, consistent spacing increments |
-| Motion | Short hover, focus and selection transitions, disabled or reduced under reduced-motion preference |
+| Token or treatment  | Direction                                                                                                                                 |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Main background     | Deep blue-green charcoal, approximately `#101718`                                                                                         |
+| Surfaces            | Warm charcoal stone with gently varied values                                                                                             |
+| Accent              | Muted gold, approximately `#d8b66d`, used for primary action and selected navigation                                                      |
+| Text                | Warm off-white for primary copy; readable muted stone for supporting text                                                                 |
+| Typography          | A restrained editorial or fantasy-influenced display treatment paired with a readable system sans-serif; no required remote font download |
+| Borders and texture | Fine inset lines, low-opacity CSS grain or gradients; preserve text contrast                                                              |
+| Class identity      | Consistent class accents and original glyphs, always paired with text                                                                     |
+| Shape and spacing   | Detailed but restrained cards, generous internal padding, consistent spacing increments                                                   |
+| Motion              | Short hover, focus and selection transitions, disabled or reduced under reduced-motion preference                                         |
 
 Avoid oversized glowing borders, dense dashboard charts, tiny uppercase labels as body copy and decorative lore that obscures task completion. The product's personality comes from typography, composition, character treatments and the journal language.
 

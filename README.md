@@ -1,10 +1,10 @@
 # Gregular — WoW Forever companion
 
-Character management and a functional leveling planner, with browser-local profiles. Pass 2 adds editable routes, zone/dungeon/custom objectives and level-aware Next Up recommendations. The existing **Party / Roll class draft remains unchanged at the root**. This branch does not release the companion to production.
+Character management and a functional leveling planner, with browser-local profiles. Pass 2.5 adds validated JSON import, replacement backups and Cloudflare preview preparation. The existing **Party / Roll class draft remains at the root**. This branch does not release the companion to production.
 
 ## Run the companion
 
-Use Node **22.18+ (22.x)** or **24+** and npm. From the repository directory:
+Use Node **22.18.0**, pinned in `.node-version`, and npm. The application also supports newer 22.x releases or Node 24+. From the repository directory:
 
 ```powershell
 npm ci --ignore-scripts
@@ -17,7 +17,7 @@ Reloading restores this tab's active profile; entering the same username later o
 
 The leveling catalogue contains a few sourced Forever facts; starter order and level windows are **editorial personal plans**, not verified leveling guides. Zone ranges, access rules and missing prerequisites remain explicit unknowns. Talent/item previews remain illustrative. Race/class combinations and the 1–60 planning input range do not promise beta availability. See [progression sources and limitations](docs/progression-data.md).
 
-Existing version-1 profiles migrate without losing characters, notes or objective completion. Their exact original JSON is backed up locally before the first version-2 save. JSON export includes routes and current session changes. **JSON import/restore is deferred**; keep exports outside browser storage if needed.
+Existing version-1 profiles migrate without losing characters, notes or objective completion. Their exact original JSON is backed up locally before the first version-2 save. **Import profile** accepts validated version-1 or version-2 exports, previews the named profile, and requires confirmation before replacement. Replacement creates a recoverable local backup; use **Profile settings → Restore backup** or **Download backup**. Failed or canceled imports leave saved profiles intact. **Export profile** includes routes and current session changes. Keep exports outside browser storage for portability; profiles are not automatically synchronized between browsers or preview URLs.
 
 ## Build and validate
 
@@ -27,10 +27,19 @@ npm test
 npx playwright install chromium
 npm run test:ui
 npm run build
+npm run test:build
 npm run preview
 ```
 
-Preview the combined build at **http://127.0.0.1:5174/companion/** and the preserved class draft at **http://127.0.0.1:5174/**. Development, build preview, and production are different origins, so their local saves are separate. Use one origin consistently during evaluation. `npm run serve` starts only the existing draft on port 4175.
+Preview the combined build at **http://127.0.0.1:5174/companion/** and the preserved class draft at **http://127.0.0.1:5174/**. `npm run test:build` checks the compiled static output, nested assets, redirects, missing paths and class-draft preservation. To run browser coverage against the compiled companion:
+
+```powershell
+$env:COMPANION_BUILT = '1'
+npm run test:companion
+Remove-Item Env:COMPANION_BUILT
+```
+
+Development, build preview and production are different origins, so their local saves are separate. Use a stable Cloudflare branch alias during repeated review, and export/import when changing origins. `npm run serve` starts only the existing draft on port 4175.
 
 On Windows, an installed browser can be used instead of downloading Chromium:
 
@@ -39,7 +48,7 @@ $env:PLAYWRIGHT_EXECUTABLE_PATH = 'C:\Program Files (x86)\Microsoft\Edge\Applica
 npm run test:ui
 ```
 
-The verification workflow runs both unit and browser suites plus the combined build. It does not deploy. Pages currently serves the source tree from `main` `/`; an approved production migration must publish the built `dist/` artifact and verify the custom domain in Pages settings. Simply merging Vite source will not deploy a runnable companion. No DNS or hosting changes are included.
+The verification workflow runs unit, browser and combined-build checks. It does not deploy. A separate Cloudflare Pages Git project can provide automatic PR previews after the owner's one-time account authorization: see [preview setup](docs/preview-setup.md) for exact settings. No real Cloudflare deployment was verified in this pass. GitHub Pages continues serving the source tree from `main` `/`; a future approved production migration must publish `dist/` and verify the custom domain. No DNS or production hosting changes are included.
 
 ## Documentation
 
@@ -49,6 +58,8 @@ The verification workflow runs both unit and browser suites plus the combined bu
 - [Forever data-source feasibility and licensing gaps](docs/game-data-feasibility.md)
 - [Leveling snapshot, provenance and update process](docs/progression-data.md)
 - [Leveling demonstration](docs/leveling-demo.md)
+- [Cloudflare preview setup and stable URLs](docs/preview-setup.md)
+- [Manual acceptance checklist and optional demo profile](docs/manual-qa.md)
 - [Prioritized roadmap and acceptance criteria](docs/roadmap.md)
 - [Validation evidence and limitations](docs/validation.md)
 
@@ -76,11 +87,11 @@ A responsive static shared-screen class draft for friends. Enter player names an
 
 Nine classes: Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Warlock and Warrior. Starting roles are conservative editable group rules:
 
-| Role | Classes |
-| --- | --- |
-| Tank | Warrior, Paladin, Druid |
+| Role   | Classes                        |
+| ------ | ------------------------------ |
+| Tank   | Warrior, Paladin, Druid        |
 | Healer | Priest, Paladin, Druid, Shaman |
-| DPS | All nine |
+| DPS    | All nine                       |
 
 Experimental Shaman tank is an explicit optional toggle, off by default. It is not represented as impossible or as a confirmed launch role. Beta balance and role viability can change; edit the pools for your group.
 
@@ -107,7 +118,7 @@ The versioned browser key is `wow-forever.class-draft.v1`. Saves contain only pl
 
 ## Hosting and recovery
 
-Existing GitHub Pages branch publishing uses `main` `/` with CNAME `gregular.org` and unchanged DNS. `.github/workflows/site.yml` verifies changes on push/PR; it does not deploy independently. No manual workflow dispatch or trading updater is needed. The public build allowlist is `index.html`, `assets/`, `CNAME`, `.nojekyll`; the existing root publishing setup can also expose other public source files, which contain no credentials or player saves.
+Existing GitHub Pages branch publishing uses `main` `/` with CNAME `gregular.org` and unchanged DNS. `.github/workflows/site.yml` verifies changes on push/PR; it does not deploy independently. The combined build copies only `index.html`, `assets/`, `CNAME`, `.nojekyll` from the original tool, generates routing/404 files, and adds the compiled `companion/` assets. Cloudflare feature builds add a small companion link to the copied root page. The original root source stays unchanged; GitHub Pages branch publishing can also expose other public source files, which contain no credentials or player saves.
 
 Briarwick was preserved before replacement in the remote branch **`archive/briarwick-2026-10-01`**, verified at **`64ae5b4328296bb4fd20e83f0b9e9f3adf60216e`**. Its original isolated local checkout is also preserved. The class-draft main tree contains no Briarwick game route, story/save modules, town artwork or game preview scripts. No archive copy is deployed. To restore later, create a reviewed restoration branch from that archive and merge it normally; history is never rewritten.
 

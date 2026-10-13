@@ -1,73 +1,50 @@
-# Leveling planner validation
+# Preview and profile recovery validation
 
-Pass 2 builds on reviewed prototype commit `7ccd1aa`, on `codex/leveling-planner`, targeting `codex/forever-companion-prototype`. PR #1 remains unmerged. Validation used Windows, Node 22.18.0, npm 10.9.3 and installed Microsoft Edge through Playwright's Chromium engine on 13 October 2026 (Pacific/Auckland).
+Pass 2.5 builds on `codex/leveling-planner` at `7a04b75`, on `codex/pr-previews-profile-import`, targeting the leveling branch. PR #1 and PR #2 remain unmerged. Validation used Node 22.18.0, Windows and installed Edge through Playwright's Chromium engine on 13 October 2026 (Pacific/Auckland).
 
 ## Results
 
-| Check | Result | Scope |
-| --- | --- | --- |
-| TypeScript | Pass | Strict checking across UI, planner, migration and reference types. |
-| Clean install | Pass | `npm ci --ignore-scripts`; 50 packages audited, zero reported vulnerabilities at execution time. |
-| Original class-draft unit tests | 24 passed | Existing ordering, matching, randomness, persistence and recovery. |
-| Companion unit tests | 71 passed | 36 domain/repository tests and 35 planner/dataset tests. |
-| Original class-draft browser tests | 21 passed | Existing tool, accessibility, responsive behavior and saved-state recovery. |
-| Leveling browser tests | 12 passed | New end-to-end workflows, export, migration, accessibility and responsive checks. |
-| Full companion browser tests | 32 passed in 44.8 seconds | Existing 20 scenarios plus 12 leveling workflows, against final compiled `/companion/`. |
-| Combined static build | Pass | Legacy public files plus compiled `/companion/`; no deployment. |
-| Preservation | Pass | No changes to root `index.html`, `assets/`, `CNAME`, `.nojekyll`, build/server scripts, deployment workflow, package manifests or original draft tests/config. Built root HTML and CNAME hashes match source. |
-| Whitespace | Pass | `git diff --check`. |
+| Check                            | Result                    | Scope                                                                                                                      |
+| -------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| TypeScript                       | Pass                      | Strict checking across the companion and new transfer UI/model.                                                            |
+| Original unit tests              | 24 passed                 | Preserved class-draft behavior.                                                                                            |
+| Companion unit tests             | 117 passed                | Existing planner/domain/repository coverage plus transfer, recovery and optional demo validation.                          |
+| Compiled output                  | 9 passed                  | Root preservation, nested assets/MIME types, redirects, queries, hash documents, demo download, 404s and output allowlist. |
+| Ordinary build                   | Pass                      | Original draft at `/`, companion at `/companion/`; no deployment.                                                          |
+| Simulated Cloudflare build       | Pass                      | `CF_PAGES=1` feature build; 9 output checks and desktop/mobile browser smoke checks.                                       |
+| Full browser suite               | 66 passed                 | Original 21 cases and companion 45 cases, including 13 new import/recovery cases.                                          |
+| Compiled companion browser suite | 45 passed in 51.0 seconds | All 45 cases against the nested compiled `/companion/` route.                                                              |
+| Whitespace                       | Pass                      | `git diff --check`.                                                                                                        |
 
-Planner tests cover blank creation, immutable edits, stable IDs, reordering, completion/skipping, explicit prerequisites, missing prerequisites, faction restrictions, level changes, priorities, empty states, different character levels, announced bands versus entry minima, player access gates, unavailable content, reviewed beta cap, missing/changed records and non-destructive template restoration. Dataset tests enforce source linkage and the distinction between unknown facts and editorial planning windows.
+The 44 new transfer/repository tests cover v1 migration, v2 round-trip, stable IDs and supported data, malformed/newer/duplicate records, no writes during preview, single-use confirmation, exact backup, restore reversal, quota/read failures, revision overflow, target/backup interference, invalidated review tokens and stale normal saves after replacement. Two demo tests validate its shape and distinct Next Up results. Existing planner policy and catalogue tests remain unchanged.
 
-Migration tests preserve profile/character/objective IDs, notes and completed legacy objectives. Version-1 loads do not write storage. The first new save keeps the exact v1 JSON backup before upgrading; failed backups, quota errors, invalid/newer profiles and stale tabs remain protected. Repeated migration reads use stable planner IDs. Missing snapshot references and older dataset versions survive saves.
+Browser coverage includes actual file selection and demo download, cancellation and keyboard confirmation, export into an independent browser context, invalid-file preservation, v1 import, exact backup download, restore/cancel, another-tab edits, backup failure, username isolation, direct hash navigation and reload. New accessibility checks scan import and recovery at 1440, 820, 390 and 320px. They retain axe WCAG 2 A/AA and 2.1 AA rules and separate horizontal-overflow assertions. Existing class-draft, character CRUD, planner, keyboard and mock-section checks still run.
 
-Browser workflows exercise a test-created Horde Troll Priest at level 24, personal/zone/dungeon CRUD, route renaming/reordering, template restoration, completion/skipping, level-driven Next Up, access and prerequisites, character/username isolation, reload, real seeded v1 migration, invalid ranges, missing references, export, multi-tab conflicts and keyboard focus. No test character is seeded into user profiles.
+The file-picker description was separated from its accessible label. The demo link has a persistent underline so users do not need to distinguish it by text color alone. Review also caught a temporary-change warning that needed to cover switching to another imported username; confirmation now warns before leaving any temporary current state behind.
 
 ## Reproduce
 
-```powershell
-npm ci --ignore-scripts
-npm run typecheck
-npm test
-npx playwright install chromium
-npm run test:ui
-npm run build
-$env:COMPANION_BUILT = '1'
-npm run test:companion
-```
+Follow [manual-qa.md](manual-qa.md) for commands and acceptance checks. Run `npm test`, `npm run test:ui`, `npm run build`, `npm run test:build`, then `COMPANION_BUILT=1 npm run test:companion` (use the documented PowerShell environment syntax on Windows). CI performs the same verification, including compiled browser tests. It publishes nothing.
 
-On Windows, `PLAYWRIGHT_EXECUTABLE_PATH` can point to installed Edge instead of downloading Chromium; see the README. Built mode starts the combined preview on port 5174 with the companion at `/companion/`. Development uses port 5173; these are different local-storage origins. Use one origin consistently for personal testing.
+The optional fixture is `companion/public/demo-profile-v2.json`; it is downloadable through Profile settings and never loaded by default. Browser tests use isolated contexts rather than real user profiles. Generated screenshots are ignored under `artifacts/profile-{import,recovery}-{desktop,tablet,mobile,compact mobile}.png`; final copies accompany the deliverables.
 
-This environment requires escalated execution for local sockets and browser processes. No production publication or settings changes were performed. Browser runs use separate output folders when run concurrently so Playwright does not delete another suite's trace artifacts.
+Final compiled sizes: HTML 0.69 kB (0.40 kB gzip), CSS 46.03 kB (10.46 kB gzip), JavaScript 304.27 kB (92.38 kB gzip). Entry assets total about 103 kB compressed, excluding the small favicon and opt-in demo download. No runtime packages, credentials, artwork, remote APIs or game-data expansion were added.
 
-## Visual and accessibility review
+## Preservation and remote limits
 
-New roadmap screenshots are generated under ignored `artifacts/leveling-{desktop,tablet,mobile}.png` at 1440x1000, 820x1100 and 390x844 viewports. Copies accompany the chat deliverables. Existing browser coverage also checks 320, 390, 768 and 1440px companion layouts and the original draft's five responsive widths.
+The root `index.html`, `assets/`, `CNAME`, `.nojekyll`, legacy tests and draft save namespace are unchanged. Ordinary build output retains original root asset bytes; only Cloudflare feature builds add a small companion link to the root artifact. Existing verification CI gained Node pinning and compiled checks, with read-only permissions and no deployment jobs.
 
-Automated axe WCAG 2 A/AA and 2.1 AA checks cover the roadmap, populated editor and Next Up at all three new sizes, alongside existing entry/roster/journal/notes/mock screens. Page overflow is checked separately. Native disclosures, selects and named arrow buttons support keyboard/touch without drag-and-drop. Reduced motion is enabled in new browser workflows. Completing a Next Up entry restores focus to a remaining action or the panel.
+Read-only GitHub checks confirmed main `c150706`, prototype `7ccd1aa`, leveling `7a04b75` and archive `64ae5b4`. GitHub Pages remains legacy publishing from `main` `/`, custom domain `gregular.org`. No branch merge, production publishing, Pages setting, DNS or archive change was performed.
 
-The compiled entry uses system fonts and existing original SVG/CSS. No artwork downloads, game-data requests, analytics, external tooltip scripts, credentials or new runtime packages are introduced.
+No authenticated Cloudflare dashboard or preview deployment checks were available. Native setup, stable aliases and PR-specific instructions are in [preview-setup.md](preview-setup.md). A local simulation verifies repository behavior, not Cloudflare's deployed redirects, actual hostname, GitHub App authorization or remote build status. The owner must connect the account and complete the documented first remote acceptance checks. Remote GitHub CI status is reported separately in the PR and handoff.
 
-Final asset sizes: HTML 0.69 kB (0.40 kB gzip), CSS 43.89 kB (10.01 kB gzip), JavaScript 293.06 kB (89.51 kB gzip). Combined compressed entry is about 100 kB, excluding the small existing favicon.
+## Remaining limitations
 
-## Limits and follow-up
+- Profiles remain browser-local lookup data, without secure authentication or automatic synchronization. Stable aliases retain an origin but do not share data with other previews/devices.
+- Replacement is deliberate, not a merge. Import opens the file's username. Only the most recent replacement backup is retained per username; export for lasting recovery. The original v1 migration backup stays separate.
+- Exactly simultaneous local-storage writes are not atomic. Observed stale target/backup content is checked before and after backup creation. A backend must eventually supply atomic conditional writes.
+- Backups contain saved records, not unsaved notes or temporary session edits. Export those before replacement or switching profiles.
+- Browser coverage uses Chromium/Edge locally and Chromium in CI; Safari, Firefox, actual touch hardware and manual screen-reader validation are not covered.
+- Forever data limitations, editorial template labels and illustrative talent/item/dungeon previews are unchanged; see [progression-data.md](progression-data.md).
 
-- Game facts are source-reviewed, not verified in a game client. Six zones and three dungeons are linked to official beta notes; no zone level ranges, entrance minima, quest chains, rewards or faction quest coverage are inferred. Two starter routes are explicitly editorial scaffolds. See [progression-data.md](progression-data.md).
-- The reviewed beta cap is 30. The 1–60 personal planning range remains provisional; reference recommendations beyond the reviewed cap are blocked. User-created plans can describe future activities.
-- JSON export includes schema 2 and routes. Import/restore remains deferred so replacement previews, validation and recovery can be implemented together. The v1 browser backup is not a cross-device backup.
-- Browser-local raw/revision checks reject observed stale writes; exactly simultaneous writes are not atomic. No backend, multiplayer or authenticated accounts exist.
-- Local checks use Windows Edge/Chromium. CI uses Linux Chromium. Firefox, Safari, real touch hardware and a manual screen-reader review are not covered.
-- Automated accessibility checks cover examined states, not all possible assistive-technology behavior.
-- Notes still save explicitly; leaving unsaved notes has no navigation guard. Planner objective dialogs preserve their draft on validation errors.
-- Talent, item and standalone dungeon previews remain illustrative. Actual loot tables, talent allocation and automatic game synchronization remain outside this pass.
-- Production still serves the unchanged class draft from `main`. Main, archive branches, Pages configuration and DNS must remain unchanged. The draft review does not authorize deployment.
-
-## Final compiled and remote verification
-
-The final compiled companion passed all 32 scenarios, including export, migration, template restoration and the three screenshot/accessibility workflows. The original tool passed all 21 browser cases separately. Both root and companion preview entries were checked for HTTP responses; root HTML and CNAME hashes match source. Screenshots were visually inspected at desktop, tablet and mobile sizes.
-
-Remote checks confirmed the prototype still at `7ccd1aa`, main at `c150706` and the Briarwick archive at `64ae5b4` before publication of the new branch. Draft-PR CI status is reported in the PR and final handoff separately; local results do not imply remote CI completion. First-pass evidence remains available in the prototype base commit `7ccd1aa`.
-
-The first Linux CI run passed all new leveling workflows but caught the existing mock-section accessibility scan during a section opacity animation. The test now waits for the selected navigation state and rendering frames before enumerating and awaiting animations, and asserts full opacity before scanning. The contrast rule remains enabled; the check measures the fully rendered screen. This change addresses a render-timing race rather than excluding the affected content. The final focused accessibility workflow passed three consecutive compiled runs after this correction.
-
-The subsequent CI run passed that accessibility check and exposed a separate keyboard-test setup race: programmatically focusing an objective could precede the page's scheduled navigation focus. The keyboard workflow now waits for selected navigation and main-content focus before activating the objective. It still checks completion, prerequisite release and focus on the next action.
+Earlier Pass 2 validation remains in base commit `7a04b75`; this report records the current pass.

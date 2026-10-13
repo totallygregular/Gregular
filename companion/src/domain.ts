@@ -344,18 +344,18 @@ function validateProfileVersion(value: unknown, version: 1 | 2): Profile {
   const characters = candidate.characters.map((value): Character => {
     const character = record(value, "Saved character");
     const characterId = id(character.id, "Character ID");
-    if (characterIds.has(characterId))
+    if (characterIds.has(characterId.toLowerCase()))
       return invalid("The profile contains duplicate character IDs.");
-    characterIds.add(characterId);
+    characterIds.add(characterId.toLowerCase());
     if (!Array.isArray(character.objectives))
       return invalid("The objective list is invalid.");
     const objectiveIds = new Set<string>();
     const objectives = character.objectives.map((value): Objective => {
       const objective = record(value, "Saved objective");
       const objectiveId = id(objective.id, "Objective ID");
-      if (objectiveIds.has(objectiveId))
+      if (objectiveIds.has(objectiveId.toLowerCase()))
         return invalid("The character contains duplicate objective IDs.");
-      objectiveIds.add(objectiveId);
+      objectiveIds.add(objectiveId.toLowerCase());
       if (typeof objective.completed !== "boolean")
         return invalid("Saved objective completion is invalid.");
       if (objective.priority !== "normal" && objective.priority !== "high")
