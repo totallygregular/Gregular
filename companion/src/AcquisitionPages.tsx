@@ -46,6 +46,9 @@ import type {
   WishlistStatus,
 } from "./acquisitionTypes";
 import "./acquisition.css";
+import { ItemPortrait, ProviderInspector, useProviderIcons } from "./ItemPresentation";
+import { providerNames, type TooltipProvider } from "./itemProviders";
+import { characterHash } from "./navigation";
 
 export interface AcquisitionPageProps {
   character: Character;
@@ -271,12 +274,14 @@ function SourceList({
 function ItemDetails({
   item,
   data,
+  open = false,
 }: {
   item: ItemRecord;
   data: AcquisitionDataset;
+  open?: boolean;
 }) {
   return (
-    <details>
+    <details open={open || undefined}>
       <summary>Item details and sources</summary>
       <dl className="acquisition-stats">
         <div>
@@ -330,6 +335,11 @@ export function EquipmentPage(props: AcquisitionPageProps) {
   const state = character.acquisition;
   const data = resolveAcquisition(state, acquisitionCatalogue);
   const { change, status } = useChanges(props);
+  const [provider, setProvider] = useState<TooltipProvider>(() => { try { return sessionStorage.getItem("gregular.item-provider") === "foreverdb" ? "foreverdb" : "local"; } catch { return "local"; } });
+  useEffect(() => { try { sessionStorage.setItem("gregular.item-provider", provider); } catch { /* optional UI preference */ } }, [provider]);
+  const [inspected, setInspected] = useState<ItemRecord | null>(null);
+  const [view, setView] = useState("grid");
+  const { icons, bridge } = useProviderIcons(provider, acquisitionCatalogue.items.flatMap(i => i.gameId ? [i.gameId] : []));
   const [query, setQuery] = useState("");
   const [slot, setSlot] = useState("");
   const [quality, setQuality] = useState("");
@@ -344,7 +354,7 @@ export function EquipmentPage(props: AcquisitionPageProps) {
   const [sourceItem, setSourceItem] = useState<ItemRecord | null>(null);
   const results = data.items.filter(
     (item) =>
-      item.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()) &&
+      item.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) &&
       (!slot || item.slot === slot) &&
       (!quality || item.quality === quality) &&
       (!equipmentType || item.equipmentType === equipmentType) &&
@@ -388,6 +398,7 @@ export function EquipmentPage(props: AcquisitionPageProps) {
         Missing fields remain unknown. Personal items and source links are
         labelled user supplied. The catalogue works offline.
       </p>
+      {bridge}
       <section className="panel">
         <div className="acquisition-heading">
           <h3>Equipment finder</h3>
@@ -399,6 +410,11 @@ export function EquipmentPage(props: AcquisitionPageProps) {
             Add personal item
           </button>
         </div>
+        <div className="equipment-controls">
+          <label>Item details service<select aria-label="Item details service" value={provider} onChange={e => setProvider(e.target.value as TooltipProvider)}>{Object.entries(providerNames).filter(([id]) => id !== "wow-forever").map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
+          <div className="acquisition-actions" aria-label="Equipment view"><button className="secondary" aria-pressed={view === "grid"} onClick={() => setView("grid")}>Grid</button><button className="secondary" aria-pressed={view === "list"} onClick={() => setView("list")}>List</button></div>
+        </div>
+        <p className="acquisition-muted">Inspect an icon for details. Optional services contact the selected provider; local details always work. {provider === "foreverdb" && <a href="https://foreverdb.net/embed" target="_blank" rel="noreferrer">Icons & tooltips by ForeverDB</a>}{provider === "wow-forever" && <a href="https://wow-forever.gg/developers/#tooltips" target="_blank" rel="noreferrer">Tooltips by wow-forever.gg</a>}</p>
         <div className="acquisition-filters">
           <label>
             Item name
@@ -444,6 +460,7 @@ export function EquipmentPage(props: AcquisitionPageProps) {
             </select>
           </label>
         </div>
+        <details className="equipment-extra-filters"><summary>More item filters</summary>
         <div className="acquisition-filters secondary-filters">
           <label>
             Equipment type
@@ -486,20 +503,21 @@ export function EquipmentPage(props: AcquisitionPageProps) {
             Level and class filters include known matching fields only.
           </p>
         </div>
+        </details>
         <p className="acquisition-muted" role="status">
           {results.length} matching {results.length === 1 ? "item" : "items"}
         </p>
         {results.length ? (
-          <div className="acquisition-grid">
+          <div className={`acquisition-grid equipment-results ${view === "list" ? "is-list" : ""}`}>
             {results.map((item) => {
               const existing = state.wishlist.find(
                 (entry) => entry.itemId === item.id,
               );
               return (
                 <article className="acquisition-card" key={item.id}>
-                  <h4 className={`acquisition-quality-${item.quality}`}>
+                  <div className="equipment-card-heading"><ItemPortrait item={item} icon={item.gameId ? icons[item.gameId] : undefined} inspect={setInspected} /><h4 className={`acquisition-quality-${item.quality}`}>
                     {item.name}
-                  </h4>
+                  </h4></div>
                   <div className="acquisition-badges">
                     <span className="acquisition-badge">
                       {item.quality} quality
@@ -521,6 +539,7 @@ export function EquipmentPage(props: AcquisitionPageProps) {
                       ? `Requires level ${item.requiredLevel}`
                       : "Required level unknown"}
                   </p>
+                  <p className="equipment-source-summary">{item.sourceIds.length ? [...new Set(item.sourceIds.map(id => methodNames[data.sources.find(s => s.id === id)?.method ?? "unknown"]))].join(" · ") : "Unknown source"}</p>
                   <ItemDetails item={item} data={data} />
                   <div className="acquisition-actions">
                     <button
@@ -624,6 +643,9 @@ export function EquipmentPage(props: AcquisitionPageProps) {
                 saving={saving}
                 change={change}
                 addSource={setSourceItem}
+                characterId={character.id}
+                inspect={setInspected}
+                icons={icons}
               />
             ))}
           </div>
@@ -638,6 +660,7 @@ export function EquipmentPage(props: AcquisitionPageProps) {
         </p>
       </section>
       {status}
+      {inspected && <Modal title={inspected.name} close={() => setInspected(null)}><div className="item-inspection"><ProviderInspector item={inspected} provider={provider} /><ItemDetails item={inspected} data={data} open /></div></Modal>}
       {manualItem && (
         <ManualItemForm
           saving={saving}
@@ -696,7 +719,13 @@ function WishlistCard({
   saving,
   change,
   addSource,
+  characterId,
+  inspect,
+  icons,
 }: {
+  characterId: string;
+  inspect: (item: ItemRecord) => void;
+  icons: Record<number, string>;
   entry: WishlistEntry;
   item?: ItemRecord;
   data: AcquisitionDataset;
@@ -708,9 +737,9 @@ function WishlistCard({
   useEffect(() => setNotes(entry.notes), [entry.notes]);
   return (
     <article className="acquisition-card">
-      <h4 className={`acquisition-quality-${item?.quality || "unknown"}`}>
+      <div className="equipment-card-heading">{item && <ItemPortrait item={item} icon={item.gameId ? icons[item.gameId] : undefined} inspect={inspect} />}<h4 className={`acquisition-quality-${item?.quality || "unknown"}`}>
         {item?.name || `Unavailable item · ${entry.itemId}`}
-      </h4>
+      </h4></div>
       <div className="acquisition-badges">
         <span
           className={`acquisition-badge ${entry.status === "acquired" ? "is-complete" : ""}`}
@@ -782,6 +811,7 @@ function WishlistCard({
           Choose a source to show the linked quest or dungeon goal.
         </p>
       ) : null}
+      {entry.preferredSourceId && (() => { const source = data.sources.find(s => s.id === entry.preferredSourceId); const section = source?.method === "craft" ? "professions" : source?.questId ? "quests" : source?.dungeonId ? "dungeons" : undefined; return section ? <p className="equipment-source-summary"><a href={`#${characterHash(characterId, section)}`}>Open {section === "professions" ? "crafting preparation" : section === "quests" ? "quest goal" : "dungeon goal"}</a></p> : null; })()}
       {item && <ItemDetails item={item} data={data} />}
       <details>
         <summary>Personal notes and management</summary>

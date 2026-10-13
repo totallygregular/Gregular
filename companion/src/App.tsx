@@ -1,3 +1,4 @@
+import { ProfessionsPage } from "./ProfessionsPage";
 import {
   useEffect,
   useMemo,
@@ -176,6 +177,7 @@ export function App() {
           ? "Saved in this browser"
           : `${result.message || "Could not save."} Changes in this tab are temporary; download a backup before leaving.`,
       );
+      // Success here means applied to this tab; the save bar separately reports persistence.
       return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not make that change.");
@@ -485,6 +487,7 @@ export function App() {
                     <Talents character={character} />
                   )}
                   {route.section === "equipment" && <EquipmentPage character={character} saving={saving} onChange={(state) => commit((p) => setCharacterAcquisition(p, character.id, state))} />}
+                  {route.section === "professions" && <ProfessionsPage character={character} saving={saving} onChange={(next) => commit(p => ({...p, characters: p.characters.map(c => c.id === character.id ? next : c)}))} onNavigate={(section) => go(character.id, section)} />}
                   {route.section === "notes" && (
                     <Notes
                       character={character}

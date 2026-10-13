@@ -1,10 +1,11 @@
 import { createBlankPlanner, validatePlanner } from "./planner";
 import type { CharacterPlanner } from "./progressionTypes";
 import { createBlankAcquisition, validateAcquisition } from "./acquisition";
-import type { CharacterAcquisition } from "./acquisitionTypes";
+import type { CharacterAcquisition, CharacterCrafting } from "./acquisitionTypes";
+import { createBlankCrafting, validateCrafting } from "./crafting";
 
 /** Saved character labels stay import-compatible; new editor choices use reviewed Forever data. */
-export const PROFILE_SCHEMA_VERSION = 3 as const;
+export const PROFILE_SCHEMA_VERSION = 4 as const;
 
 export type CharacterStatus = "planned" | "leveling" | "paused";
 export type ObjectivePriority = "high" | "normal";
@@ -32,6 +33,7 @@ export interface Character extends CharacterDraft {
   notes: string;
   planner: CharacterPlanner;
   acquisition: CharacterAcquisition;
+  crafting: CharacterCrafting;
 }
 
 export interface Profile {
@@ -189,6 +191,7 @@ export function createCharacter(
     notes: "",
     planner: createBlankPlanner(),
     acquisition: createBlankAcquisition(),
+    crafting: createBlankCrafting(),
   };
 }
 
@@ -323,6 +326,12 @@ export function setCharacterAcquisition(profile: Profile, characterId: string, a
   return mapCharacter(profile, characterId, (character) => ({ ...character, acquisition: checked }));
 }
 
+/** Crafting state belongs only to the selected character. */
+export function setCharacterCrafting(profile: Profile, characterId: string, crafting: CharacterCrafting): Profile {
+  const checked = validateCrafting(crafting);
+  return mapCharacter(profile, characterId, (character) => ({ ...character, crafting: checked }));
+}
+
 /** Validates untrusted persisted data and returns a fresh, known-shape object. */
 export function validateProfile(value: unknown): Profile {
   return validateProfileVersion(value, PROFILE_SCHEMA_VERSION);
@@ -333,10 +342,11 @@ export function migrateProfile(value: unknown): Profile {
   const candidate = record(value, "Profile");
   if (candidate.schemaVersion === 1) return validateProfileVersion(value, 1);
   if (candidate.schemaVersion === 2) return validateProfileVersion(value, 2);
+  if (candidate.schemaVersion === 3) return validateProfileVersion(value, 3);
   return validateProfile(value);
 }
 
-function validateProfileVersion(value: unknown, version: 1 | 2 | 3): Profile {
+function validateProfileVersion(value: unknown, version: 1 | 2 | 3 | 4): Profile {
   const candidate = record(value, "Profile");
   if (candidate.schemaVersion !== version)
     return invalid("This profile uses an unsupported storage version.");
@@ -392,6 +402,7 @@ function validateProfileVersion(value: unknown, version: 1 | 2 | 3): Profile {
           ? createBlankPlanner("My route", characterId)
           : validatePlanner(character.planner),
       acquisition: version < 3 ? createBlankAcquisition() : validateAcquisition(character.acquisition),
+      crafting: version < 4 ? createBlankCrafting() : validateCrafting(character.crafting),
     };
   });
   return {

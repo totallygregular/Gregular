@@ -131,7 +131,7 @@ test("creates a Troll Priest with opted-in sample objectives and keeps it after 
   for (const text of ["Troll Priest", "Holy", "0 / 3 objectives"])
     await expect(page.locator(".character-card")).toContainText(text);
   const before = await saved(page);
-  expect(before.schemaVersion).toBe(3);
+  expect(before.schemaVersion).toBe(4);
   expect(before.characters[0].id).toMatch(/^[a-f0-9-]{36}$/);
   await page.reload();
   await expect(

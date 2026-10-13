@@ -12,6 +12,9 @@ const mittens = "https://foreverdb.net/item/270030";
 const mittensWowhead =
   "https://www.wowhead.com/forever/item=270030/tattered-mittens";
 const boots = "https://foreverdb.net/item/6335";
+const copperVest = "https://foreverdb.net/item/10421";
+const glowingBoots = "https://foreverdb.net/item/250482";
+const blacksmithing = "https://foreverdb.net/profession/blacksmithing";
 
 function evidence(
   url: string,
@@ -25,10 +28,12 @@ function evidence(
  * Sparse editorial facts, manually reviewed against explicitly Forever sources.
  * This is a starter catalogue, not a database import or an in-client validation.
  * No source prose, icons, maps, drop rates or Classic fallback facts are copied.
- * Review notes and reuse limits: docs/acquisition-data-feasibility.md.
+ * Review notes and reuse limits: docs/acquisition-data-feasibility.md and
+ * docs/item-data-integration.md. Recipe IDs are local reference identities,
+ * never an inferred game spell ID. Material game IDs are unknown here.
  */
 export const acquisitionDataset: AcquisitionDataset = {
-  version: "forever-acquisition-2026-10-14.1",
+  version: "forever-acquisition-2026-10-14.2",
   reviewedAt,
   items: [
     {
@@ -120,6 +125,63 @@ export const acquisitionDataset: AcquisitionDataset = {
         },
       ),
     },
+    {
+      id: "forever:item:10421",
+      gameId: 10421,
+      name: "Rough Copper Vest",
+      quality: "uncommon",
+      slot: "Chest",
+      equipmentType: "Mail",
+      requiredLevel: 2,
+      stats: [
+        { label: "Armor", value: "108" },
+        { label: "Stamina", value: "+1" },
+      ],
+      classRestrictions: [],
+      sourceIds: ["forever:source:10421-craft"],
+      evidence: evidence(
+        copperVest,
+        "ForeverDB's client snapshot (build 1.60.1.70338, extracted 2026-10-13) identifies the changed uncommon Forever vest and these values. Recipe learning source and class restrictions are unknown. Gregular has not checked crafting in the game client.",
+        {
+          identity: copperVest,
+          quality: copperVest,
+          slot: copperVest,
+          equipmentType: copperVest,
+          requiredLevel: copperVest,
+          stats: copperVest,
+        },
+      ),
+    },
+    {
+      id: "forever:item:250482",
+      gameId: 250482,
+      name: "Glowing Copper Boots",
+      quality: "rare",
+      slot: "Feet",
+      equipmentType: "Mail",
+      requiredLevel: 10,
+      stats: [
+        { label: "Armor", value: "109" },
+        { label: "Intellect", value: "+4" },
+        { label: "Healing power", value: "+9" },
+        { label: "Spell damage", value: "+3" },
+      ],
+      classRestrictions: [],
+      sourceIds: ["forever:source:250482-craft"],
+      evidence: evidence(
+        glowingBoots,
+        "ForeverDB's client snapshot (build 1.60.1.70338, extracted 2026-10-13) identifies these new Forever boots and values. The provider labels them bind-on-pickup; another-crafter planning does not establish transferability. Recipe learning source and class restrictions are unknown. Not independently checked in the game client.",
+        {
+          identity: glowingBoots,
+          quality: glowingBoots,
+          slot: glowingBoots,
+          equipmentType: glowingBoots,
+          requiredLevel: glowingBoots,
+          stats: glowingBoots,
+          binding: glowingBoots,
+        },
+      ),
+    },
   ],
   sources: [
     {
@@ -151,7 +213,82 @@ export const acquisitionDataset: AcquisitionDataset = {
         { itemToQuest: `${url} ; ${bookOfUr}` },
       ),
     })),
+    ...[
+      ["10421", "Rough Copper Vest", "rough-copper-vest", copperVest],
+      ["250482", "Glowing Copper Boots", "glowing-copper-boots", glowingBoots],
+    ].map(([id, name, recipe, url]) => ({
+      id: `forever:source:${id}-craft`,
+      itemIds: [`forever:item:${id}`],
+      method: "craft" as const,
+      label: `Blacksmithing · ${name}`,
+      recipeId: `forever:recipe:${recipe}`,
+      availability: "unknown" as const,
+      evidence: evidence(
+        url,
+        "ForeverDB identifies Blacksmithing as this item's client-derived crafting source. Its profession list supplies the recipe skill and material quantities. Learning source, current character access and special crafting requirements are unknown; no Classic trainer fallback is included.",
+        { itemToRecipe: `${url} ; ${blacksmithing}`, profession: blacksmithing },
+      ),
+    })),
   ],
+  recipes: [
+    {
+      id: "forever:recipe:rough-copper-vest",
+      name: "Rough Copper Vest",
+      itemId: "forever:item:10421",
+      profession: "Blacksmithing",
+      requiredSkill: 1,
+      sourceIds: [],
+      materials: [{ materialId: "forever:material:copper-bar", quantity: 4 }],
+      materialCompleteness: "complete",
+      evidence: evidence(
+        blacksmithing,
+        "The reviewed ForeverDB recipe list (build 1.60.1.70338, extracted 2026-10-13) lists Blacksmithing skill 1 and 4 Copper Bar. Complete describes this provider-listed reagent set, not a verified learning source or in-client crafting test. Recipe game ID and special requirements remain unknown.",
+        {
+          output: copperVest,
+          profession: blacksmithing,
+          requiredSkill: blacksmithing,
+          materials: blacksmithing,
+        },
+      ),
+    },
+    {
+      id: "forever:recipe:glowing-copper-boots",
+      name: "Glowing Copper Boots",
+      itemId: "forever:item:250482",
+      profession: "Blacksmithing",
+      requiredSkill: 35,
+      sourceIds: [],
+      materials: [
+        { materialId: "forever:material:copper-bar", quantity: 2 },
+        { materialId: "forever:material:lesser-magic-essence", quantity: 4 },
+        { materialId: "forever:material:light-leather", quantity: 2 },
+      ],
+      materialCompleteness: "complete",
+      evidence: evidence(
+        blacksmithing,
+        "The reviewed ForeverDB recipe list (build 1.60.1.70338, extracted 2026-10-13) lists Blacksmithing skill 35, 2 Copper Bar, 4 Lesser Magic Essence and 2 Light Leather. Complete describes the provider-listed reagent set. Learning source, recipe game ID and special requirements remain unknown. The finished item is labelled bind-on-pickup; transferability is not asserted.",
+        {
+          output: glowingBoots,
+          profession: blacksmithing,
+          requiredSkill: blacksmithing,
+          materials: blacksmithing,
+        },
+      ),
+    },
+  ],
+  materials: [
+    ["copper-bar", "Copper Bar"],
+    ["lesser-magic-essence", "Lesser Magic Essence"],
+    ["light-leather", "Light Leather"],
+  ].map(([id, name]) => ({
+    id: `forever:material:${id}`,
+    name,
+    evidence: evidence(
+      blacksmithing,
+      "Material name reviewed in ForeverDB's Forever Blacksmithing recipe list (build 1.60.1.70338, extracted 2026-10-13). Numeric material game ID, acquisition sources and ownership remain unknown. Collected quantities belong to individual character crafting goals.",
+      { name: blacksmithing },
+    ),
+  })),
   quests: [
     {
       id: "forever:quest:1013",

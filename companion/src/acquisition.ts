@@ -1,3 +1,4 @@
+import { validateCraftingCatalogue } from "./crafting";
 import type {
   AcquisitionDataset,
   AcquisitionDungeon,
@@ -192,6 +193,7 @@ function source(value: unknown): AcquisitionSource {
     ...optionalRef(candidate.questId, "questId"),
     ...optionalRef(candidate.dungeonId, "dungeonId"),
     ...optionalRef(candidate.npcId, "npcId"),
+    ...optionalRef(candidate.recipeId, "recipeId"),
     ...optionalRef(candidate.zoneId, "zoneId"),
     ...optionalText(candidate.zoneName, "zoneName"),
     ...optionalText(candidate.bossName, "bossName"),
@@ -384,6 +386,7 @@ export function validateAcquisition(value: unknown): CharacterAcquisition {
 export function validateAcquisitionDataset(value: unknown): AcquisitionDataset {
   const candidate = object(value, "Acquisition catalogue");
   const dataset: AcquisitionDataset = {
+    ...validateCraftingCatalogue(candidate),
     version: text(candidate.version, "Catalogue version", 100),
     reviewedAt: text(candidate.reviewedAt, "Catalogue review date", 40),
     items: unique(

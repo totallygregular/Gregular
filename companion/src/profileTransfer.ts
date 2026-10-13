@@ -14,11 +14,13 @@ export interface ProfileTransferSummary {
   questGoals: number;
   questChains: number;
   dungeonGoals: number;
+  professions: number;
+  craftingGoals: number;
 }
 
 export interface ParsedProfileTransfer {
   profile: Profile;
-  sourceSchemaVersion: 1 | 2 | 3;
+  sourceSchemaVersion: 1 | 2 | 3 | 4;
   summary: ProfileTransferSummary;
 }
 
@@ -38,9 +40,9 @@ export function parseProfileTransfer(text: string): ParsedProfileTransfer {
     typeof value === "object" && value !== null && "schemaVersion" in value
       ? value.schemaVersion
       : undefined;
-  if (version !== 1 && version !== 2 && version !== 3)
+  if (version !== 1 && version !== 2 && version !== 3 && version !== 4)
     throw new ValidationError(
-      "This profile uses an unsupported storage version. Import a version-1, version-2 or version-3 profile.",
+      "This profile uses an unsupported storage version. Import a version-1, version-2, version-3 or version-4 profile.",
     );
   const profile = migrateProfile(value);
   const entries = profile.characters.flatMap(
@@ -66,6 +68,8 @@ export function parseProfileTransfer(text: string): ParsedProfileTransfer {
       questGoals: profile.characters.reduce((total, character) => total + character.acquisition.questProgress.length, 0),
       questChains: profile.characters.reduce((total, character) => total + character.acquisition.manualChains.length, 0),
       dungeonGoals: profile.characters.reduce((total, character) => total + character.acquisition.dungeonProgress.length, 0),
+      professions: profile.characters.reduce((total, character) => total + character.crafting.professions.length, 0),
+      craftingGoals: profile.characters.reduce((total, character) => total + character.crafting.goals.length, 0),
     },
   };
 }

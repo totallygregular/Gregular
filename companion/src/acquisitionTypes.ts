@@ -34,6 +34,8 @@ export interface AcquisitionSource {
   questId?: string;
   dungeonId?: string;
   npcId?: string;
+  /** Recipe references share the same acquisition graph as quest/dungeon links. */
+  recipeId?: string;
   zoneId?: string;
   zoneName?: string;
   bossName?: string;
@@ -81,6 +83,84 @@ export interface AcquisitionDataset {
   quests: QuestRecord[];
   dungeons: AcquisitionDungeon[];
   npcs: AcquisitionNpc[];
+  /** Optional so older editorial snapshots remain readable. */
+  recipes?: CraftingRecipe[];
+  materials?: CraftingMaterial[];
+}
+
+export interface CraftingMaterial {
+  id: string;
+  gameId?: number;
+  name: string;
+  evidence: AcquisitionEvidence;
+}
+export interface RecipeMaterialRequirement {
+  materialId: string;
+  quantity: number;
+}
+export interface CraftingRecipe {
+  id: string;
+  name: string;
+  itemId: string;
+  profession?: string;
+  requiredSkill?: number;
+  /** Optional recipe item; never infer a spell/recipe ID from the finished item ID. */
+  recipeItemId?: string;
+  /** How the recipe is learned, separate from the finished item's craft source. */
+  sourceIds: string[];
+  materials: RecipeMaterialRequirement[];
+  materialCompleteness: "complete" | "partial" | "unknown";
+  specialRequirements?: string;
+  evidence: AcquisitionEvidence;
+}
+export interface CharacterProfession {
+  id: string;
+  name: string;
+  category: "primary" | "secondary";
+  /** A recorded planning value, not an asserted Forever cap. */
+  skill?: number;
+}
+export interface CharacterCraftingGoal {
+  id: string;
+  recipeId: string;
+  recipeStatus: "unknown" | "needed" | "learned";
+  /** Counts belong to this goal; they never represent shared inventory. */
+  materialsCollected: RecipeMaterialRequirement[];
+  crafted: boolean;
+  crafter: "self" | "other" | "undecided";
+  crafterName: string;
+  notes: string;
+  tracked: boolean;
+}
+export interface CharacterCrafting {
+  professions: CharacterProfession[];
+  goals: CharacterCraftingGoal[];
+  manualRecipes: CraftingRecipe[];
+  manualMaterials: CraftingMaterial[];
+}
+export interface CraftingGoal {
+  goal: CharacterCraftingGoal;
+  recipe?: CraftingRecipe;
+  item?: ItemRecord;
+  /** Finished-item ownership stays solely in the existing wishlist. */
+  wishlistEntry?: WishlistEntry;
+  materials: {
+    requirement: RecipeMaterialRequirement;
+    material?: CraftingMaterial;
+    collected: number;
+  }[];
+  derived: boolean;
+}
+export interface ManualCraftingDraft {
+  name: string;
+  profession?: string;
+  recipeName?: string;
+  requiredSkill?: number;
+  materials?: { name: string; quantity: number }[];
+  materialCompleteness?: "complete" | "partial" | "unknown";
+  notes?: string;
+  referenceUrl?: string;
+  specialRequirements?: string;
 }
 export interface WishlistEntry {
   id: string;
