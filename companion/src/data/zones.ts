@@ -112,10 +112,21 @@ export const catalogueSources: CatalogueSource[] = [
     reuse:
       "MIT-licensed zone range and explicit road-connection facts. Notice retained in docs/zone-provenance.md.",
   },
+  {
+    id: "gregular-editorial-2026-10-13",
+    title: "Gregular Pass 4.5 editorial planning guidance",
+    publisher: "Gregular project owner",
+    url: "https://github.com/totallygregular/Gregular/blob/codex/route-relevance-coverage/docs/zone-guidance.md",
+    publishedAt: "2026-10-13",
+    reviewedAt: REVIEWED,
+    gameRevision: null,
+    reuse:
+      "Owner-requested Riverglades 35–45 planning correction. Not an official announcement or independent gameplay verification.",
+  },
 ];
 
 export const catalogueMetadata = {
-  version: "forever-zones-2026-10-13.1",
+  version: "forever-zones-2026-10-13.2",
   reviewedAt: REVIEWED,
   gameRevision: "1.60.1.70338 (community-reported client snapshot)",
   sources: catalogueSources,
@@ -162,7 +173,8 @@ type ZoneSeed = [
   rangeSource?:
     | "foreverdb-leveling"
     | "libtourist-classic"
-    | "blizzard-skyborne",
+    | "blizzard-skyborne"
+    | "gregular-editorial-2026-10-13",
 ];
 const seeds: ZoneSeed[] = [
   [
@@ -506,6 +518,10 @@ const seeds: ZoneSeed[] = [
     "Eastern Kingdoms",
     "Eastern Kingdoms",
     "Both",
+    35,
+    45,
+    [],
+    "gregular-editorial-2026-10-13",
   ],
   ["mount-hyjal", "Mount Hyjal", "Kalimdor", "Northern Kalimdor", "Unknown"],
   ["shendralas", "Shen'dralas", "Kalimdor", "South of Desolace", "Unknown"],
@@ -580,13 +596,17 @@ export const zoneCatalogue: ZoneRecord[] = seeds.map(
         ? evidence(
             rangeSource === "blizzard-skyborne"
               ? "forever-confirmed"
-              : "classic-derived",
+              : rangeSource === "gregular-editorial-2026-10-13"
+                ? "editorial"
+                : "classic-derived",
             [rangeSource],
             rangeSource === "foreverdb-leveling"
               ? "Approximate Classic quest-level percentiles for quests present in the Forever client; new Forever quests are not included."
               : rangeSource === "blizzard-skyborne"
                 ? "Blizzard announced a level 1–12 starting experience."
-                : "Classic Era guidance; Forever questing suitability is not verified.",
+                : rangeSource === "gregular-editorial-2026-10-13"
+                  ? "Owner-requested editorial planning range of 35–45. Exact endpoints are not established by the reviewed official material or independent gameplay."
+                  : "Classic Era guidance; Forever questing suitability is not verified.",
           )
         : evidence(
             "unknown",

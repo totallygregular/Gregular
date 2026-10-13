@@ -1,10 +1,10 @@
 # Zone catalogue and travel provenance
 
-Reviewed **13 October 2026**. Catalogue `forever-zones-2026-10-13.1`; graph `forever-travel-2026-10-13.1`. These are manually curated planning snapshots, not a live game database or an independently played leveling guide.
+Reviewed **13 October 2026**. Catalogue `forever-zones-2026-10-13.2`; graph `forever-travel-2026-10-13.1`. These are manually curated planning snapshots, not a live game database or an independently played leveling guide.
 
 ## What is established
 
-The catalogue contains **45 zones**, including broad coverage of ordinary 1–60 questing for both factions. **39 zones have approximate recommended ranges**. Six expose “range unknown” rather than fabricated endpoints. Saved personal entry/exit levels are separate profile data and never replaced by reference data.
+The catalogue contains **45 zones**, including broad coverage of ordinary 1–60 questing for both factions. **40 zones have approximate recommended ranges**: one Forever-confirmed, 38 provisional Classic-derived and one editorial. Five expose “range unknown” rather than fabricated endpoints. Saved personal entry/exit levels are separate profile data and never replaced by reference data.
 
 | Field | Evidence used | Presentation |
 | --- | --- | --- |
@@ -15,11 +15,12 @@ The catalogue contains **45 zones**, including broad coverage of ordinary 1–60
 | Original-race suggestions | ForeverDB's Classic associations retained in the Forever client | Classic-derived, optional |
 | Faction questing audience | Curated faction guide audience; broader contested Classic zones use editorial guidance | Editorial; independent of physical access |
 | Broad regional groups | Editorial grouping for browsing | Does not establish connections |
-| Deadwind Pass, Moonglade, Riverglades, Mount Hyjal, Shen'dralas, Darkspear Islands ranges | No established general questing range in the reviewed material | Unknown; personal plans remain editable |
+| Riverglades range | Owner-requested Pass 4.5 planning correction, recorded in [zone-guidance.md](zone-guidance.md) | Editorial estimate, low confidence; 35–45 |
+| Deadwind Pass, Moonglade, Mount Hyjal, Shen'dralas, Darkspear Islands ranges | No established general questing range in the reviewed material | Unknown; personal plans remain editable |
 
 **Redridge Mountains, Duskwood and Wetlands are recommended to Alliance** because that is their practical audience in the reviewed guide. Contested territory does not establish a useful Horde quest route. Their walking connections remain available to both factions. No catalogue record currently claims a hard faction entry restriction (`accessFactions` is absent).
 
-The guide's percentile method omits some low/high quest outliers and new Forever quests. The six familiar starting zones instead use the documented Classic 1–12 interval so new level-1 characters can find starting content. A recommendation is an approximate content window, not an entry requirement, XP promise, or claim that every level can be completed in one zone. Guidance above the current beta cap is especially provisional.
+The guide's percentile method omits some low/high quest outliers and new Forever quests. The six familiar starting zones instead use the documented Classic 1–12 interval so new level-1 characters can find starting content. A recommendation is an approximate content window, not an entry requirement, XP promise, or claim that every level can be completed in one zone. Guidance above the current beta cap is especially provisional. Soft route-planning advice and the advisory long-stay review prompt are separately editorial; see [zone-guidance.md](zone-guidance.md). They do not upgrade the range evidence or estimate quest XP.
 
 ## Sources and research boundaries
 
@@ -32,7 +33,7 @@ The guide's percentile method omits some low/high quest outliers and new Forever
 | [ForeverDB: Travel](https://foreverdb.net/travel) | Publication date / exact extraction build not supplied | Selected transport endpoints and factions, described by the author as client-derived |
 | [LibTourist Classic Era](https://www.curseforge.com/wow/addons/libtourist-classic-era/files/8865898) | Classic 1.15.9, 12 September; commit `d2380757a8fe2b1cb2d341817e36e1cd0bccee3a` | Permitted Classic numerical ranges and explicit road topology |
 
-The Blizzard News mirrors above returned full article text during review. Equivalent `worldofwarcraft.blizzard.com` pages intermittently returned HTTP 403; a blocked page was not treated as evidence. Found Photos establishes Mount Hyjal's identity but no numeric questing range. Its description of Riverglades as mid-level does not establish exact endpoints; both remain unknown here.
+The Blizzard News mirrors above returned full article text during the original review. Equivalent `worldofwarcraft.blizzard.com` pages intermittently returned HTTP 403; a blocked page was not treated as evidence. Found Photos establishes Mount Hyjal's identity but no numeric questing range, which remains unknown. Its description of Riverglades as mid-level does not establish exact endpoints. Pass 4.5 uses the owner's requested 35–45 as an explicitly editorial correction, independent of the official identity and faction evidence. No new source or gameplay confirmation of those endpoints is claimed.
 
 [Wowhead's Forever zone index](https://www.wowhead.com/forever/zones) was investigated but inaccessible to the research tool. A [Forever Westfall page](https://www.wowhead.com/forever/de/zone=40/westfall) was readable, but inherited Classic-era comments do not confirm current Forever ranges. No Wowhead dump, map, icon, image or quest text is included.
 

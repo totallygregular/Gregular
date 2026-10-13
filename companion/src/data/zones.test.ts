@@ -20,7 +20,7 @@ describe("versioned zone catalogue", () => {
     expect(new Set(catalogueSources.map(({ id }) => id)).size).toBe(
       catalogueSources.length,
     );
-    expect(catalogueMetadata.version).toBe("forever-zones-2026-10-13.1");
+    expect(catalogueMetadata.version).toBe("forever-zones-2026-10-13.2");
     for (const zone of zoneCatalogue) {
       expect(zone.id).toMatch(/^forever:zone:[a-z0-9-]+$/);
       expect(zone.reviewedAt).toBe(catalogueMetadata.reviewedAt);
@@ -78,7 +78,7 @@ describe("versioned zone catalogue", () => {
     expect(getZone(zoneId("tanaris"))?.evidence.levels.sourceIds).toEqual([
       "libtourist-classic",
     ]);
-    expect(getZone(zoneId("riverglades"))?.recommendedLevel).toBeUndefined();
+    expect(getZone(zoneId("moonglade"))?.recommendedLevel).toBeUndefined();
     expect(getZone(zoneId("mount-hyjal"))?.faction).toBe("Unknown");
     expect(
       confidenceLabel(getZone(zoneId("westfall"))!.evidence.levels),
@@ -88,6 +88,35 @@ describe("versioned zone catalogue", () => {
         (zone) => zone.evidence.levels.kind === "forever-confirmed",
       ),
     ).toHaveLength(1);
+  });
+
+  it("keeps Riverglades 35–45 as an editorial correction without upgrading official evidence", () => {
+    const zone = getZone(zoneId("riverglades"))!;
+    expect(zone.recommendedLevel).toEqual({ min: 35, max: 45 });
+    expect(zone.evidence.levels).toMatchObject({
+      kind: "editorial",
+      confidence: "low",
+      sourceIds: ["gregular-editorial-2026-10-13"],
+    });
+    expect(zone.evidence.levels.note).toContain("Owner-requested");
+    expect(zone.evidence.levels.note).toContain("not established");
+    expect(zone.evidence.identity.kind).toBe("forever-confirmed");
+    expect(zone.evidence.faction.kind).toBe("forever-confirmed");
+    expect(zone.evidence.geography.kind).toBe("editorial");
+    expect(zone.startingRaces).toEqual([]);
+    expect(zone.adjoiningZoneIds).toEqual([]);
+    for (const level of [35, 40, 45])
+      expect(
+        filterZones({ level, suitability: "now" }).some(({ id }) => id === zone.id),
+      ).toBe(true);
+    expect(
+      filterZones({ level: 34, suitability: "later" }).some(({ id }) => id === zone.id),
+    ).toBe(true);
+    expect(
+      filterZones({ level: 46, suitability: "now" }).some(({ id }) => id === zone.id),
+    ).toBe(false);
+    expect(zoneCatalogue.filter(({ recommendedLevel }) => recommendedLevel)).toHaveLength(40);
+    expect(zoneCatalogue.filter(({ recommendedLevel }) => !recommendedLevel)).toHaveLength(5);
   });
 
   it("filters questing suitability without inventing hard faction entry restrictions", () => {
