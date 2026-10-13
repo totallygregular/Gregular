@@ -71,6 +71,11 @@ async function noOverflow(page) {
 }
 async function accessible(page) {
   await page.evaluate(async () => {
+    // Native hash navigation can resolve before React commits the next screen.
+    // Flush rendering before enumerating animations, then scan settled colors.
+    await new Promise((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve)),
+    );
     await Promise.allSettled(
       document
         .getAnimations()
@@ -80,6 +85,8 @@ async function accessible(page) {
         .map((animation) => animation.finished),
     );
   });
+  const content = page.locator(".dashboard-content");
+  if (await content.count()) await expect(content).toHaveCSS("opacity", "1");
   const result = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
@@ -540,6 +547,7 @@ test("automated accessibility covers entry, roster, creation, journal, notes and
     "Notes",
   ]) {
     await section(page, name).click();
+    await expect(section(page, name)).toHaveAttribute("aria-current", "page");
     await accessible(page);
     if (name === "Equipment") {
       await page.getByText("Item details", { exact: true }).click();
