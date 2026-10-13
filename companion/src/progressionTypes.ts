@@ -131,4 +131,6 @@ export interface NextUpResult {
   recommendations: Recommendation[];
   upcoming: Recommendation[];
   blocked: Recommendation[];
+  /** Earlier visits and associated goals remain saved until explicitly resolved. */
+  unfinished?: Recommendation[];
 }

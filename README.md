@@ -1,6 +1,6 @@
 # Gregular — WoW Forever companion
 
-Character management and a functional leveling planner, with browser-local profiles. Pass 2.5 adds validated JSON import, replacement backups and Cloudflare preview preparation. The existing **Party / Roll class draft remains at the root**. This branch does not release the companion to production.
+Character management and a zone-first leveling route builder, with browser-local profiles. Pass 3 adds a visual route timeline, a broad sourced zone catalogue and travel-aware suggestions, preserving validated JSON import and backups. The existing **Party / Roll class draft remains at the root**. This branch does not release the companion to production.
 
 ## Run the companion
 
@@ -11,11 +11,11 @@ npm ci --ignore-scripts
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173/**. Enter a username, create a character, then open **Leveling**. Start blank or choose a faction starter route; add zones, dungeon milestones and personal objectives, adjust target levels, reorder entries and mark progress. The journal's **Next Up** follows your character level and saved plan. Follow the [Troll Priest demonstration](docs/leveling-demo.md) for a complete example.
+Open **http://127.0.0.1:5173/**. Enter a username, create a character, then open **Leveling**. Accept an optional race starting suggestion or start anywhere. Browse zones, choose personal entry/exit levels, insert/repeat/reorder visits, and track progress. Travel updates for the previous and following stops. The journal's **Next Up** follows your level and saved order without automatically completing earlier work. Existing plans and dungeon tools remain under **Objectives & dungeons**. Follow the [zone-route demonstration](docs/zone-route-demo.md).
 
 Reloading restores this tab's active profile; entering the same username later opens the same browser-local data. Names are case-insensitive. Each character has an independent route, and there is no three-character limit. Username entry is **not secure authentication**: profiles are not synced and can be opened by anyone using this browser.
 
-The leveling catalogue contains a few sourced Forever facts; starter order and level windows are **editorial personal plans**, not verified leveling guides. Zone ranges, access rules and missing prerequisites remain explicit unknowns. Talent/item previews remain illustrative. Race/class combinations and the 1–60 planning input range do not promise beta availability. See [progression sources and limitations](docs/progression-data.md).
+The zone catalogue distinguishes **Forever-confirmed**, **client-derived**, **Classic-derived**, **editorial** and **unknown** guidance per field. Most recommended ranges are explicitly provisional Classic estimates; personal planned ranges are stored independently. Travel uses evidence-backed directed connections and deterministic relative weights, assumes no flight paths unlocked and never claims precise minutes. Talent/item previews remain illustrative. Race/class labels and 1–60 planning do not promise beta availability. See [zone and travel provenance](docs/zone-provenance.md) and [legacy progression references](docs/progression-data.md).
 
 Existing version-1 profiles migrate without losing characters, notes or objective completion. Their exact original JSON is backed up locally before the first version-2 save. **Import profile** accepts validated version-1 or version-2 exports, previews the named profile, and requires confirmation before replacement. Replacement creates a recoverable local backup; use **Profile settings → Restore backup** or **Download backup**. Failed or canceled imports leave saved profiles intact. **Export profile** includes routes and current session changes. Keep exports outside browser storage for portability; profiles are not automatically synchronized between browsers or preview URLs.
 
@@ -48,7 +48,7 @@ $env:PLAYWRIGHT_EXECUTABLE_PATH = 'C:\Program Files (x86)\Microsoft\Edge\Applica
 npm run test:ui
 ```
 
-The verification workflow runs unit, browser and combined-build checks. It does not deploy. A separate Cloudflare Pages Git project can provide automatic PR previews after the owner's one-time account authorization: see [preview setup](docs/preview-setup.md) for exact settings. No real Cloudflare deployment was verified in this pass. GitHub Pages continues serving the source tree from `main` `/`; a future approved production migration must publish `dist/` and verify the custom domain. No DNS or production hosting changes are included.
+The verification workflow runs unit, browser and combined-build checks. It does not deploy. The existing Cloudflare Pages Git integration provides branch previews: see [preview setup](docs/preview-setup.md) and [Pass 3 validation](docs/zone-route-validation.md) for the actual review deployment. GitHub Pages continues serving the source tree from `main` `/`. No DNS or production hosting changes are included.
 
 ## Documentation
 
@@ -57,6 +57,9 @@ The verification workflow runs unit, browser and combined-build checks. It does 
 - [UX and design specification](docs/ux-design.md)
 - [Forever data-source feasibility and licensing gaps](docs/game-data-feasibility.md)
 - [Leveling snapshot, provenance and update process](docs/progression-data.md)
+- [Zone catalogue and travel graph provenance](docs/zone-provenance.md)
+- [Zone-first route demonstration](docs/zone-route-demo.md)
+- [Pass 3 validation](docs/zone-route-validation.md)
 - [Leveling demonstration](docs/leveling-demo.md)
 - [Cloudflare preview setup and stable URLs](docs/preview-setup.md)
 - [Manual acceptance checklist and optional demo profile](docs/manual-qa.md)

@@ -25,7 +25,8 @@ import {
   profileStorageKey,
 } from "./profileRepository";
 import { ClassCrest, Icon, Landscape, Modal } from "./components";
-import { LevelingPlanner, NextUpPanel } from "./LevelingPlanner";
+import { NextUpPanel } from "./LevelingPlanner";
+import { LevelingPlanner } from "./ZoneRouteBuilder";
 import { ProfileSettings } from "./ProfileSettings";
 import { buildInfo } from "./buildInfo";
 import { progressionDataset } from "./data/progression";
