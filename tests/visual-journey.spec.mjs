@@ -117,6 +117,22 @@ test("suggested focus leaves earlier visits visibly unfinished and never complet
   await expect(stop(page, "Westfall").locator(".stop-state")).toHaveText("Earlier unfinished");
   expect(await saved(page)).toEqual(before);
 });
+test("future-only overview shows the first destination and its saved successor without changing progress", async ({ page }) => {
+  const entries = sampleEntries().slice(1).map((visit) => ({ ...visit, status: "planned" }));
+  await openFixture(page, entries, 1);
+  const overview = page.getByRole("region", { name: "Journey overview", exact: true });
+  await expect(overview.locator(".overview-location")).toContainText("Westfall");
+  await expect(overview.locator(".overview-location")).toContainText("12–18");
+  await expect(overview.locator(".overview-next")).toContainText("Redridge Mountains");
+  await expect(overview.locator(".overview-next")).toContainText("18–24");
+  await expect(overview.locator(".overview-next")).toContainText("Moderate travel");
+  await expect(overview.locator(".overview-next")).not.toContainText("Choose the next stop");
+  const before = await saved(page);
+  expect(before.characters[0].planner.entries).toEqual(entries);
+  await page.reload();
+  await expect(overview.locator(".overview-next")).toContainText("Redridge Mountains");
+  expect(await saved(page)).toEqual(before);
+});
 test("travel connectors precede destination cards and only show supported transport", async ({ page }) => {
   await openFixture(page, sampleEntries({ extended: true }));
   for (const name of ["Westfall", "Redridge Mountains", "Darkshore", longName]) {

@@ -93,7 +93,9 @@ export function LevelingPlanner({
     ? stops.findIndex((s) => s.id === progress.current!.id)
     : -1;
   const focus = progress.current || progress.next;
-  const next = progress.current ? progress.next : undefined;
+  const next = progress.current
+    ? progress.next
+    : progress.upcoming.find((stop) => stop.id !== focus?.id);
   const finished = stops.length > 0 && !focus;
   return (
     <div className="zone-planner">

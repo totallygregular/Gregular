@@ -24,7 +24,7 @@ Reviewed on 13 October 2026. Local rendered checks use installed Microsoft Edge 
 | Class-draft unit tests | 24 pass |
 | Companion unit tests | 154 pass, including 3 new transport-presentation cases |
 | Existing class-draft browser tests | 21 pass |
-| Compiled companion browser tests | 68 pass: 58 existing + 10 new |
+| Compiled companion browser tests | 69 pass: 58 existing + 11 new |
 | Compiled static/HTTP compatibility checks | 9 pass |
 
 The original 58 companion browser cases and their assertions are retained. New coverage exercises direct complete/reactivate actions; suggested versus earlier unfinished states; selected transport icons; connector placement; keyboard reorder and modal focus restoration; manual-state persistence; overview empty/resolved states; desktop/laptop/tablet/mobile rendered layouts; actual computed text sizes, including large editor fields; reduced motion; touch targets and taps; overflow and axe WCAG AA checks. Existing suites continue to exercise reload, JSON export/import, backup recovery, character isolation, multi-tab conflicts, faction filtering, insertion, skipped visits and the other dashboard sections.
