@@ -14,6 +14,7 @@ export default defineConfig({
     "connected-progression.spec.mjs",
     "item-browser.spec.mjs",
     "crafting.spec.mjs",
+    "gear-discovery.spec.mjs",
   ],
   outputDir: built ? "artifacts/compiled-test-results" : "test-results",
   workers: 1,

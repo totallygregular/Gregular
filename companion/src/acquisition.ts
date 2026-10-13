@@ -1,4 +1,5 @@
 import { validateCraftingCatalogue } from "./crafting";
+import { isItemStatKey, type ItemStatProfile } from "./itemStats";
 import type {
   AcquisitionDataset,
   AcquisitionDungeon,
@@ -13,6 +14,7 @@ import type {
   ManualQuestDraft,
   QuestGoal,
   QuestRecord,
+  SourceLocationRole,
   WishlistEntry,
 } from "./acquisitionTypes";
 
@@ -146,6 +148,21 @@ function evidence(value: unknown): AcquisitionEvidence {
     ...(fields ? { fields } : {}),
   };
 }
+function numericStats(value: unknown): ItemStatProfile {
+  const candidate = object(value, "Numeric statistics");
+  const entries = Object.entries(object(candidate.values, "Numeric statistic values"));
+  const values: ItemStatProfile["values"] = {};
+  for (const [key, amount] of entries) {
+    if (!isItemStatKey(key) || typeof amount !== "number" || !Number.isFinite(amount) || Math.abs(amount) > 1_000_000)
+      return invalid("Numeric statistics contain an unsupported field or value.");
+    values[key] = amount;
+  }
+  return {
+    values,
+    completeness: choice(candidate.completeness, ["complete", "partial", "unknown"], "Statistic completeness"),
+    ...optionalText(candidate.mappingNote, "mappingNote", 2000),
+  };
+}
 function item(value: unknown): ItemRecord {
   const candidate = object(value, "Item");
   return {
@@ -169,6 +186,7 @@ function item(value: unknown): ItemRecord {
         value: text(stat.value, "Statistic value", 100),
       };
     }),
+    ...(candidate.numericStats === undefined ? {} : { numericStats: numericStats(candidate.numericStats) }),
     classRestrictions: unique(
       array(candidate.classRestrictions, "Class restrictions", 20).map(
         (value) => text(value, "Class", 60),
@@ -182,19 +200,27 @@ function item(value: unknown): ItemRecord {
 }
 function source(value: unknown): AcquisitionSource {
   const candidate = object(value, "Acquisition source");
+  const method = choice(candidate.method, ["quest", "dungeon", "vendor", "craft", "world", "unknown"], "Acquisition method");
+  const roleMethods: Record<SourceLocationRole, string | undefined> = {
+    "quest-pickup": "quest", "quest-objective": "quest", "quest-turn-in": "quest",
+    "dungeon-entrance": "dungeon", "dungeon-region": "dungeon", "boss-location": "dungeon",
+    vendor: "vendor", "world-enemy": "world", "recipe-learning": "craft",
+    "material-source": "craft", "crafting-requirement": "craft", unspecified: undefined,
+  };
+  const locationRole = candidate.locationRole === undefined ? undefined
+    : choice(candidate.locationRole, Object.keys(roleMethods) as SourceLocationRole[], "Source location role");
+  if (locationRole && roleMethods[locationRole] && roleMethods[locationRole] !== method)
+    return invalid("Source location role does not match its acquisition method.");
   return {
     id: ref(candidate.id),
-    method: choice(
-      candidate.method,
-      ["quest", "dungeon", "vendor", "craft", "world", "unknown"],
-      "Acquisition method",
-    ),
+    method,
     label: text(candidate.label, "Source name"),
     ...optionalRef(candidate.questId, "questId"),
     ...optionalRef(candidate.dungeonId, "dungeonId"),
     ...optionalRef(candidate.npcId, "npcId"),
     ...optionalRef(candidate.recipeId, "recipeId"),
     ...optionalRef(candidate.zoneId, "zoneId"),
+    ...(locationRole === undefined ? {} : { locationRole }),
     ...optionalText(candidate.zoneName, "zoneName"),
     ...optionalText(candidate.bossName, "bossName"),
     ...optionalLevel(candidate.requiredLevel, "requiredLevel"),

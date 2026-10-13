@@ -4,6 +4,7 @@ import { getDungeonGoals, getQuestGoals } from "./acquisition";
 import { acquisitionDataset } from "./data/acquisitionCatalogue";
 import { characterHash } from "./navigation";
 import { getRouteProgress } from "./routeBuilder";
+import { getRouteWishlistSummary } from "./gearRoute";
 import "./connectedOverview.css";
 
 export function ConnectedOverview({ character }: { character: Character }) {
@@ -15,6 +16,7 @@ export function ConnectedOverview({ character }: { character: Character }) {
   const dungeons = getDungeonGoals(state, acquisitionDataset);
   const wanted = state.wishlist.filter((e) => e.status === "wanted");
   const acquired = state.wishlist.filter((e) => e.status === "acquired");
+  const equipmentRoute = getRouteWishlistSummary(character, acquisitionDataset);
   const activeChains = state.manualChains.filter((chain) =>
     chain.questIds.some(
       (id) =>
@@ -71,6 +73,7 @@ export function ConnectedOverview({ character }: { character: Character }) {
           {linked.size} outstanding linked{" "}
           {linked.size === 1 ? "goal" : "goals"}
         </p>
+        {!!wanted.length && <p className="summary-preview">{equipmentRoute.direct} on route · {equipmentRoute.nearby} nearby · {equipmentRoute.unknown} locations unknown</p>}
         {!!wanted.length && (
           <p className="summary-preview">
             {wanted

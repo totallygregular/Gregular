@@ -33,7 +33,7 @@ function evidence(
  * never an inferred game spell ID. Material game IDs are unknown here.
  */
 export const acquisitionDataset: AcquisitionDataset = {
-  version: "forever-acquisition-2026-10-14.2",
+  version: "forever-acquisition-2026-10-14.3",
   reviewedAt,
   items: [
     {
@@ -50,6 +50,11 @@ export const acquisitionDataset: AcquisitionDataset = {
         { label: "Healing", value: "+11" },
         { label: "Spell damage", value: "+4" },
       ],
+      numericStats: {
+        values: { intellect: 2, spirit: 8, healingPower: 11, spellDamage: 4 },
+        completeness: "partial",
+        mappingNote: "The existing display label Healing maps to healing power for this reviewed item only: ForeverDB item 273052 explicitly labels +11 Healing Power (build 1.60.1.70338; reviewed 2026-10-14). This is not a global label alias or a complete stat inventory.",
+      },
       classRestrictions: [],
       sourceIds: ["forever:source:273052-shade"],
       evidence: evidence(
@@ -71,6 +76,7 @@ export const acquisitionDataset: AcquisitionDataset = {
       slot: "Hands",
       equipmentType: "Cloth",
       stats: [{ label: "Armor", value: "29" }],
+      numericStats: { values: { armor: 29 }, completeness: "partial" },
       classRestrictions: [],
       sourceIds: ["forever:source:270030-book-of-ur"],
       evidence: evidence(
@@ -95,6 +101,7 @@ export const acquisitionDataset: AcquisitionDataset = {
         { label: "Armor", value: "82" },
         { label: "Stamina", value: "+7" },
       ],
+      numericStats: { values: { armor: 82, stamina: 7 }, completeness: "partial" },
       classRestrictions: [],
       sourceIds: ["forever:source:6335-book-of-ur"],
       evidence: evidence(
@@ -112,6 +119,7 @@ export const acquisitionDataset: AcquisitionDataset = {
       equipmentType: "Miscellaneous",
       requiredLevel: 17,
       stats: [],
+      numericStats: { values: {}, completeness: "unknown" },
       classRestrictions: [],
       sourceIds: [],
       evidence: evidence(
@@ -137,6 +145,7 @@ export const acquisitionDataset: AcquisitionDataset = {
         { label: "Armor", value: "108" },
         { label: "Stamina", value: "+1" },
       ],
+      numericStats: { values: { armor: 108, stamina: 1 }, completeness: "partial" },
       classRestrictions: [],
       sourceIds: ["forever:source:10421-craft"],
       evidence: evidence(
@@ -166,6 +175,10 @@ export const acquisitionDataset: AcquisitionDataset = {
         { label: "Healing power", value: "+9" },
         { label: "Spell damage", value: "+3" },
       ],
+      numericStats: {
+        values: { armor: 109, intellect: 4, healingPower: 9, spellDamage: 3 },
+        completeness: "partial",
+      },
       classRestrictions: [],
       sourceIds: ["forever:source:250482-craft"],
       evidence: evidence(

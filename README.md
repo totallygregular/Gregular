@@ -56,6 +56,9 @@ The verification workflow runs unit, browser and combined-build checks. It does 
 
 ## Documentation
 
+- [Pass 7: Gear Discovery validation and demonstration](docs/pass-7.md)
+- [Gear Discovery route and travel semantics](docs/gear-discovery-route.md)
+- [Structured gear data feasibility and reproducible benchmark](docs/gear-data-feasibility.md)
 - [Repository assessment](docs/repository-assessment.md)
 - [Architecture and future cloud migration](docs/architecture.md)
 - [UX and design specification](docs/ux-design.md)
