@@ -1,5 +1,6 @@
 import type { Character } from "./domain";
 import { resolveAcquisition, validateReferenceUrl } from "./acquisition";
+import { itemIdentityKey } from "./itemIdentity";
 import type {
   AcquisitionDataset, AcquisitionEvidence, CharacterCrafting,
   CharacterCraftingGoal, CharacterProfession, CraftingGoal, CraftingMaterial,
@@ -144,7 +145,20 @@ export function untrackCraftingGoal(character: Character, recipeId: string): Cha
 /** References and per-goal progress are merged for display; no persistent goals are duplicated. */
 export function getCraftingGoals(character: Character, dataset: AcquisitionDataset): CraftingGoal[] {
   const resolved = resolveAcquisition(character.acquisition, dataset);
-  const recipes = new Map([...(dataset.recipes ?? []), ...character.crafting.manualRecipes].map((entry) => [entry.id, entry]));
+  const resolvedIdentities = new Map<string, string>();
+  for (const entry of resolved.items) {
+    const key = itemIdentityKey(entry);
+    if (key) resolvedIdentities.set(key, entry.id);
+  }
+  const aliases = new Map<string, string>();
+  for (const entry of [...dataset.items, ...character.acquisition.manualItems]) {
+    const key = itemIdentityKey(entry), canonical = key ? resolvedIdentities.get(key) : undefined;
+    if (canonical) aliases.set(entry.id, canonical);
+  }
+  // Imported personal recipes retain their saved output references. Resolve
+  // those references for display without rewriting the player's recipe record.
+  const personalRecipes = character.crafting.manualRecipes.map((entry) => ({ ...entry, itemId: aliases.get(entry.itemId) ?? entry.itemId }));
+  const recipes = new Map([...(resolved.recipes ?? []), ...personalRecipes].map((entry) => [entry.id, entry]));
   const materials = new Map([...(dataset.materials ?? []), ...character.crafting.manualMaterials].map((entry) => [entry.id, entry]));
   const items = new Map(resolved.items.map((entry) => [entry.id, entry]));
   const sources = new Map(resolved.sources.map((entry) => [entry.id, entry]));

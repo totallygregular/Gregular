@@ -1,5 +1,7 @@
 # Item data integration: Pass 6 decision
 
+Pass 8 adds [item ID/link entry and editable personal details](item-data-contract.md), preserving this documented tooltip presentation contract. See the [focused source decision](forever-item-data-decision.md) and [current licence boundaries](source-licenses.md).
+
 Reviewed **14 October 2026, Pacific/Auckland**. Read together with
 [the acquisition feasibility report](acquisition-data-feasibility.md) and
 [the connected acquisition model](connected-acquisition-model.md).

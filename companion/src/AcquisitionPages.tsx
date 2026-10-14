@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Character } from "./domain";
 import { Modal } from "./components";
 import { acquisitionDataset as acquisitionCatalogue } from "./data/acquisitionCatalogue";
@@ -9,6 +9,8 @@ import {
   updateWishlistEntry,
   removeWishlistItem,
   addManualItem,
+  addIdentifiedWishlistItem,
+  updateManualItem,
   addManualSource,
   addManualQuest,
   updateManualQuest,
@@ -48,6 +50,8 @@ import type {
 import "./acquisition.css";
 import { ItemPortrait, ProviderInspector, useProviderIcons } from "./ItemPresentation";
 import { providerNames, type TooltipProvider } from "./itemProviders";
+import { isForeverItemIdentity, itemIdentityKey } from "./itemIdentity";
+const ItemEntryForm = lazy(() => import("./ItemEntryForm").then(module => ({ default: module.ItemEntryForm })));
 import { characterHash } from "./navigation";
 import { GearDiscoveryControls, type GearScope } from "./GearDiscoveryControls";
 import { createGearSearchIndex, searchGear, type GearSearchOptions } from "./gearSearch";
@@ -372,6 +376,8 @@ export function EquipmentPage(props: AcquisitionPageProps) {
   const [wishlistSlot, setWishlistSlot] = useState("");
   const [wishlistMethod, setWishlistMethod] = useState("");
   const [manualItem, setManualItem] = useState(false);
+  const [identityEntry, setIdentityEntry] = useState(false);
+  const [editingItem, setEditingItem] = useState<ItemRecord | null>(null);
   const [sourceItem, setSourceItem] = useState<ItemRecord | null>(null);
   const searchOptions: GearSearchOptions = {
     ...discovery, name: query, slot: slot || undefined,
@@ -406,7 +412,7 @@ export function EquipmentPage(props: AcquisitionPageProps) {
     );
   });
   const iconItems = [...pageResults.map(result => result.item), ...wishlist.slice(0, 36).flatMap(entry => data.items.find(item => item.id === entry.itemId) ?? [])];
-  const { icons, bridge } = useProviderIcons(provider, [...new Set(iconItems.flatMap(item => item.gameId && item.evidence.kind === "reviewed-forever" ? [item.gameId] : []))]);
+  const { icons, bridge } = useProviderIcons(provider, [...new Set(iconItems.flatMap(item => isForeverItemIdentity(item) && item.gameId ? [item.gameId] : []))]);
   return (
     <div className="acquisition-page">
       <Title
@@ -423,6 +429,8 @@ export function EquipmentPage(props: AcquisitionPageProps) {
       <section className="panel">
         <div className="acquisition-heading">
           <h3>Equipment finder</h3>
+          <div className="acquisition-actions">
+          <button className="primary" onClick={() => setIdentityEntry(true)} disabled={saving}>Add item by ID or link</button>
           <button
             className="secondary"
             onClick={() => setManualItem(true)}
@@ -430,6 +438,7 @@ export function EquipmentPage(props: AcquisitionPageProps) {
           >
             Add personal item
           </button>
+          </div>
         </div>
         <div className="equipment-controls">
           <label>Item details service<select aria-label="Item details service" value={provider} onChange={e => setProvider(e.target.value as TooltipProvider)}>{Object.entries(providerNames).filter(([id]) => id !== "wow-forever").map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
@@ -586,6 +595,7 @@ export function EquipmentPage(props: AcquisitionPageProps) {
                               item.sourceIds.length === 1
                                 ? item.sourceIds[0]
                                 : undefined,
+                              acquisitionCatalogue,
                             ),
                           `${item.name} added to the wishlist${item.sourceIds.length === 1 ? " with its listed source" : ""}.`,
                         )
@@ -679,6 +689,11 @@ export function EquipmentPage(props: AcquisitionPageProps) {
                 characterId={character.id}
                 inspect={setInspected}
                 icons={icons}
+                personalItem={state.manualItems.find(item => item.id === entry.itemId || (itemIdentityKey(item) && itemIdentityKey(item) === itemIdentityKey(data.items.find(record => record.id === entry.itemId) ?? entry)))}
+                editPersonal={(item) => {
+                  const personal = state.manualItems.find(record => record.id === item.id || (itemIdentityKey(record) && itemIdentityKey(record) === itemIdentityKey(item)));
+                  setEditingItem(personal ?? { id: `user:item:forever:${item.gameId}`, gameId: item.gameId, gameVariant: "wow-forever", name: `Forever item #${item.gameId}`, quality: "unknown", stats: [], classRestrictions: [], sourceIds: [], evidence: { kind: "user-supplied", note: "Your personal details, separate from reviewed facts." } });
+                }}
               />
             ))}
           </div>
@@ -693,6 +708,19 @@ export function EquipmentPage(props: AcquisitionPageProps) {
         </p>
       </section>
       {status}
+      <Suspense fallback={<p role="status">Loading item entry…</p>}>
+      {identityEntry && <ItemEntryForm data={data} state={state} saving={saving} provider={provider} setProvider={setProvider} close={() => setIdentityEntry(false)} save={async (identity, draft) => {
+        if (!identity) return false;
+        const ok = await change(s => addIdentifiedWishlistItem(s, acquisitionCatalogue, identity, draft), "Item added to your wishlist. Personal details and sources can be edited here.");
+        if (ok) setIdentityEntry(false);
+        return ok;
+      }} />}
+      {editingItem && <ItemEntryForm data={data} state={state} editing={editingItem} saving={saving} provider={provider} setProvider={setProvider} close={() => setEditingItem(null)} save={async (_, draft) => {
+        const ok = await change(s => s.manualItems.some(item => item.id === editingItem.id) ? updateManualItem(s, editingItem.id, draft) : addManualItem(s, { ...draft, gameId: editingItem.gameId, gameVariant: editingItem.gameVariant }), "Personal item details saved.");
+        if (ok) setEditingItem(null);
+        return ok;
+      }} />}
+      </Suspense>
       {inspected && <Modal title={inspected.name} close={() => setInspected(null)}><div className="item-inspection"><ProviderInspector item={inspected} provider={provider} /><RouteDiscoveryDetails item={inspected} character={character} data={data} open /><ItemDetails item={inspected} data={data} open /></div></Modal>}
       {manualItem && (
         <ManualItemForm
@@ -755,10 +783,14 @@ function WishlistCard({
   characterId,
   inspect,
   icons,
+  editPersonal,
+  personalItem,
 }: {
   characterId: string;
   inspect: (item: ItemRecord) => void;
   icons: Record<number, string>;
+  editPersonal: (item: ItemRecord) => void;
+  personalItem?: ItemRecord;
   entry: WishlistEntry;
   item?: ItemRecord;
   data: AcquisitionDataset;
@@ -846,6 +878,8 @@ function WishlistCard({
       ) : null}
       {entry.preferredSourceId && (() => { const source = data.sources.find(s => s.id === entry.preferredSourceId); const section = source?.method === "craft" ? "professions" : source?.questId ? "quests" : source?.dungeonId ? "dungeons" : undefined; return section ? <p className="equipment-source-summary"><a href={`#${characterHash(characterId, section)}`}>Open {section === "professions" ? "crafting preparation" : section === "quests" ? "quest goal" : "dungeon goal"}</a></p> : null; })()}
       {item && <ItemDetails item={item} data={data} />}
+      {personalItem && item?.evidence.kind === "reviewed-forever" && <details><summary>Your saved personal details</summary><p className="acquisition-muted">Reviewed facts for this identity are available above. Your personal details are retained separately.</p><ItemDetails item={personalItem} data={data} open /></details>}
+      {(personalItem || item?.gameId) && <button className="secondary" disabled={saving} onClick={() => editPersonal(personalItem ?? item!)}>{personalItem ? "Edit personal details" : "Add personal details"}</button>}
       <details>
         <summary>Personal notes and management</summary>
         <form
@@ -1046,6 +1080,7 @@ function ManualSourceForm({
   const [label, setLabel] = useState("");
   const [questId, setQuestId] = useState("");
   const [dungeonId, setDungeonId] = useState("");
+  const [recipeId, setRecipeId] = useState("");
   const [manualDungeonName, setManualDungeonName] = useState("");
   const [zoneName, setZoneName] = useState("");
   const [locationRole, setLocationRole] = useState<GearLocationRole | "">("");
@@ -1067,6 +1102,7 @@ function ManualSourceForm({
             label,
             availability: "unknown",
             questId: method === "quest" ? questId || undefined : undefined,
+            recipeId: method === "craft" ? recipeId || undefined : undefined,
             dungeonId:
               method === "dungeon" && dungeonId !== "new"
                 ? dungeonId || undefined
@@ -1172,6 +1208,7 @@ function ManualSourceForm({
             </label>
           </>
         )}
+        {method === "craft" && <label>Crafting recipe (optional)<select value={recipeId} onChange={e => setRecipeId(e.target.value)}><option value="">Recipe unknown · personal plan only</option>{(data.recipes ?? []).filter(recipe => recipe.itemId === item.id).map(recipe => <option key={recipe.id} value={recipe.id}>{recipe.name}</option>)}</select><span className="field-help">A personal crafting source can remain incomplete. Create a full personal recipe in Professions when you know its materials.</span></label>}
         <label>
           Associated zone (optional)
           <input

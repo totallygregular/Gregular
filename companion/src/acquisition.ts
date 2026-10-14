@@ -1,5 +1,6 @@
 import { validateCraftingCatalogue } from "./crafting";
 import { isItemStatKey, type ItemStatProfile } from "./itemStats";
+import { FOREVER_VARIANT, isValidGameItemId, itemIdentityKey, MAX_GAME_ITEM_ID, type ItemIdentity } from "./itemIdentity";
 import type {
   AcquisitionDataset,
   AcquisitionDungeon,
@@ -102,6 +103,23 @@ function positive(value: unknown, label: string, max = 1000000): number {
 function optionalLevel(value: unknown, key: string): Record<string, number> {
   return value === undefined ? {} : { [key]: positive(value, "Level", 60) };
 }
+function optionalItemIdentity(value: Record<string, unknown>): Partial<ItemIdentity> {
+  if (value.gameVariant !== undefined && value.gameVariant !== FOREVER_VARIANT)
+    return invalid("Only WoW Forever item identities are supported.");
+  if (value.gameVariant !== undefined && value.gameId === undefined)
+    return invalid("A game variant requires a game item ID.");
+  return {
+    ...(value.gameId === undefined ? {} : { gameId: positive(value.gameId, "Game item ID", MAX_GAME_ITEM_ID) }),
+    ...(value.gameVariant === undefined ? {} : { gameVariant: FOREVER_VARIANT }),
+  };
+}
+/** Legacy shared record IDs are a documented Forever identity, never a name match. */
+function identityForReference(id: string, items: ItemRecord[] = []): Partial<ItemIdentity> {
+  const known = items.find((entry) => entry.id === id);
+  if (known && itemIdentityKey(known)) return { gameId: known.gameId, gameVariant: FOREVER_VARIANT };
+  const match = id.match(/^forever:item:([1-9]\d*)$/);
+  return match && isValidGameItemId(Number(match[1])) ? { gameId: Number(match[1]), gameVariant: FOREVER_VARIANT } : {};
+}
 export function validateReferenceUrl(value: unknown): string {
   const checked = text(value, "Reference URL", 2000);
   let url: URL;
@@ -165,6 +183,9 @@ function numericStats(value: unknown): ItemStatProfile {
 }
 function item(value: unknown): ItemRecord {
   const candidate = object(value, "Item");
+  const identitySuffix = typeof candidate.id === "string" ? candidate.id.match(/^(?:forever:item:|user:item:forever:)([1-9]\d*)$/) : null;
+  if (identitySuffix && candidate.gameId !== undefined && Number(identitySuffix[1]) !== candidate.gameId)
+    return invalid("Game item ID conflicts with its stable item reference.");
   return {
     id: ref(candidate.id),
     name: text(candidate.name, "Item name"),
@@ -176,14 +197,12 @@ function item(value: unknown): ItemRecord {
     ...optionalText(candidate.slot, "slot", 80),
     ...optionalText(candidate.equipmentType, "equipmentType", 80),
     ...optionalLevel(candidate.requiredLevel, "requiredLevel"),
-    ...(candidate.gameId === undefined
-      ? {}
-      : { gameId: positive(candidate.gameId, "Game ID") }),
+    ...optionalItemIdentity(candidate),
     stats: array(candidate.stats, "Item statistics", 40).map((value) => {
       const stat = object(value, "Statistic");
       return {
         label: text(stat.label, "Statistic label", 80),
-        value: text(stat.value, "Statistic value", 100),
+        value: text(stat.value, "Statistic value", 1000),
       };
     }),
     ...(candidate.numericStats === undefined ? {} : { numericStats: numericStats(candidate.numericStats) }),
@@ -316,13 +335,14 @@ export function createBlankAcquisition(): CharacterAcquisition {
 /** Removed references and malformed dependency graphs stay saved for visible review. */
 export function validateAcquisition(value: unknown): CharacterAcquisition {
   const candidate = object(value, "Character acquisition plan");
-  return {
+  const result: CharacterAcquisition = {
     wishlist: unique(
       array(candidate.wishlist, "Wishlist").map((value): WishlistEntry => {
         const entry = object(value, "Wishlist item");
         return {
           id: ref(entry.id),
           itemId: ref(entry.itemId),
+          ...optionalItemIdentity(entry),
           status: choice(
             entry.status,
             ["wanted", "acquired", "dismissed"],
@@ -408,6 +428,22 @@ export function validateAcquisition(value: unknown): CharacterAcquisition {
       "Dungeon progress",
     ),
   };
+  const identities = new Set<string>();
+  for (const entry of result.manualItems) {
+    const key = itemIdentityKey(entry);
+    if (key && identities.has(key)) return invalid("Personal items contain duplicate game identities.");
+    if (key) identities.add(key);
+  }
+  identities.clear();
+  for (const entry of result.wishlist) {
+    const linkedIdentity = identityForReference(entry.itemId, result.manualItems);
+    const saved = itemIdentityKey(entry), linked = itemIdentityKey(linkedIdentity);
+    if (saved && linked && saved !== linked) return invalid("Wishlist game identity conflicts with its item reference.");
+    const key = saved ?? linked;
+    if (key && identities.has(key)) return invalid("Wishlist contains duplicate game item identities.");
+    if (key) identities.add(key);
+  }
+  return result;
 }
 export function validateAcquisitionDataset(value: unknown): AcquisitionDataset {
   const candidate = object(value, "Acquisition catalogue");
@@ -466,26 +502,88 @@ export function validateAcquisitionDataset(value: unknown): AcquisitionDataset {
     )
   )
     return invalid("Catalogue quest dependencies contain a cycle.");
+  const identities = dataset.items.flatMap((entry) => {
+    const key = itemIdentityKey(entry);
+    return key ? [key] : [];
+  });
+  if (new Set(identities).size !== identities.length)
+    return invalid("Catalogue contains duplicate game item identities.");
   return dataset;
 }
 export function resolveAcquisition(
   state: CharacterAcquisition,
   dataset: AcquisitionDataset,
 ): AcquisitionDataset {
-  const sources = [...dataset.sources, ...state.manualSources];
+  // Keep saved references stable when a later reviewed snapshot learns a personal ID.
+  // Only reviewed facts are presented as reviewed; the original personal record is
+  // retained separately and remains editable in state.manualItems.
+  const canonical = new Map<string, string>();
+  const knownReferences = new Map([...dataset.items, ...state.manualItems].map((entry) => [entry.id, entry]));
+  for (const entry of state.wishlist) {
+    const key = itemIdentityKey(entry) ?? itemIdentityKey(knownReferences.get(entry.itemId) ?? identityForReference(entry.itemId));
+    if (key && !canonical.has(key)) canonical.set(key, entry.itemId);
+  }
+  const personalByIdentity = new Map<string, ItemRecord>();
+  for (const entry of state.manualItems) {
+    const key = itemIdentityKey(entry);
+    if (key) { personalByIdentity.set(key, entry); if (!canonical.has(key)) canonical.set(key, entry.id); }
+  }
+  const aliases = new Map<string, string>();
+  const byIdentity = new Map<string, ItemRecord>();
+  const records: ItemRecord[] = [];
+  for (const entry of dataset.items) {
+    const key = itemIdentityKey(entry), id = (key && canonical.get(key)) || entry.id;
+    aliases.set(entry.id, id);
+    const resolved = id === entry.id && !(key && personalByIdentity.has(key)) ? entry : { ...entry, id, catalogueReferenceId: entry.id };
+    records.push(resolved);
+    if (key) byIdentity.set(key, resolved);
+  }
+  for (const entry of state.manualItems) {
+    const key = itemIdentityKey(entry), reviewed = key ? byIdentity.get(key) : undefined;
+    const id = reviewed?.id ?? (key ? canonical.get(key) : undefined) ?? entry.id;
+    aliases.set(entry.id, id);
+    if (!reviewed) {
+      const resolved = id === entry.id ? entry : { ...entry, id };
+      records.push(resolved); if (key) byIdentity.set(key, resolved);
+    }
+  }
+  // A removed optional snapshot must not make the persisted game identity unusable.
+  for (const entry of state.wishlist) {
+    const identity = itemIdentityKey(entry) ? entry : identityForReference(entry.itemId);
+    const key = itemIdentityKey(identity);
+    if (!key || byIdentity.has(key)) continue;
+    const placeholder: ItemRecord = {
+      id: entry.itemId, gameId: identity.gameId, gameVariant: FOREVER_VARIANT,
+      name: `Forever item #${identity.gameId}`, quality: "unknown", stats: [],
+      classRestrictions: [], sourceIds: [],
+      evidence: { kind: "user-supplied", note: "Saved item identity. Reference details are unavailable in the current catalogue." },
+    };
+    records.push(placeholder);
+    byIdentity.set(key, placeholder);
+  }
+  const alias = (id: string): string => aliases.get(id) ?? id;
+  const sources = [...dataset.sources, ...state.manualSources].map((entry) => ({
+    ...entry, ...(entry.itemIds ? { itemIds: [...new Set(entry.itemIds.map(alias))] } : {}),
+  }));
+  const linkedSources = new Map<string, Set<string>>();
+  const link = (itemId: string, sourceId: string): void => {
+    const ids = linkedSources.get(itemId) ?? new Set<string>();
+    ids.add(sourceId); linkedSources.set(itemId, ids);
+  };
+  state.manualItems.forEach((entry) => entry.sourceIds.forEach((sourceId) => link(alias(entry.id), sourceId)));
+  sources.forEach((entry) => entry.itemIds?.forEach((itemId) => link(itemId, entry.id)));
   return {
     ...dataset,
     sources,
-    quests: [...dataset.quests, ...state.manualQuests],
+    quests: [...dataset.quests, ...state.manualQuests].map((entry) => ({ ...entry, rewardItemIds: [...new Set(entry.rewardItemIds.map(alias))] })),
     dungeons: [...dataset.dungeons, ...state.manualDungeons],
-    items: [...dataset.items, ...state.manualItems].map((entry) => ({
+    ...(dataset.recipes ? { recipes: dataset.recipes.map((entry) => ({ ...entry, itemId: alias(entry.itemId) })) } : {}),
+    items: records.map((entry) => ({
       ...entry,
       sourceIds: [
         ...new Set([
           ...entry.sourceIds,
-          ...state.manualSources
-            .filter((source) => source.itemIds?.includes(entry.id))
-            .map((source) => source.id),
+          ...(linkedSources.get(entry.id) ?? []),
         ]),
       ],
     })),
@@ -528,8 +626,11 @@ export function addWishlistItem(
   state: CharacterAcquisition,
   itemId: string,
   preferredSourceId?: string,
+  dataset?: AcquisitionDataset,
 ): CharacterAcquisition {
-  if (state.wishlist.some((entry) => entry.itemId === itemId))
+  const known = [...(dataset?.items ?? []), ...state.manualItems];
+  const identity = identityForReference(itemId, known), key = itemIdentityKey(identity);
+  if (state.wishlist.some((entry) => entry.itemId === itemId || (key && key === (itemIdentityKey(entry) ?? itemIdentityKey(identityForReference(entry.itemId, known))))))
     return invalid("This item is already on this character's wishlist.");
   return validateAcquisition({
     ...state,
@@ -538,6 +639,7 @@ export function addWishlistItem(
       {
         id: crypto.randomUUID(),
         itemId,
+        ...identity,
         status: "wanted",
         notes: "",
         ...(preferredSourceId ? { preferredSourceId } : {}),
@@ -582,11 +684,13 @@ export function addManualItem(
   draft: ManualItemDraft,
 ): CharacterAcquisition {
   const entry = item({
-    id: `user:item:${crypto.randomUUID()}`,
+    id: draft.gameId === undefined ? `user:item:${crypto.randomUUID()}` : `user:item:forever:${draft.gameId}`,
     name: draft.name,
     quality: draft.quality ?? "unknown",
-    stats: [],
-    classRestrictions: [],
+    ...optionalItemIdentity({ ...draft, ...(draft.gameId === undefined ? {} : { gameVariant: draft.gameVariant ?? FOREVER_VARIANT }) }),
+    stats: draft.stats ?? [],
+    ...(draft.numericStats === undefined ? {} : { numericStats: draft.numericStats }),
+    classRestrictions: draft.classRestrictions ?? [],
     sourceIds: [],
     ...optionalText(draft.slot, "slot", 80),
     ...optionalText(draft.equipmentType, "equipmentType", 80),
@@ -597,6 +701,63 @@ export function addManualItem(
     ...state,
     manualItems: [...state.manualItems, entry],
   });
+}
+/** Stable game identity is immutable; edits remain personal, never reviewed facts. */
+export function updateManualItem(
+  state: CharacterAcquisition,
+  id: string,
+  draft: ManualItemDraft,
+): CharacterAcquisition {
+  const previous = state.manualItems.find((entry) => entry.id === id);
+  if (!previous) return invalid("Personal item could not be found.");
+  if ((draft.gameId !== undefined && draft.gameId !== previous.gameId) ||
+      (draft.gameVariant !== undefined && draft.gameVariant !== (previous.gameVariant ?? (previous.gameId === undefined ? undefined : FOREVER_VARIANT))))
+    return invalid("An existing item's game identity cannot be changed. Add the correct item separately.");
+  const next = item({
+    ...previous,
+    name: draft.name,
+    quality: draft.quality ?? "unknown",
+    slot: draft.slot,
+    equipmentType: draft.equipmentType,
+    requiredLevel: draft.requiredLevel,
+    stats: draft.stats ?? previous.stats,
+    numericStats: draft.numericStats,
+    classRestrictions: draft.classRestrictions ?? previous.classRestrictions,
+    evidence: userEvidence(draft.referenceUrl),
+  });
+  return validateAcquisition({ ...state, manualItems: state.manualItems.map((entry) => entry.id === id ? next : entry) });
+}
+/** Reuse a reviewed/personal identity; unknown game IDs need no local database row. */
+export function addIdentifiedWishlistItem(
+  state: CharacterAcquisition,
+  dataset: AcquisitionDataset,
+  identity: ItemIdentity,
+  draft: Partial<ManualItemDraft> = {},
+): CharacterAcquisition {
+  const checked = optionalItemIdentity({ ...identity });
+  const key = itemIdentityKey(checked);
+  if (!key) return invalid("A valid Forever game item identity is required.");
+  const known = [...state.manualItems, ...dataset.items].find((entry) => itemIdentityKey(entry) === key);
+  let next = state;
+  let itemId = known?.id;
+  const hasPersonalFacts = Boolean(draft.name?.trim() || draft.slot?.trim() || draft.equipmentType?.trim() ||
+    draft.requiredLevel !== undefined || (draft.quality && draft.quality !== "unknown") ||
+    Object.keys(draft.numericStats?.values ?? {}).length || draft.stats?.length || draft.classRestrictions?.length);
+  // A reviewed identity may have unknown fields. Save only explicitly authored
+  // personal values separately; never initialise this row from reviewed facts.
+  if (!itemId || (known?.evidence.kind === "reviewed-forever" && hasPersonalFacts)) {
+    next = addManualItem(state, {
+      ...draft,
+      gameId: identity.gameId,
+      gameVariant: FOREVER_VARIANT,
+      name: draft.name?.trim() || `Forever item #${identity.gameId}`,
+    });
+    itemId ??= next.manualItems[next.manualItems.length - 1].id;
+  }
+  next = addWishlistItem(next, itemId, undefined, dataset);
+  if (draft.notes !== undefined)
+    next = updateWishlistEntry(next, next.wishlist[next.wishlist.length - 1].id, { notes: draft.notes });
+  return next;
 }
 export type ManualSourceDraft = Omit<
   AcquisitionSource,

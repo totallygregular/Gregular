@@ -1,0 +1,11 @@
+.item-entry { display: grid; gap: 18px; }
+.item-entry-preview { padding: 18px; border: 1px solid var(--border, #394345); border-radius: 12px; background: #121b1d; }
+.item-entry-preview .eyebrow { margin: 0 0 6px; }
+.item-entry-preview h3 { margin: 0; overflow-wrap: anywhere; }
+.item-entry-preview p:last-child { margin-bottom: 0; }
+.item-entry-icon { flex: 0 0 52px; min-height: 52px; display: grid; place-items: center; color: #c4b78f; position: relative; }
+.item-entry-icon img { position: absolute; inset: 2px; background: #121b1d; object-fit: contain; }
+.item-entry-service { display: grid; gap: 8px; }
+.item-entry details { padding: 12px 0; }
+.item-entry summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.item-entry .acquisition-form-grid { margin-top: 10px; }
