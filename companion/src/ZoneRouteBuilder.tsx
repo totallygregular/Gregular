@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { Character } from "./domain";
 import { getDungeonGoals, getZoneAcquisitionGoals } from "./acquisition";
+import { getRouteWishlistSummary } from "./gearRoute";
 import { acquisitionDataset } from "./data/acquisitionCatalogue";
 import { characterHash } from "./navigation";
 import type {
@@ -56,6 +57,7 @@ export function LevelingPlanner({
   editLevel: () => void;
 }) {
   const planner = character.planner;
+  const routeEquipment = getRouteWishlistSummary(character, acquisitionDataset);
   const stops = planner.entries.filter((entry) => entry.kind !== "custom");
   const progress = getRouteProgress(planner, character.level);
   const transitions = new Map(
@@ -250,6 +252,7 @@ export function LevelingPlanner({
                     ? outstandingZoneObjectives(planner, zone)
                     : [];
                   const linkedGoals = zone ? getZoneAcquisitionGoals(character.acquisition, acquisitionDataset, zone.id, zone.name) : undefined;
+                  const routeItems = routeEquipment.byRouteEntry.get(entry.id) ?? 0;
                   const dungeonGoal = entry.kind === "dungeon" && entry.recordId ? getDungeonGoals(character.acquisition, acquisitionDataset).find((goal) => goal.dungeonId === entry.recordId) : undefined;
                   const actualIndex = planner.entries.findIndex(
                     (e) => e.id === entry.id,
@@ -324,6 +327,7 @@ export function LevelingPlanner({
                             </ul>
                           </div>
                         )}
+                        {!!routeItems && <p className="planner-help"><a href={`#${characterHash(character.id, "equipment")}`}>{routeItems} desired {routeItems === 1 ? "item has" : "items have"} a linked acquisition here</a></p>}
                         {(!!linkedGoals?.quests || !!linkedGoals?.desiredItems || !!linkedGoals?.dungeonGoals || !!dungeonGoal?.items.length) && <div className="route-acquisition-goals" role="group" aria-label={`Connected goals for ${entry.title}`}>
                           {!!linkedGoals?.quests && <a href={`#${characterHash(character.id, "quests")}`}>{linkedGoals.quests} outstanding quests</a>}
                           {!!linkedGoals?.desiredItems && <a href={`#${characterHash(character.id, "equipment")}`}>{linkedGoals.desiredItems} desired items</a>}

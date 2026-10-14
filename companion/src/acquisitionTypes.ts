@@ -1,8 +1,15 @@
+import type { ItemStatProfile } from "./itemStats";
+
 /** Reference facts are shared; personal state never lives in the catalogue. */
 export type AcquisitionMethod =
   "quest" | "dungeon" | "vendor" | "craft" | "world" | "unknown";
 export type ItemQuality =
   "poor" | "common" | "uncommon" | "rare" | "epic" | "legendary" | "unknown";
+export type SourceLocationRole =
+  "quest-pickup" | "quest-objective" | "quest-turn-in" |
+  "dungeon-entrance" | "dungeon-region" | "boss-location" |
+  "vendor" | "world-enemy" | "recipe-learning" | "material-source" |
+  "crafting-requirement" | "unspecified";
 export type WishlistStatus = "wanted" | "acquired" | "dismissed";
 export interface AcquisitionEvidence {
   kind: "reviewed-forever" | "user-supplied";
@@ -21,6 +28,8 @@ export interface ItemRecord {
   equipmentType?: string;
   requiredLevel?: number;
   stats: { label: string; value: string }[];
+  /** Optional versioned numeric facts; display stats/effects and provenance remain intact. */
+  numericStats?: ItemStatProfile;
   classRestrictions: string[];
   sourceIds: string[];
   evidence: AcquisitionEvidence;
@@ -37,6 +46,8 @@ export interface AcquisitionSource {
   /** Recipe references share the same acquisition graph as quest/dungeon links. */
   recipeId?: string;
   zoneId?: string;
+  /** A generic zone label alone does not establish an acquisition/access location. */
+  locationRole?: SourceLocationRole;
   zoneName?: string;
   bossName?: string;
   requiredLevel?: number;

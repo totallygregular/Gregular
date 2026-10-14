@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Character } from "./domain";
 import { Modal } from "./components";
 import { acquisitionDataset as acquisitionCatalogue } from "./data/acquisitionCatalogue";
@@ -49,6 +49,10 @@ import "./acquisition.css";
 import { ItemPortrait, ProviderInspector, useProviderIcons } from "./ItemPresentation";
 import { providerNames, type TooltipProvider } from "./itemProviders";
 import { characterHash } from "./navigation";
+import { GearDiscoveryControls, type GearScope } from "./GearDiscoveryControls";
+import { createGearSearchIndex, searchGear, type GearSearchOptions } from "./gearSearch";
+import { formatStat, normaliseItemStats, statDefinitions } from "./itemStats";
+import { getGearRouteIndex, getItemRouteRelevance, gearLocationRoleLabels, isInRouteScope, type GearLocationRole, type ItemRouteRelevance } from "./gearRoute";
 
 export interface AcquisitionPageProps {
   character: Character;
@@ -280,6 +284,7 @@ function ItemDetails({
   data: AcquisitionDataset;
   open?: boolean;
 }) {
+  const numeric = normaliseItemStats(item);
   return (
     <details open={open || undefined}>
       <summary>Item details and sources</summary>
@@ -324,26 +329,42 @@ function ItemDetails({
           Item statistics have not been supplied.
         </p>
       )}
+      <details><summary>Searchable statistics and coverage</summary><p className="acquisition-muted">Numeric coverage: {numeric.completeness}. {numeric.completeness === "complete" ? "Omitted supported numeric fields are confirmed zero in this record." : "Omitted values remain unknown."} {numeric.mappingNote}</p><ul className="acquisition-source-list">{statDefinitions.flatMap(stat => { const value = numeric.values[stat.key]; return value === undefined ? [] : [<li key={stat.key}>{formatStat(stat.key, value)}</li>]; })}</ul>{numeric.unmapped.length > 0 && <p className="acquisition-muted">Unmapped display effects are retained above and do not silently become searchable numeric bonuses.</p>}</details>
       <SourceList item={item} data={data} />
       <Evidence record={item} />
     </details>
   );
 }
 
+function RouteDiscoveryDetails({ item, character, data, open = false, relevance }: { item: ItemRecord; character: Character; data: AcquisitionDataset; open?: boolean; relevance?: ItemRouteRelevance }) {
+  const route = relevance ?? getItemRouteRelevance(item, character, data);
+  return <details className="gear-route-details" open={open || undefined}><summary>Source locations and travel</summary>
+    <p>{route.label} · {route.explanation}</p>
+    {route.sources.length > 0 && <ul>{route.sources.map(source => <li key={source.sourceId}><strong>{data.sources.find(s => s.id === source.sourceId)?.label ?? "Unresolved source"}</strong><div>{source.explanation}</div>{source.locations.map((location, index) => <div key={index}>{gearLocationRoleLabels[location.role]}: {location.locationName ?? "Unknown"} · {location.explanation}{!location.qualifiesAcquisition && " · Context only; does not confirm item acquisition here."}{location.travel && <span> {location.travel.explanation}{location.travel.provisional ? " · Provisional travel evidence." : ""}</span>}<div>{location.evidence.kind === "user-supplied" ? "User supplied location" : "Reviewed location relationship"} · <Reference url={location.evidence.url} /></div></div>)}</li>)}</ul>}
+  </details>;
+}
+
 export function EquipmentPage(props: AcquisitionPageProps) {
   const { character, saving } = props;
   const state = character.acquisition;
-  const data = resolveAcquisition(state, acquisitionCatalogue);
+  const data = useMemo(() => resolveAcquisition(state, acquisitionCatalogue), [state]);
+  const searchIndex = useMemo(() => createGearSearchIndex(data), [data]);
   const { change, status } = useChanges(props);
   const [provider, setProvider] = useState<TooltipProvider>(() => { try { return sessionStorage.getItem("gregular.item-provider") === "foreverdb" ? "foreverdb" : "local"; } catch { return "local"; } });
   useEffect(() => { try { sessionStorage.setItem("gregular.item-provider", provider); } catch { /* optional UI preference */ } }, [provider]);
   const [inspected, setInspected] = useState<ItemRecord | null>(null);
-  const [view, setView] = useState("grid");
-  const { icons, bridge } = useProviderIcons(provider, acquisitionCatalogue.items.flatMap(i => i.gameId ? [i.gameId] : []));
+  const [view, setView] = useState(() => { try { return sessionStorage.getItem("gregular.gear-view") === "list" ? "list" : "grid"; } catch { return "grid"; } });
+  useEffect(() => { try { sessionStorage.setItem("gregular.gear-view", view); } catch { /* optional UI preference */ } }, [view]);
+  const [discovery, setDiscovery] = useState<GearSearchOptions>({ level: { mode: "all" }, statMode: "any", classMode: "exclude-known-incompatible", sort: "match" });
+  const [scope, setScope] = useState<GearScope>("anywhere");
+  const [includeUnknownLocations, setIncludeUnknownLocations] = useState(false);
+  const [resultPage, setResultPage] = useState(0);
   const [query, setQuery] = useState("");
   const [slot, setSlot] = useState("");
   const [quality, setQuality] = useState("");
   const [method, setMethod] = useState("");
+  const routeResults = useMemo(() => getGearRouteIndex(character, data, { acquisitionMethod: method ? method as AcquisitionMethod : undefined }), [data, character.planner, character.faction, method]);
+  const routeRanks = useMemo(() => new Map([...routeResults].map(([id, result]) => [id, ({ direct: 0, nearby: 1, elsewhere: 2, unknown: 3 })[result.classification]])), [routeResults]);
   const [equipmentType, setEquipmentType] = useState("");
   const [className, setClassName] = useState("");
   const [maxLevel, setMaxLevel] = useState("");
@@ -352,28 +373,26 @@ export function EquipmentPage(props: AcquisitionPageProps) {
   const [wishlistMethod, setWishlistMethod] = useState("");
   const [manualItem, setManualItem] = useState(false);
   const [sourceItem, setSourceItem] = useState<ItemRecord | null>(null);
-  const results = data.items.filter(
-    (item) =>
-      item.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) &&
-      (!slot || item.slot === slot) &&
-      (!quality || item.quality === quality) &&
-      (!equipmentType || item.equipmentType === equipmentType) &&
-      (!className || item.classRestrictions.includes(className)) &&
-      (!maxLevel ||
-        (item.requiredLevel !== undefined &&
-          item.requiredLevel <= Number(maxLevel))) &&
-      (!method ||
-        (method === "unknown"
-          ? !item.sourceIds.length ||
-            item.sourceIds.some(
-              (id) =>
-                (data.sources.find((s) => s.id === id)?.method ?? "unknown") ===
-                "unknown",
-            )
-          : item.sourceIds.some(
-              (id) => data.sources.find((s) => s.id === id)?.method === method,
-            ))),
-  );
+  const searchOptions: GearSearchOptions = {
+    ...discovery, name: query, slot: slot || undefined,
+    quality: quality ? quality as ItemQuality : undefined,
+    method: method ? method as AcquisitionMethod : undefined,
+    equipmentTypes: equipmentType ? [equipmentType] : [],
+    maxLevel: maxLevel ? Number(maxLevel) : undefined,
+    sortStat: discovery.stats?.some(s => s.key === discovery.sortStat) ? discovery.sortStat : discovery.stats?.[0]?.key,
+  };
+  let discoveryError = "";
+  const searched = (() => { try { return searchGear(searchIndex, character, searchOptions, routeRanks); } catch (error) { discoveryError = error instanceof Error ? error.message : "Check the discovery filters."; return []; } })();
+  const results = searched
+    .filter(result => (!className || result.item.classRestrictions.includes(className)) && isInRouteScope(routeResults.get(result.item.id)!, scope, includeUnknownLocations));
+  const incomplete = (result: typeof results[number]) => result.status === "unknown" || (scope !== "anywhere" && routeResults.get(result.item.id)?.classification === "unknown");
+  const confirmedResults = results.filter(result => !incomplete(result));
+  const incompleteResults = results.filter(incomplete);
+  const displayedResults = [...confirmedResults, ...incompleteResults];
+  useEffect(() => setResultPage(0), [query, slot, quality, method, equipmentType, className, maxLevel, discovery, scope, includeUnknownLocations, character.id]);
+  const pageCount = Math.max(1, Math.ceil(displayedResults.length / 36));
+  const activePage = Math.min(resultPage, pageCount - 1);
+  const pageResults = displayedResults.slice(activePage * 36, (activePage + 1) * 36);
   const wishlist = state.wishlist.filter((entry) => {
     const item = data.items.find((i) => i.id === entry.itemId);
     return (
@@ -386,11 +405,13 @@ export function EquipmentPage(props: AcquisitionPageProps) {
           : wishlistMethod === "unknown"))
     );
   });
+  const iconItems = [...pageResults.map(result => result.item), ...wishlist.slice(0, 36).flatMap(entry => data.items.find(item => item.id === entry.itemId) ?? [])];
+  const { icons, bridge } = useProviderIcons(provider, [...new Set(iconItems.flatMap(item => item.gameId && item.evidence.kind === "reviewed-forever" ? [item.gameId] : []))]);
   return (
     <div className="acquisition-page">
       <Title
         title="Equipment"
-        description="Find equipment, choose how to pursue it, and keep a wishlist for this character."
+        description={`Discover gear for ${character.name}, level ${character.level} ${character.className}. Search names or desired stats, then plan how to pursue it.`}
       />
       <p className="acquisition-notice">
         Limited reviewed catalogue · {acquisitionCatalogue.items.length}{" "}
@@ -415,6 +436,8 @@ export function EquipmentPage(props: AcquisitionPageProps) {
           <div className="acquisition-actions" aria-label="Equipment view"><button className="secondary" aria-pressed={view === "grid"} onClick={() => setView("grid")}>Grid</button><button className="secondary" aria-pressed={view === "list"} onClick={() => setView("list")}>List</button></div>
         </div>
         <p className="acquisition-muted">Inspect an icon for details. Optional services contact the selected provider; local details always work. {provider === "foreverdb" && <a href="https://foreverdb.net/embed" target="_blank" rel="noreferrer">Icons & tooltips by ForeverDB</a>}{provider === "wow-forever" && <a href="https://wow-forever.gg/developers/#tooltips" target="_blank" rel="noreferrer">Tooltips by wow-forever.gg</a>}</p>
+        <GearDiscoveryControls character={character} options={discovery} onChange={next => { setDiscovery(next.sort === "stat" && !next.stats?.length ? { ...next, sort: "match", sortStat: undefined } : next); setMaxLevel(""); }} scope={scope} onScope={setScope} includeUnknownLocations={includeUnknownLocations} onUnknownLocations={setIncludeUnknownLocations} />
+        {discoveryError && <p className="acquisition-error" role="alert">{discoveryError}</p>}
         <div className="acquisition-filters">
           <label>
             Item name
@@ -505,20 +528,25 @@ export function EquipmentPage(props: AcquisitionPageProps) {
         </div>
         </details>
         <p className="acquisition-muted" role="status">
-          {results.length} matching {results.length === 1 ? "item" : "items"}
+          {confirmedResults.length} matching {confirmedResults.length === 1 ? "item" : "items"}{incompleteResults.length > 0 ? ` · ${incompleteResults.length} incomplete records shown separately` : ""}
         </p>
         {results.length ? (
           <div className={`acquisition-grid equipment-results ${view === "list" ? "is-list" : ""}`}>
-            {results.map((item) => {
+            {pageResults.map((result, pageIndex) => {
+              const index = activePage * 36 + pageIndex;
+              const item = result.item;
+              const route = routeResults.get(item.id)!;
               const existing = state.wishlist.find(
                 (entry) => entry.itemId === item.id,
               );
               return (
                 <article className="acquisition-card" key={item.id}>
+                  {incomplete(result) && index === confirmedResults.length && <p className="gear-match-label is-unknown"><strong>Incomplete records · matches cannot be confirmed</strong></p>}
                   <div className="equipment-card-heading"><ItemPortrait item={item} icon={item.gameId ? icons[item.gameId] : undefined} inspect={setInspected} /><h4 className={`acquisition-quality-${item.quality}`}>
                     {item.name}
                   </h4></div>
                   <div className="acquisition-badges">
+                    {incomplete(result) && <span className="acquisition-badge is-warning">Incomplete filter match</span>}
                     <span className="acquisition-badge">
                       {item.quality} quality
                     </span>
@@ -539,7 +567,11 @@ export function EquipmentPage(props: AcquisitionPageProps) {
                       ? `Requires level ${item.requiredLevel}`
                       : "Required level unknown"}
                   </p>
+                  {Boolean(discovery.stats?.length) && <><div className="gear-match-stats">{result.statMatch.matched.map(stat => <span key={stat.key} className="gear-stat-badge">{formatStat(stat.key, stat.value)}</span>)}</div><p className={`gear-match-label ${result.statMatch.status === "unknown" ? "is-unknown" : ""}`}>{result.statMatch.status === "unknown" ? "Stat match uncertain" : `${result.statMatch.matched.length}/${discovery.stats!.length} desired stats match`}{result.statMatch.unknownKeys.length > 0 ? ` · ${result.statMatch.unknownKeys.length} unknown` : ""}</p></>}
+                  <p className="gear-route-label" data-classification={route.classification}><strong>{route.label}</strong> · {route.explanation}</p>
+                  <p className="gear-uncertainty-label">{result.suitability.classRestriction === "unknown" ? "Class restrictions unknown · " : ""}Armor / weapon training not verified</p>
                   <p className="equipment-source-summary">{item.sourceIds.length ? [...new Set(item.sourceIds.map(id => methodNames[data.sources.find(s => s.id === id)?.method ?? "unknown"]))].join(" · ") : "Unknown source"}</p>
+                  <RouteDiscoveryDetails item={item} character={character} data={data} relevance={route} />
                   <ItemDetails item={item} data={data} />
                   <div className="acquisition-actions">
                     <button
@@ -577,9 +609,10 @@ export function EquipmentPage(props: AcquisitionPageProps) {
           </div>
         ) : (
           <Empty title="No matching items">
-            Try fewer filters or add a personal item with your own reference.
+            {scope !== "anywhere" ? "No acquisition location is confirmed in this scope for the selected items. Unknown locations do not mean an item is unavailable; include them separately or search Anywhere." : "Try fewer filters or include incomplete records separately. A missing stat is not a confirmed zero."}
           </Empty>
         )}
+        {pageCount > 1 && <div className="acquisition-actions" aria-label="Equipment result pages"><button className="secondary" disabled={activePage === 0} onClick={() => setResultPage(activePage - 1)}>Previous results</button><span className="acquisition-muted" role="status">Page {activePage + 1} of {pageCount} · up to 36 items per page</span><button className="secondary" disabled={activePage + 1 >= pageCount} onClick={() => setResultPage(activePage + 1)}>Next results</button></div>}
       </section>
       <section className="panel">
         <div className="acquisition-heading">
@@ -660,7 +693,7 @@ export function EquipmentPage(props: AcquisitionPageProps) {
         </p>
       </section>
       {status}
-      {inspected && <Modal title={inspected.name} close={() => setInspected(null)}><div className="item-inspection"><ProviderInspector item={inspected} provider={provider} /><ItemDetails item={inspected} data={data} open /></div></Modal>}
+      {inspected && <Modal title={inspected.name} close={() => setInspected(null)}><div className="item-inspection"><ProviderInspector item={inspected} provider={provider} /><RouteDiscoveryDetails item={inspected} character={character} data={data} open /><ItemDetails item={inspected} data={data} open /></div></Modal>}
       {manualItem && (
         <ManualItemForm
           saving={saving}
@@ -1015,6 +1048,7 @@ function ManualSourceForm({
   const [dungeonId, setDungeonId] = useState("");
   const [manualDungeonName, setManualDungeonName] = useState("");
   const [zoneName, setZoneName] = useState("");
+  const [locationRole, setLocationRole] = useState<GearLocationRole | "">("");
   const [bossName, setBossName] = useState("");
   const [referenceUrl, setReferenceUrl] = useState("");
   return (
@@ -1043,6 +1077,7 @@ function ManualSourceForm({
                 : undefined,
             zoneId: zone?.id,
             zoneName: zoneName || undefined,
+            locationRole: locationRole || undefined,
             bossName: bossName || undefined,
             referenceUrl: referenceUrl || undefined,
           });
@@ -1056,7 +1091,7 @@ function ManualSourceForm({
           Acquisition method
           <select
             value={method}
-            onChange={(e) => setMethod(e.target.value as AcquisitionMethod)}
+            onChange={(e) => { setMethod(e.target.value as AcquisitionMethod); setLocationRole(""); }}
           >
             {methods.map((m) => (
               <option value={m} key={m}>
@@ -1151,6 +1186,7 @@ function ManualSourceForm({
             ))}
           </datalist>
         </label>
+        <label>Location relationship (optional)<select aria-label="Location relationship (optional)" value={locationRole} onChange={e => setLocationRole(e.target.value as GearLocationRole | "")}><option value="">Unspecified · context only</option>{({ quest: ["quest-pickup", "quest-objective", "quest-turn-in"], dungeon: ["dungeon-entrance", "dungeon-region", "boss-location"], vendor: ["vendor"], world: ["world-enemy"], craft: ["recipe-learning", "material-source", "crafting-requirement"], unknown: [] } as Record<AcquisitionMethod, GearLocationRole[]>)[method].map(role => <option key={role} value={role}>{gearLocationRoleLabels[role]}</option>)}</select><span className="field-help">Specify what the zone means for your personal plan. Pickup or dungeon region alone cannot confirm item acquisition. Dungeon entrance access remains unknown until separately reviewed.</span></label>
         <label>
           Source reference link
           <input
