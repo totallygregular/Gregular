@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { ItemRecord } from "./acquisitionTypes";
 import { Icon } from "./components";
 import { permittedIcon, providerFrame, type TooltipProvider } from "./itemProviders";
+import { isForeverItemIdentity } from "./itemIdentity";
 import "./itemPresentation.css";
 
 export function useProviderIcons(provider: TooltipProvider, ids: number[]) {
@@ -34,6 +35,6 @@ export function ItemPortrait({ item, icon, inspect }: { item: ItemRecord; icon?:
 }
 
 export function ProviderInspector({ item, provider }: { item: ItemRecord; provider: TooltipProvider }) {
-  if (provider === "local" || !item.gameId || item.evidence.kind !== "reviewed-forever") return <p className="acquisition-muted">Local details are available below. Select an optional tooltip service in Equipment for provider details.</p>;
-  return <div className="provider-inspector"><iframe title={`${provider} tooltip for ${item.name}`} src={providerFrame(provider, [item.gameId])} sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" referrerPolicy="no-referrer" /><p className="acquisition-muted">Live provider data may differ from the reviewed snapshot. <a href={provider === "foreverdb" ? "https://foreverdb.net/embed" : "https://wow-forever.gg/developers/#tooltips"} target="_blank" rel="noreferrer">Tooltips by {provider === "foreverdb" ? "ForeverDB" : "wow-forever.gg"} ↗</a></p></div>;
+  if (provider === "local" || !item.gameId || !isForeverItemIdentity(item)) return <p className="acquisition-muted">Local details are available below. Select an optional tooltip service in Equipment for provider details.</p>;
+  return <div className="provider-inspector"><iframe title={`${provider} tooltip for ${item.name}`} src={providerFrame(provider, [item.gameId])} sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" referrerPolicy="no-referrer" /><p className="acquisition-muted">Live provider details are separate from saved local facts and personal notes. <a href={provider === "foreverdb" ? "https://foreverdb.net/embed" : "https://wow-forever.gg/developers/#tooltips"} target="_blank" rel="noreferrer">Tooltips by {provider === "foreverdb" ? "ForeverDB" : "wow-forever.gg"} ↗</a></p></div>;
 }

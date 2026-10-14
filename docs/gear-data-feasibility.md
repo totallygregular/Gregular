@@ -1,5 +1,7 @@
 # Gear Discovery data: Pass 7 feasibility
 
+Pass 8 closes the repeated bulk-source investigation with a [focused Path B decision](forever-item-data-decision.md) and a working [item identity/personal-entry contract](item-data-contract.md). Reopen bulk work only when a concrete permitted input changes that gate.
+
 Reviewed **14 October 2026, Pacific/Auckland**. This supplements
 [item integration](item-data-integration.md),
 [acquisition feasibility](acquisition-data-feasibility.md),

@@ -56,6 +56,10 @@ The verification workflow runs unit, browser and combined-build checks. It does 
 
 ## Documentation
 
+- [Pass 8: item entry, validation and preview](docs/pass-8.md)
+- [Pass 8: focused Forever source assessment and Path B decision](docs/forever-item-data-decision.md)
+- [Reusable item identities, personal details and future snapshot contract](docs/item-data-contract.md)
+- [Item source and licence boundaries](docs/source-licenses.md)
 - [Pass 7: Gear Discovery validation and demonstration](docs/pass-7.md)
 - [Gear Discovery route and travel semantics](docs/gear-discovery-route.md)
 - [Structured gear data feasibility and reproducible benchmark](docs/gear-data-feasibility.md)

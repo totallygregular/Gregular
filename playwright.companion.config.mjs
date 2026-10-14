@@ -15,6 +15,7 @@ export default defineConfig({
     "item-browser.spec.mjs",
     "crafting.spec.mjs",
     "gear-discovery.spec.mjs",
+    "item-entry.spec.mjs",
   ],
   outputDir: built ? "artifacts/compiled-test-results" : "test-results",
   workers: 1,

@@ -1,4 +1,5 @@
 import type { ItemStatProfile } from "./itemStats";
+import type { ItemIdentity } from "./itemIdentity";
 
 /** Reference facts are shared; personal state never lives in the catalogue. */
 export type AcquisitionMethod =
@@ -22,6 +23,10 @@ export interface AcquisitionEvidence {
 export interface ItemRecord {
   id: string;
   gameId?: number;
+  /** Omitted only by legacy records in the existing Forever-only schema. */
+  gameVariant?: ItemIdentity["gameVariant"];
+  /** Runtime reference when a reviewed snapshot supersedes a personal identity. */
+  catalogueReferenceId?: string;
   name: string;
   quality: ItemQuality;
   slot?: string;
@@ -176,6 +181,9 @@ export interface ManualCraftingDraft {
 export interface WishlistEntry {
   id: string;
   itemId: string;
+  /** Stable game identity survives removal of an optional catalogue snapshot. */
+  gameId?: number;
+  gameVariant?: ItemIdentity["gameVariant"];
   /** Never choose an arbitrary source for the player. */
   preferredSourceId?: string;
   status: WishlistStatus;
@@ -230,7 +238,7 @@ export type ManualQuestDraft = Pick<QuestRecord, "name"> &
   > & { notes?: string; referenceUrl?: string };
 export type ManualItemDraft = Pick<ItemRecord, "name"> &
   Partial<
-    Pick<ItemRecord, "quality" | "slot" | "equipmentType" | "requiredLevel">
+    Pick<ItemRecord, "quality" | "slot" | "equipmentType" | "requiredLevel" | "gameId" | "gameVariant" | "numericStats" | "stats" | "classRestrictions">
   > & { referenceUrl?: string; notes?: string };
 export interface QuestGoal {
   questId: string;
