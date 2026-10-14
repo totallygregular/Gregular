@@ -175,3 +175,23 @@ Review captures: [desktop](images/pass-7/equipment-desktop.png),
 [mobile](images/pass-7/equipment-mobile.png),
 [real ForeverDB tooltip](images/pass-7/foreverdb-tooltip.png), and
 [isolated route fixture — not game content](images/pass-7/isolated-route-fixture.png).
+
+## Published review evidence
+
+- [Draft PR #9](https://github.com/totallygregular/Gregular/pull/9) targets
+  `codex/item-browser-crafting` and preserves PR #8 beneath it.
+- [Stable feature preview](https://codex-gear-discovery.gregular.pages.dev/companion/)
+  and [immutable implementation preview](https://2b256ae2.gregular.pages.dev/companion/)
+  were deployed by the unchanged Cloudflare Pages integration.
+- All seven Gear Discovery acceptance cases passed on that deployed preview,
+  including real reviewed records, isolated route fixtures, mobile accessibility,
+  wishlist/source links and export/import. The separate live ForeverDB discovery
+  check also passed after waiting for its documented script-loaded state before
+  focusing the link. Its first preview attempt focused before initialization and
+  timed out; the corrected test retains its tooltip assertion.
+- [GitHub verification for implementation commit 6253eda](https://github.com/totallygregular/Gregular/actions/runs/38483561083)
+  passed all required checks. The final follow-up changes only this evidence and
+  the optional live-test initialization wait; application code is identical.
+- The separate pre-existing Workers check reports that `gregular-preview` does
+  not exist on the account. Successful Pages deployment is independent of that
+  failure. No Worker, Pages, production hosting or DNS configuration was changed.

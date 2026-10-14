@@ -25,6 +25,7 @@ test("live ForeverDB with Gear Discovery stat matches", async ({ page }) => {
   await card.screenshot({ path: "artifacts/pass-7/gear-live-result.png" });
   await card.getByRole("button", { name: "Inspect Ponderous Orb", exact: true }).click();
   const frame = page.frameLocator('iframe[title="foreverdb tooltip for Ponderous Orb"]');
+  await expect(frame.getByRole("status")).toContainText("script loaded", { timeout: 20000 });
   await frame.locator("#item").focus();
   await expect(frame.getByRole("tooltip")).toContainText("Ponderous Orb", { timeout: 20000 });
   await page.screenshot({ path: "artifacts/pass-7/gear-live-tooltip.png" });
